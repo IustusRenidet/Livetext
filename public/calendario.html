@@ -1,0 +1,795 @@
+<!-- views/calendario.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Calendario de Eventos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/calendario.css">
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --event-clase: #ff5722;
+            --event-examen: #2196f3;
+            --event-taller: #9c27b0;
+            --event-convocatoria: #3498db;
+            --event-parcial: #f39c12;
+            --event-intersemestral: #1abc9c;
+            --event-curso-especial: #34495e;
+            --event-intensivo: #e67e22;
+            --event-sabatino: #8e44ad;
+            --event-verano: #f1c40f;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --calendar-bg: linear-gradient(145deg, #ffffff, #e6e6e6);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            padding: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 2rem;
+            color: var(--white) !important;
+        }
+
+        .logo-image {
+            width: 100px;
+            margin-right: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-link {
+            color: var(--white) !important;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+
+        .login-btn {
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-container {
+            flex: 1;
+            padding-top: 2rem;
+        }
+
+        .filters-bar {
+            background: var(--primary-color);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-button {
+            background: var(--gradient-bg);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            margin: 0.2rem;
+            border-radius: 25px;
+            color: var(--white);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-button:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+            animation: tada 0.5s ease;
+        }
+
+        .filter-button.active {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        #calendar {
+            background: var(--calendar-bg);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            color: var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #calendar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(230, 126, 34, 0.1), transparent);
+            z-index: 0;
+        }
+
+        #calendar > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .fc-event {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 0.4rem;
+            color: var(--white);
+            font-size: 0.9rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .fc-event:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            z-index: 5;
+        }
+
+        .fc-event.clase {
+            background-color: var(--event-clase);
+        }
+
+        .fc-event.examen {
+            background-color: var(--event-examen);
+        }
+
+        .fc-event.taller {
+            background-color: var(--event-taller);
+        }
+
+        .fc-event.convocatoria {
+            background-color: var(--event-convocatoria);
+        }
+
+        .fc-event.parcial {
+            background-color: var(--event-parcial);
+        }
+
+        .fc-event.intersemestral {
+            background-color: var(--event-intersemestral);
+        }
+
+        .fc-event.curso-especial {
+            background-color: var(--event-curso-especial);
+        }
+
+        .fc-event.intensivo {
+            background-color: var(--event-intensivo);
+        }
+
+        .fc-event.sabatino {
+            background-color: var(--event-sabatino);
+        }
+
+        .fc-event.verano {
+            background-color: var(--event-verano);
+        }
+
+        .fc-daygrid-day:hover {
+            background: rgba(230, 126, 34, 0.15);
+            transition: background 0.3s ease;
+        }
+
+        .fc-day-today {
+            background-color: rgba(230, 126, 34, 0.2) !important;
+        }
+
+        .fc-day-today .fc-daygrid-day-number {
+            background: var(--secondary-color);
+            color: var(--white);
+            border-radius: 50%;
+            padding: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .fc-button {
+            background: var(--secondary-color) !important;
+            border: 1px solid var(--white) !important;
+            color: var(--white) !important;
+            transition: all 0.3s ease;
+        }
+
+        .fc-prev-button, .fc-next-button {
+            border-radius: 50% !important;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fc-today-button, .fc-dayGridMonth-button, .fc-timeGridWeek-button, .fc-timeGridDay-button {
+            border-radius: 8px !important;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .fc-button:hover {
+            background: var(--accent-color) !important;
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            animation: bounceIn 0.3s ease;
+        }
+
+        .fc-icon {
+            color: var(--white);
+            font-size: 1.2rem;
+        }
+
+        .fc-toolbar-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: none; /* Eliminar borde incompleto */
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: var(--white);
+            border-radius: 15px 15px 0 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+        }
+
+        .modal-body {
+            background: #f0f0f0;
+            color: var(--primary-color);
+            border-radius: 0 0 15px 15px;
+            padding: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: #f0f0f0;
+            border-radius: 0 0 15px 15px;
+            padding: 1rem;
+            justify-content: center; /* Centrar el botón */
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body p {
+            margin: 0.75rem 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .modal-body strong {
+            color: var(--secondary-color);
+        }
+
+        .section-title {
+            color: var(--secondary-color);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer {
+            background: var(--accent-color);
+            color: var(--white);
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            #calendar {
+                padding: 1rem;
+            }
+            
+            .fc-header-toolbar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .fc-toolbar {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                align-items: center;
+            }
+            
+            .fc-toolbar-chunk {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .fc-button-group {
+                display: flex;
+                justify-content: center;
+            }
+            
+            .filter-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filters-bar {
+                padding: 0.75rem;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .filters-bar::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            .filters-bar::-webkit-scrollbar-thumb {
+                background: var(--secondary-color);
+                border-radius: 10px;
+            }
+
+            .filter-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                margin: 0.15rem;
+                display: inline-block;
+            }
+
+            #calendar {
+                padding: 0.75rem;
+            }
+
+            .fc-daygrid-day-frame {
+                min-height: 80px;
+            }
+            
+            .fc-view-harness {
+                min-height: 500px;
+            }
+            
+            .fc-event {
+                font-size: 0.8rem;
+                padding: 0.3rem;
+            }
+            
+            .fc-daygrid-event-dot {
+                display: none;
+            }
+            
+            .fc-daygrid-day-number {
+                font-size: 0.9rem;
+            }
+            
+            .fc-col-header-cell-cushion {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .logo-image {
+                width: 80px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+            
+            .fc-header-toolbar.fc-toolbar {
+                gap: 0.5rem;
+            }
+            
+            .fc-toolbar-title {
+                font-size: 1.2rem !important;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .fc-button {
+                padding: 0.3rem 0.6rem !important;
+                font-size: 0.8rem !important;
+            }
+            
+            .fc-prev-button, .fc-next-button {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .fc-view-harness {
+                min-height: 400px;
+            }
+            
+            .fc-daygrid-day-frame {
+                min-height: 60px;
+                padding: 2px !important;
+            }
+            
+            .modal-dialog {
+                margin: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fc-event-title {
+                white-space: normal;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-height: 1.2;
+            }
+            
+            .fc-timeGridWeek-view .fc-event, 
+            .fc-timeGridDay-view .fc-event {
+                padding: 2px;
+            }
+            
+            .fc-timegrid-event-harness {
+                margin-right: 1px;
+            }
+            
+            .fc-timegrid-slots tr {
+                height: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image">
+                LIVETEXT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/recursos.html"><i class="fas fa-book"></i> Recursos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/calendario.html"><i class="fas fa-calendar-alt"></i> Calendario</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/pagos.html"><i class="fas fa-credit-card"></i> Pagos</a></li>
+                </ul>
+                <div class="d-flex">
+                    <a href="/login.html" class="btn login-btn"><i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-container">
+        <div class="container">
+            <!-- Título -->
+            <div class="row mb-4 animate__animated animate__fadeInDown">
+                <div class="col-12">
+                    <h2 class="section-title">Calendario de Eventos</h2>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-4 animate__animated animate__fadeInDown" style="animation-duration: 1s;">
+                <div class="col-12">
+                    <div class="filters-bar">
+                        <div class="d-flex flex-wrap justify-content-center filter-buttons">
+                            <button class="filter-button active" data-filter="all">Todos</button>
+                            <button class="filter-button" data-filter="convocatoria">Convocatorias</button>
+                            <button class="filter-button" data-filter="clase">Clases</button>
+                            <button class="filter-button" data-filter="evento">Eventos</button>
+                            <button class="filter-button" data-filter="examen">Exámenes</button>
+                            <button class="filter-button" data-filter="parcial">Parciales</button>
+                            <button class="filter-button" data-filter="intersemestral">Intersemestrales</button>
+                            <button class="filter-button" data-filter="curso-especial">Cursos Especiales</button>
+                            <button class="filter-button" data-filter="intensivo">Intensivos</button>
+                            <button class="filter-button" data-filter="sabatino">Sabatinos</button>
+                            <button class="filter-button" data-filter="verano">Verano</button>
+                            <button class="filter-button" data-filter="ingles">Inglés</button>
+                            <button class="filter-button" data-filter="frances">Francés</button>
+                            <button class="filter-button" data-filter="aleman">Alemán</button>
+                            <button class="filter-button" data-filter="italiano">Italiano</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendario -->
+            <div class="row animate__animated animate__fadeInUp" style="animation-duration: 1.2s;">
+                <div class="col-12">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de detalles del evento -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered animate__animated animate__zoomIn">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Detalles del Evento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Título:</strong> <span id="eventTitle"></span></p>
+                    <p><strong>Fecha:</strong> <span id="eventDate"></span></p>
+                    <p><strong>Hora:</strong> <span id="eventTime"></span></p>
+                    <p><strong>Curso:</strong> <span id="eventCourse"></span></p>
+                    <p><strong>Tipo:</strong> <span id="eventType"></span></p>
+                    <p><strong>Ubicación:</strong> <span id="eventLocation"></span></p>
+                    <p><strong>Instructor:</strong> <span id="eventInstructor"></span></p>
+                    <p><strong>Descripción:</strong> <span id="eventDescription"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4">
+        <div class="container">
+            <!-- Logos y redes sociales -->
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="text-white fs-4">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información de contacto -->
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 | 
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740, Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const calendarEl = document.getElementById('calendar');
+            
+            let initialView = 'dayGridMonth';
+            let headerToolbar = {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            };
+            
+            if (window.innerWidth < 576) {
+                headerToolbar = {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                };
+            }
+            
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: initialView,
+                locale: 'es',
+                headerToolbar: headerToolbar,
+                height: 'auto',
+                contentHeight: 'auto',
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    axios.get('/events')
+                        .then(response => {
+                            const events = response.data.map(event => ({
+                                title: event.title,
+                                start: event.start,
+                                end: event.end,
+                                color: event.color,
+                                extendedProps: {
+                                    type: event.type,
+                                    course: event.course,
+                                    description: event.description || 'Sin descripción',
+                                    location: event.location || 'Ubicación no especificada',
+                                    instructor: event.instructor || 'Instructor no especificado'
+                                }
+                            }));
+                            successCallback(events);
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar eventos:', error);
+                            failureCallback(error);
+                        });
+                },
+                eventDidMount: function(info) {
+                    const eventClasses = {
+                        'convocatoria': 'convocatoria',
+                        'clase': 'clase',
+                        'evento': 'evento',
+                        'examen': 'examen',
+                        'parcial': 'parcial',
+                        'intersemestral': 'intersemestral',
+                        'curso-especial': 'curso-especial',
+                        'intensivo': 'intensivo',
+                        'sabatino': 'sabatino',
+                        'verano': 'verano'
+                    };
+                    const eventType = info.event.extendedProps.type;
+                    if (eventClasses[eventType]) {
+                        info.el.classList.add(eventClasses[eventType]);
+                    }
+                    const tooltip = new bootstrap.Tooltip(info.el, {
+                        title: `${info.event.title}<br>${info.event.extendedProps.course}<br>${info.event.start.toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'short' })}`,
+                        html: true,
+                        placement: 'top',
+                        trigger: 'hover'
+                    });
+                },
+                eventClick: function(info) {
+                    document.getElementById('eventTitle').textContent = info.event.title;
+                    document.getElementById('eventDate').textContent = info.event.start.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    document.getElementById('eventTime').textContent = `${info.event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${info.event.end.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+                    document.getElementById('eventCourse').textContent = info.event.extendedProps.course;
+                    document.getElementById('eventType').textContent = getEventTypeText(info.event.extendedProps.type);
+                    document.getElementById('eventLocation').textContent = info.event.extendedProps.location;
+                    document.getElementById('eventInstructor').textContent = info.event.extendedProps.instructor;
+                    document.getElementById('eventDescription').textContent = info.event.extendedProps.description;
+                    const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                    modal.show();
+                },
+                windowResize: function(view) {
+                    if (window.innerWidth < 576) {
+                        calendar.setOption('headerToolbar', {
+                            left: 'prev,next',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek'
+                        });
+                    } else {
+                        calendar.setOption('headerToolbar', {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                        });
+                    }
+                    calendar.updateSize();
+                }
+            });
+
+            calendar.render();
+
+            // Filtros
+            const filterButtons = document.querySelectorAll('.filter-button');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const filter = button.getAttribute('data-filter').toLowerCase();
+                    
+                    calendar.getEvents().forEach(event => {
+                        const eventType = event.extendedProps.type.toLowerCase();
+                        const eventCourse = event.extendedProps.course.toLowerCase();
+                        if (filter === 'all') {
+                            event.setProp('display', 'auto');
+                        } else if (eventType === filter || (['ingles', 'frances', 'aleman', 'italiano'].includes(filter) && eventCourse.includes(filter))) {
+                            event.setProp('display', 'auto');
+                        } else {
+                            event.setProp('display', 'none');
+                        }
+                    });
+                });
+            });
+
+            // Animaciones del modal
+            const eventModal = document.getElementById('eventModal');
+            eventModal.addEventListener('hide.bs.modal', function () {
+                document.querySelector('.modal-dialog').classList.remove('animate__zoomIn');
+                document.querySelector('.modal-dialog').classList.add('animate__zoomOut');
+            });
+            
+            eventModal.addEventListener('hidden.bs.modal', function () {
+                document.querySelector('.modal-dialog').classList.remove('animate__zoomOut');
+            });
+            
+            eventModal.addEventListener('show.bs.modal', function () {
+                document.querySelector('.modal-dialog').classList.remove('animate__zoomOut');
+                document.querySelector('.modal-dialog').classList.add('animate__zoomIn');
+            });
+
+            function getEventTypeText(type) {
+                const types = {
+                    'convocatoria': 'Convocatoria',
+                    'clase': 'Clase',
+                    'evento': 'Evento',
+                    'examen': 'Examen',
+                    'parcial': 'Parcial',
+                    'intersemestral': 'Intersemestral',
+                    'curso-especial': 'Curso Especial',
+                    'intensivo': 'Intensivo',
+                    'sabatino': 'Sabatino',
+                    'verano': 'Verano'
+                };
+                return types[type] || 'Evento';
+            }
+        });
+    </script>
+</body>
+</html>

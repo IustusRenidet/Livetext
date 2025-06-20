@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Cursos de Idiomas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<style>
+    :root {
+        --primary-color: #000b24;
+        --secondary-color: #e67e22;
+        --dark-bg: #232A40;
+        --light-bg: #D7D7D9;
+        --accent-color: #D94E41;
+        --white: #fff;
+        --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--white);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .navbar {
+        background-color: var(--primary-color) !important;
+        padding: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar-brand {
+        font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+        font-size: 2rem;
+        color: var(--white) !important;
+    }
+
+    .logo-image {
+        width: 100px;
+        margin-right: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .logo-image:hover {
+        transform: scale(1.1);
+    }
+
+    .nav-link {
+        color: var(--white) !important;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: var(--secondary-color) !important;
+    }
+
+    .login-btn {
+        background: var(--secondary-color);
+        color: var(--white);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .main-container {
+        flex: 1;
+        padding-top: 2rem;
+    }
+
+    .filters-bar {
+        background: var(--primary-color);
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .filter-button {
+        background: var(--secondary-color);
+        border: none;
+        padding: 0.5rem 1rem;
+        margin: 0.2rem;
+        border-radius: 5px;
+        color: var(--white);
+        transition: transform 0.2s ease, background 0.3s ease;
+    }
+
+    .filter-button:hover {
+        transform: scale(1.05);
+        background: var(--accent-color);
+    }
+
+    .filter-button.active {
+        background: var(--accent-color);
+        transform: scale(1.05);
+    }
+
+    .content-grid {
+        margin-top: 2rem;
+        column-count: 3;
+        column-gap: 1rem;
+    }
+
+    .grid-item {
+        background: var(--light-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+        break-inside: avoid;
+    }
+
+    .grid-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .grid-item img,
+    .grid-item video {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+    }
+
+    .grid-item .post-content {
+        padding: 1rem;
+        color: var(--primary-color);
+    }
+
+    .grid-item .post-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .newsletter-card {
+        background: var(--gradient-bg);
+        color: var(--white);
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .newsletter-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+        z-index: 0;
+    }
+
+    .newsletter-card .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    .newsletter-card h4 {
+        font-weight: bold;
+        color: var(--secondary-color);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .newsletter-card .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--secondary-color);
+        color: var(--white);
+        transition: all 0.3s ease;
+    }
+
+    .newsletter-card .form-control:focus {
+        border-color: var(--white);
+        box-shadow: 0 0 10px rgba(230, 126, 34, 0.5);
+        transform: scale(1.02);
+    }
+
+    .newsletter-card .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .newsletter-card .btn-subscribe {
+        background: var(--secondary-color);
+        color: var(--white);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        width: 100%;
+        max-width: 200px;
+        margin-top: 1rem;
+    }
+
+    .newsletter-card .btn-subscribe:hover {
+        background: var(--accent-color);
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .newsletter-card .unsubscribe-link {
+        color: var(--white);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .newsletter-card .unsubscribe-link:hover {
+        color: var(--secondary-color);
+        animation: tada 1s ease;
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+
+    .section-title {
+        color: var(--secondary-color);
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .floating-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--secondary-color);
+        color: var(--white);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .floating-button:hover {
+        transform: scale(1.1);
+    }
+
+    .chat-container {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 350px;
+        max-height: 500px;
+        background: var(--dark-bg);
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        display: none;
+        flex-direction: column;
+        animation: slideInRight 0.3s ease;
+    }
+
+    .chat-header {
+        background: var(--primary-color);
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .chat-input-container {
+        display: flex;
+        padding: 0.5rem;
+        background: var(--primary-color);
+        border-radius: 0 0 10px 10px;
+    }
+
+    .chat-input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: var(--white);
+        padding: 0.5rem;
+        border-radius: 5px;
+    }
+
+    .chat-send {
+        background: var(--secondary-color);
+        border: none;
+        padding: 0.5rem;
+        color: var(--white);
+        border-radius: 5px;
+    }
+
+    .quick-options {
+        padding: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .quick-option {
+        background: var(--secondary-color);
+        border: none;
+        padding: 0.5rem;
+        border-radius: 5px;
+        color: var(--white);
+        font-size: 0.9rem;
+        transition: transform 0.2s ease;
+    }
+
+    .quick-option:hover {
+        transform: scale(1.05);
+    }
+
+    .footer {
+        background: var(--accent-color);
+        color: var(--white);
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .content-grid {
+            column-count: 1;
+        }
+
+        .chat-container {
+            width: 100%;
+            bottom: 0;
+            right: 0;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .newsletter-card {
+            padding: 1.5rem;
+        }
+
+        .newsletter-card .form-control {
+            margin-bottom: 0.5rem;
+        }
+
+        .newsletter-card .btn-subscribe {
+            max-width: 100%;
+            padding: 0.5rem 1rem;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .newsletter-form .row {
+            align-items: flex-end;
+        }
+
+        .newsletter-form .col-md-5 {
+            flex: 0 0 45%;
+            max-width: 45%;
+        }
+
+        .newsletter-form .col-md-2 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image">
+                LIVETEXT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-home"></i>
+                            Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="recursos.html"><i class="fas fa-book"></i>
+                            Recursos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="calendario.html"><i class="fas fa-calendar-alt"></i>
+                            Calendario</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pagos.html"><i class="fas fa-credit-card"></i>
+                            Pagos</a></li>
+                </ul>
+                <div class="d-flex">
+                    <a href="login.html" class="btn login-btn"><i class="fas fa-sign-in-alt me-2"></i> Iniciar
+                        Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-container">
+        <div class="container-fluid">
+            <!-- Newsletter -->
+            <div class="row mb-5 animate__animated animate__fadeInUp">
+                <div class="col-md-8 mx-auto">
+                    <div class="card newsletter-card">
+                        <div class="card-body p-4 text-center">
+                            <h4 class="card-title">¡Únete a nuestro boletín!</h4>
+                            <p class="card-text mb-4">Recibe un resumen semanal de nuevas publicaciones directamente en tu correo.</p>
+                            <form id="newsletterForm" class="row g-3 justify-content-center newsletter-form">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control" id="nombreNewsletter" placeholder="Nombre" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="email" class="form-control" id="emailNewsletter" placeholder="Correo electrónico" required>
+                                </div>
+                                <div class="col-12">
+                                    <div style="margin-left: 20px;">
+                                        <label><input type="radio" name="notificationFrequency" value="weekly" checked> Resumen semanal</label>
+                                    </div>
+                                    <div>
+                                        <label><input type="checkbox" name="notificationTypes" value="posts" checked> Posts</label>
+                                        <label><input type="checkbox" name="notificationTypes" value="resources" checked> Recursos académicos</label>
+                                        <label><input type="checkbox" name="notificationTypes" value="events" checked> Eventos de calendario</label>
+                                        <label><input type="checkbox" name="notificationTypes" value="payments" checked> Formularios de pago</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-subscribe animate__animated" onclick="this.classList.add('animate__bounce')">Suscribirse</button>
+                                </div>
+                            </form>
+                            <small class="text-muted mt-3">
+                                <a href="#" id="unsubscribeLink" class="unsubscribe-link animate__animated">Darse de baja</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-4 animate__animated animate__fadeInDown">
+                <div class="col-12">
+                    <div class="filters-bar d-flex flex-wrap justify-content-center">
+                        <button class="filter-button active" data-filter="all">Todos</button>
+                        <button class="filter-button" data-filter="anuncios">Anuncios</button>
+                        <button class="filter-button" data-filter="eventos">Eventos</button>
+                        <button class="filter-button" data-filter="recursos">Recursos</button>
+                        <button class="filter-button" data-filter="ingles">Inglés</button>
+                        <button class="filter-button" data-filter="frances">Francés</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de publicaciones -->
+            <div class="row animate__animated animate__fadeIn">
+                <div class="col-12">
+                    <div class="content-grid" id="publicaciones-container">
+                        <div class="grid-sizer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat flotante -->
+    <div class="floating-button animate__animated animate__bounceIn" id="chatButton">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-sm text-white me-2" id="toggleChatType">
+                    <i class="fas fa-robot"></i>
+                </button>
+                <h5 class="chat-title mb-0" id="chatTitle">Chat IA</h5>
+            </div>
+            <button class="close-chat" id="closeChat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="quick-options" id="quickOptions">
+            <button class="quick-option">¿Cómo inscribirme?</button>
+            <button class="quick-option">Fechas de cursos</button>
+            <button class="quick-option">Costo de cursos</button>
+            <button class="quick-option">Certificaciones</button>
+        </div>
+        <div class="asesor-info d-none" id="asesorInfo">
+            <div class="p-3 bg-light border-top">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="online-indicator me-2"></div>
+                    <span class="fw-bold" id="asesorNombre">Conectando...</span>
+                </div>
+                <small class="text-muted" id="asesorStatus">Por favor espere...</small>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
+            <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Notificación Toast -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ¡Suscripción exitosa! Recibirás un resumen semanal los lunes.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="unsubscribeToast" class="toast align-items-center text-white bg-success border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    ¡Te has dado de baja exitosamente!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">
+                    Error al procesar la solicitud. Inténtalo de nuevo.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4">
+        <div class="container">
+            <!-- Logos y redes sociales -->
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank"
+                            class="text-white fs-4">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                            target="_blank" class="text-white fs-4">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de contacto -->
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740,
+                        Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/locales/es.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.querySelector('#publicaciones-container');
+            const masonry = new Masonry(grid, {
+                itemSelector: '.grid-item',
+                columnWidth: '.grid-sizer',
+                percentPosition: true
+            });
+
+            // Toggle chat
+            const chatButton = document.getElementById('chatButton');
+            const chatContainer = document.getElementById('chatContainer');
+            chatButton.addEventListener('click', () => {
+                chatContainer.style.display = chatContainer.style.display === 'none' ? 'flex' : 'none';
+            });
+
+            // Toggle tipo de chat
+            const toggleChatType = document.getElementById('toggleChatType');
+            const chatTitle = document.getElementById('chatTitle');
+            const quickOptions = document.getElementById('quickOptions');
+            const asesorInfo = document.getElementById('asesorInfo');
+            toggleChatType.addEventListener('click', () => {
+                if (chatTitle.textContent === 'Chat IA') {
+                    chatTitle.textContent = 'Chat con Asesor';
+                    toggleChatType.innerHTML = '<i class="fas fa-robot"></i>';
+                    quickOptions.classList.add('d-none');
+                    asesorInfo.classList.remove('d-none');
+                } else {
+                    chatTitle.textContent = 'Chat IA';
+                    toggleChatType.innerHTML = '<i class="fas fa-user"></i>';
+                    quickOptions.classList.remove('d-none');
+                    asesorInfo.classList.add('d-none');
+                }
+            });
+
+            // Cerrar chat
+            document.getElementById('closeChat').addEventListener('click', () => {
+                chatContainer.style.display = 'none';
+            });
+
+            // Animación para el enlace de darse de baja
+            const unsubscribeLink = document.getElementById('unsubscribeLink');
+            unsubscribeLink.addEventListener('mouseover', () => {
+                unsubscribeLink.classList.add('animate__tada');
+            });
+            unsubscribeLink.addEventListener('animationend', () => {
+                unsubscribeLink.classList.remove('animate__tada');
+            });
+
+            // Validación y suscripción al boletín
+            const newsletterForm = document.getElementById('newsletterForm');
+            const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+            const unsubscribeToast = new bootstrap.Toast(document.getElementById('unsubscribeToast'));
+            const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nombre = document.getElementById('nombreNewsletter').value;
+                const email = document.getElementById('emailNewsletter').value;
+                const notificationFrequency = document.querySelector('input[name="notificationFrequency"]:checked')?.value || 'weekly';
+                const notificationTypes = Array.from(document.querySelectorAll('input[name="notificationTypes"]:checked')).map(cb => cb.value);
+
+                if (nombre && email) {
+                    try {
+                        const response = await fetch('/subscribe-newsletter', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: nombre,
+                                email,
+                                notificationFrequency,
+                                notificationTypes
+                            })
+                        });
+                        const result = await response.json();
+                        if (response.ok) {
+                            successToast.show();
+                            newsletterForm.reset();
+                        } else {
+                            document.getElementById('errorToastBody').textContent = result.error || 'Error al suscribirse. Inténtalo de nuevo.';
+                            errorToast.show();
+                        }
+                    } catch (error) {
+                        console.error('Error en la suscripción:', error);
+                        document.getElementById('errorToastBody').textContent = 'Error al suscribirse. Inténtalo de nuevo.';
+                        errorToast.show();
+                    }
+                }
+            });
+
+            // Lógica para darse de baja
+            unsubscribeLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const email = prompt('Por favor, ingresa tu correo para darte de baja:');
+                if (email) {
+                    try {
+                        const response = await fetch('/unsubscribe-newsletter', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email })
+                        });
+                        const result = await response.json();
+                        if (response.ok) {
+                            unsubscribeToast.show();
+                        } else {
+                            document.getElementById('errorToastBody').textContent = result.error || 'Error al darte de baja. Inténtalo de nuevo.';
+                            errorToast.show();
+                        }
+                    } catch (error) {
+                        console.error('Error al dar de baja:', error);
+                        document.getElementById('errorToastBody').textContent = 'Error al darte de baja. Inténtalo de nuevo.';
+                        errorToast.show();
+                    }
+                }
+            });
+
+            // Cargar y mostrar posts
+            async function loadPosts(filter = 'all') {
+                try {
+                    const response = await fetch('http://localhost:3000/api/posts');
+                    const posts = await response.json();
+                    const container = document.getElementById('publicaciones-container');
+                    container.innerHTML = '<div class="grid-sizer"></div>';
+
+                    const filteredPosts = filter === 'all' ? posts : posts.filter(post => post.category === filter);
+                    filteredPosts.forEach(post => {
+                        const item = document.createElement('div');
+                        item.className = 'grid-item';
+                        item.innerHTML = `
+                            <div class="post-media">
+                                ${post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
+                                    <div class="preview-media-grid">
+                                        ${post.media.map(m => `<${m.type === 'image' ? 'img' : 'video'} src="${m.path}" ${m.type === 'video' ? 'controls muted' : ''} style="height: 200px; object-fit: cover; border-radius: 12px;">`).join('')}
+                                    </div>
+                                ` : `
+                                    <div id="postCarousel${post._id}" class="carousel slide" data-bs-ride="${post.mediaMode === 'auto' ? 'carousel' : 'false'}">
+                                        <div class="carousel-inner">
+                                            ${post.media.map((m, index) => `
+                                                <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                                    <${m.type === 'image' ? 'img' : 'video'} src="${m.path}" class="d-block w-100" ${m.type === 'video' ? 'controls muted' : ''} style="max-height: 400px; object-fit: cover;">
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                        ${post.media.length > 1 ? `
+                                            <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel${post._id}" data-bs-slide="prev">
+                                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                <span class="visually-hidden">Previous</span>
+                                            </button>
+                                            <button class="carousel-control-next" type="button" data-bs-target="#postCarousel${post._id}" data-bs-slide="next">
+                                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                <span class="visually-hidden">Next</span>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `) : '<img src="https://via.placeholder.com/400x300" alt="Placeholder">'}
+                            </div>
+                            <div class="post-content">
+                                <h4>${post.title}</h4>
+                                <p>${post.content}</p>
+                                <small>Categoría: ${post.category} | Autor: ${post.author} | ${moment(post.createdAt).format('DD/MM/YYYY')}</small>
+                            </div>
+                            <div class="post-actions">
+                                <button class="btn btn-sm btn-secondary">Comentarios ${post.allowComments ? '✅' : '❌'}</button>
+                            </div>
+                        `;
+                        container.appendChild(item);
+                    });
+
+                    masonry.reloadItems();
+                    masonry.layout();
+                } catch (error) {
+                    console.error('Error al cargar posts:', error);
+                    document.getElementById('errorToastBody').textContent = 'Error al cargar las publicaciones.';
+                    errorToast.show();
+                }
+            }
+
+            // Filtros
+            document.querySelectorAll('.filter-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    loadPosts(button.dataset.filter);
+                });
+            });
+
+            // Cargar posts iniciales
+            loadPosts('all');
+        });
+    </script>
+</body>
+
+</html>

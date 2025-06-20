@@ -1,0 +1,117 @@
+/* Game Panel */
+.game-panel {
+    position: relative;
+    min-height: 600px;
+    background: var(--light-bg);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.score-display {
+    background: var(--secondary-color);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+}
+
+.categories {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.category-btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.category-btn.active {
+    background: var(--accent-color);
+    transform: scale(1.05);
+}
+
+.game-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.word-display {
+    font-size: 2rem;
+    color: var(--secondary-color);
+    text-align: center;
+    animation: bounceIn 0.5s ease;
+}
+
+.image-container {
+    width: 150px;
+    height: 150px;
+    border: 3px solid var(--secondary-color);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    animation: zoomIn 0.5s ease;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.option-btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.option-btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.option-btn.correct {
+    background: #4CAF50;
+    animation: tada 0.5s ease;
+}
+
+.option-btn.incorrect {
+    background: #f44336;
+    animation: shakeX 0.5s ease;
+}
+
+@media (max-width: 768px) {
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+}

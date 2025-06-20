@@ -1,0 +1,17 @@
+{
+    "name": "sophi/info",
+    "autoload": {
+        "psr-4": {
+            "Sophi\\Info\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "IustusRenidet",
+            "email": "130248633+IustusRenidet@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "mongodb/mongodb": "^2.0"
+    }
+}

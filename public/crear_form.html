@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Constructor de Formularios de Pago</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --frosted-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --preview-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+            --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
+            --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--dark-bg), #1a1f2e);
+            color: var(--white);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: var(--gradient-bg) !important;
+            padding: 1.3rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 2.3rem;
+            color: var(--white) !important;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--secondary-color) !important;
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .logo-image {
+            width: 120px;
+            margin-right: 15px;
+            transition: transform 0.4s ease, filter 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.2) rotate(8deg);
+            filter: drop-shadow(0 0 10px var(--secondary-color));
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .toolbox-section,
+        .preview-section {
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--gradient-bg);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeInUp 0.7s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--white) !important;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border-gradient);
+            z-index: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .preview-card {
+            background: var(--white);
+            color: #000 !important;
+            /* Color base negro */
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-card * {
+            color: #000 !important;
+            /* Forzar color negro en todos los elementos hijos */
+        }
+
+        .preview-card h5 {
+            color: #000 !important;
+            /* Específico para h5 */
+        }
+
+        .preview-card h5.text-primary {
+            color: #000 !important;
+            /* Específicamente para h5 con clase text-primary */
+        }
+
+        .preview-card h5 i {
+            color: var(--secondary-color) !important;
+            /* Mantener íconos en color secundario */
+        }
+
+        .preview-card .text-muted {
+            color: rgba(0, 0, 0, 0.6) !important;
+            /* Ajustar text-muted a negro con opacidad */
+        }
+
+        .preview-card .form-label {
+            color: #000 !important;
+            /* Etiquetas de formulario */
+        }
+
+        .preview-card .form-control,
+        .preview-card .form-select {
+            color: #000 !important;
+            /* Campos de entrada y select */
+            background: var(--white) !important;
+        }
+
+        .preview-card .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.5) !important;
+            /* Placeholder en tono negro claro */
+        }
+
+        .preview-card .form-check-label {
+            color: #000 !important;
+            /* Etiquetas de casillas */
+        }
+
+        .preview-card::before {
+            background: var(--border-gradient);
+        }
+
+        .toolbox-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed var(--secondary-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: grab;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .toolbox-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--white);
+            transform: scale(1.05);
+        }
+
+        .toolbox-item:active {
+            cursor: grabbing;
+        }
+
+        .toolbox-item i {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .toolbox-item div {
+            color: var(--white);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .toolbox-item small {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 0.8rem;
+        }
+
+        .form-builder {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            min-height: 600px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .form-builder.drag-over {
+            border-color: var(--secondary-color);
+            background: rgba(230, 126, 34, 0.1);
+        }
+
+        .form-builder-empty {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        .form-builder-empty i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+
+        .form-builder-empty small {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .form-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .form-field:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--secondary-color);
+        }
+
+        .form-field.selected {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 16px rgba(230, 126, 34, 0.5);
+        }
+
+        .field-controls {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .form-field:hover .field-controls {
+            opacity: 1;
+        }
+
+        .field-control-btn {
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .field-control-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .field-control-btn.delete:hover {
+            background: #dc3545;
+        }
+
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            color: var(--white);
+            border-radius: 8px;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--white);
+            box-shadow: var(--input-glow);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .preview-form .form-control,
+        .preview-form .form-select {
+            background: var(--white);
+            border: 1px solid #dee2e6;
+            color: var(--primary-color);
+        }
+
+        .preview-form .form-control:focus,
+        .preview-form .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.3);
+        }
+
+        .preview-form .form-label {
+            color: var(--primary-color) !important;
+            font-weight: 500;
+        }
+
+        .preview-form .form-check-label {
+            color: var(--primary-color) !important;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .sortable-ghost {
+            opacity: 0.5;
+        }
+
+        .sortable-drag {
+            transform: rotate(5deg);
+        }
+
+        .field-options {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-item input {
+            flex: 1;
+        }
+
+        .remove-option {
+            background: var(--accent-color);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .add-option {
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-option:hover {
+            background: var(--accent-color);
+        }
+
+        .properties-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .properties-panel h6 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Mejorar visibilidad en elementos específicos */
+        .card h5 {
+            color: var(--white) !important;
+            font-weight: 600;
+        }
+
+        .card h5 i {
+            color: var(--secondary-color) !important;
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        /* Forzar color blanco SOLO en toolbox y form builder */
+        .toolbox-section .card *,
+        .builder-section .card * {
+            color: var(--white) !important;
+        }
+
+        .toolbox-section .card .text-muted,
+        .builder-section .card .text-muted {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .toolbox-section .card small,
+        .builder-section .card small {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Excepciones para elementos específicos en toolbox y builder */
+        .toolbox-section .card .form-control,
+        .toolbox-section .card .form-select,
+        .builder-section .card .form-control,
+        .builder-section .card .form-select {
+            color: var(--white) !important;
+        }
+
+        /* Placeholders en constructor deben ser oscuros pero visibles */
+        .builder-section .card .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+
+        /* Los campos disabled en el constructor mantienen placeholder oscuro */
+        .builder-section .form-field .form-control[disabled]::placeholder,
+        .builder-section .form-field .form-select[disabled],
+        .builder-section .form-field .form-control[disabled] {
+            color: rgba(0, 0, 0, 0.7) !important;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .toolbox-section,
+            .preview-section {
+                position: static;
+                max-height: none;
+            }
+        }
+
+        .modal-content {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse">
+                LIVETEXT
+            </a>
+            <div class="d-flex align-items-center ms-auto gap-3">
+                <button class="btn btn-warning" onclick="saveForm()">
+                    <i class="fas fa-save me-2"></i> Guardar Formulario
+                </button>
+                <a href="/logout.php" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Toolbox Section -->
+        <div class="toolbox-section">
+            <div class="card">
+                <h5 class="mb-4 text-center">
+                    <i class="fas fa-toolbox me-2"></i> Campos Disponibles
+                </h5>
+
+                <div class="toolbox-item" draggable="true" data-field-type="text">
+                    <i class="fas fa-font"></i>
+                    <div>Campo de Texto</div>
+                    <small class="text-muted">Entrada de texto simple</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="email">
+                    <i class="fas fa-envelope"></i>
+                    <div>Email</div>
+                    <small class="text-muted">Dirección de correo</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="tel">
+                    <i class="fas fa-phone"></i>
+                    <div>Teléfono</div>
+                    <small class="text-muted">Número telefónico</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="date">
+                    <i class="fas fa-calendar"></i>
+                    <div>Fecha</div>
+                    <small class="text-muted">Selector de fecha</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="select">
+                    <i class="fas fa-list"></i>
+                    <div>Lista Desplegable</div>
+                    <small class="text-muted">Opciones múltiples</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="radio">
+                    <i class="fas fa-dot-circle"></i>
+                    <div>Opciones Exclusivas</div>
+                    <small class="text-muted">Solo una opción</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="checkbox">
+                    <i class="fas fa-check-square"></i>
+                    <div>Casillas de Verificación</div>
+                    <small class="text-muted">Múltiples selecciones</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="number">
+                    <i class="fas fa-hashtag"></i>
+                    <div>Número</div>
+                    <small class="text-muted">Solo números</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="file">
+                    <i class="fas fa-paperclip"></i>
+                    <div>Archivo</div>
+                    <small class="text-muted">Subir archivos</small>
+                </div>
+
+                <div class="toolbox-item" draggable="true" data-field-type="textarea">
+                    <i class="fas fa-align-left"></i>
+                    <div>Área de Texto</div>
+                    <small class="text-muted">Texto largo</small>
+                </div>
+            </div>
+
+            <!-- Properties Panel -->
+            <div class="properties-panel" id="propertiesPanel" style="display: none;">
+                <h6><i class="fas fa-cog me-2"></i> Propiedades del Campo</h6>
+                <div id="propertiesContent"></div>
+            </div>
+        </div>
+
+        <!-- Form Builder Section -->
+        <div class="builder-section">
+            <div class="card">
+                <h5 class="mb-4 text-center">
+                    <i class="fas fa-hammer me-2"></i> Constructor de Formulario
+                </h5>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre del Formulario</label>
+                    <input type="text" class="form-control" id="formName"
+                        placeholder="Ej: Formulario de Pago - Inglés Básico">
+                </div>
+
+                <div class="form-builder" id="formBuilder">
+                    <div class="form-builder-empty" id="builderEmpty">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <div>Arrastra campos desde la caja de herramientas</div>
+                        <small>para comenzar a construir tu formulario</small>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex gap-3">
+                    <button class="btn btn-primary" onclick="clearForm()">
+                        <i class="fas fa-trash me-2"></i> Limpiar Todo
+                    </button>
+                    <button class="btn btn-primary" onclick="previewForm()">
+                        <i class="fas fa-eye me-2"></i> Vista Previa
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <div class="card preview-card">
+                <h5 class="mb-4 text-center text-primary">
+                    <i class="fas fa-eye me-2"></i> Vista Previa del Formulario
+                </h5>
+
+                <div id="formPreview">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-form" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <div>La vista previa aparecerá aquí</div>
+                        <small>conforme agregues campos al formulario</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Form Modal -->
+    <div class="modal fade" id="saveFormModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Guardar Formulario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Curso/Materia</label>
+                        <select class="form-select" id="formCourse">
+                            <option value="">Selecciona un curso</option>
+                            <option value="ingles">Inglés</option>
+                            <option value="frances">Francés</option>
+                            <option value="aleman">Alemán</option>
+                            <option value="italiano">Italiano</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" id="formDescription" rows="3"
+                            placeholder="Describe para qué se usará este formulario..."></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="formActive" checked>
+                        <label class="form-check-label" for="formActive">
+                            Activar formulario inmediatamente
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="confirmSaveForm()">
+                        <i class="fas fa-save me-2"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage">
+                Formulario guardado exitosamente
+            </div>
+        </div>
+
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                Error al procesar la solicitud
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script>
+        let formFields = [];
+        let fieldCounter = 0;
+        let selectedField = null;
+
+        // Initialize drag and drop
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeDragAndDrop();
+            initializeSortable();
+        });
+
+        function initializeDragAndDrop() {
+            const toolboxItems = document.querySelectorAll('.toolbox-item');
+            const formBuilder = document.getElementById('formBuilder');
+
+            toolboxItems.forEach(item => {
+                item.addEventListener('dragstart', function (e) {
+                    e.dataTransfer.setData('text/plain', this.dataset.fieldType);
+                    this.style.transform = 'rotate(5deg)';
+                });
+
+                item.addEventListener('dragend', function () {
+                    this.style.transform = '';
+                });
+            });
+
+            formBuilder.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                this.classList.add('drag-over');
+            });
+
+            formBuilder.addEventListener('dragleave', function (e) {
+                if (!this.contains(e.relatedTarget)) {
+                    this.classList.remove('drag-over');
+                }
+            });
+
+            formBuilder.addEventListener('drop', function (e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                const fieldType = e.dataTransfer.getData('text/plain');
+                addField(fieldType);
+            });
+        }
+
+        function initializeSortable() {
+            const formBuilder = document.getElementById('formBuilder');
+            new Sortable(formBuilder, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                filter: '.form-builder-empty',
+                onMove: function (evt) {
+                    return evt.related.className.indexOf('form-builder-empty') === -1;
+                },
+                onEnd: function (evt) {
+                    reorderFields(evt.oldIndex, evt.newIndex);
+                }
+            });
+        }
+
+        function addField(fieldType) {
+            fieldCounter++;
+            const fieldId = `field_${fieldCounter}`;
+            const field = {
+                id: fieldId,
+                type: fieldType,
+                label: getDefaultLabel(fieldType),
+                placeholder: getDefaultPlaceholder(fieldType),
+                required: false,
+                options: fieldType === 'select' || fieldType === 'radio' || fieldType === 'checkbox' ? ['Opción 1', 'Opción 2'] : []
+            };
+
+            formFields.push(field);
+            renderFormBuilder();
+            renderPreview();
+            hideEmptyMessage();
+        }
+
+        function getDefaultLabel(fieldType) {
+            const labels = {
+                'text': 'Campo de Texto',
+                'email': 'Correo Electrónico',
+                'tel': 'Teléfono',
+                'date': 'Fecha',
+                'select': 'Lista Desplegable',
+                'radio': 'Selecciona una opción',
+                'checkbox': 'Opciones múltiples',
+                'number': 'Número',
+                'file': 'Subir Archivo',
+                'textarea': 'Área de Texto'
+            };
+            return labels[fieldType] || 'Campo';
+        }
+
+        function getDefaultPlaceholder(fieldType) {
+            const placeholders = {
+                'text': 'Ingresa texto...',
+                'email': 'ejemplo@correo.com',
+                'tel': '55 1234 5678',
+                'date': '',
+                'number': '0',
+                'textarea': 'Escribe aquí...'
+            };
+            return placeholders[fieldType] || '';
+        }
+
+        function renderFormBuilder() {
+            const formBuilder = document.getElementById('formBuilder');
+            const fieldsHtml = formFields.map(field => generateFieldHtml(field)).join('');
+
+            formBuilder.innerHTML = fieldsHtml;
+            if (formFields.length === 0) {
+                showEmptyMessage();
+            }
+        }
+
+        function generateFieldHtml(field) {
+            return `
+                <div class="form-field" data-field-id="${field.id}" onclick="selectField('${field.id}')">
+                    <div class="field-controls">
+                        <button class="field-control-btn" onclick="editField('${field.id}')" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="field-control-btn delete" onclick="deleteField('${field.id}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <label class="form-label">
+                        ${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}
+                    </label>
+                    ${renderFieldPreview(field)}
+                </div>
+            `;
+        }
+
+        function renderFieldPreview(field) {
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'tel':
+                case 'number':
+                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" disabled>`;
+
+                case 'date':
+                    return `<input type="date" class="form-control" disabled>`;
+
+                case 'textarea':
+                    return `<textarea class="form-control" rows="3" placeholder="${field.placeholder}" disabled></textarea>`;
+
+                case 'select':
+                    const selectOptions = field.options.map(opt => `<option>${opt}</option>`).join('');
+                    return `<select class="form-select" disabled><option>Selecciona...</option>${selectOptions}</select>`;
+
+                case 'radio':
+                    return field.options.map(opt => `
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${field.id}" disabled>
+                            <label class="form-check-label">${opt}</label>
+                        </div>
+                    `).join('');
+
+                case 'checkbox':
+                    return field.options.map(opt => `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" disabled>
+                            <label class="form-check-label">${opt}</label>
+                        </div>
+                    `).join('');
+
+                case 'file':
+                    return `<input type="file" class="form-control" disabled>`;
+
+                default:
+                    return `<input type="text" class="form-control" placeholder="${field.placeholder}" disabled>`;
+            }
+        }
+
+        function renderPreview() {
+            const formPreview = document.getElementById('formPreview');
+            const formName = document.getElementById('formName').value || 'Formulario de Pago';
+
+            if (formFields.length === 0) {
+                formPreview.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-form" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <div>La vista previa aparecerá aquí</div>
+                        <small>conforme agregues campos al formulario</small>
+                    </div>
+                `;
+                return;
+            }
+
+            const fieldsHtml = formFields.map(field => `
+                <div class="mb-3">
+                    <label class="form-label">
+                        ${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}
+                    </label>
+                    ${renderPreviewField(field)}
+                </div>
+            `).join('');
+
+            formPreview.innerHTML = `
+                <div class="preview-form">
+                    <h5 class="text-primary mb-4">${formName}</h5>
+                    <form>
+                        ${fieldsHtml}
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fas fa-paper-plane me-2"></i> Enviar Formulario
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        function renderPreviewField(field) {
+            switch (field.type) {
+                case 'text':
+                case 'email':
+                case 'tel':
+                case 'number':
+                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>`;
+
+                case 'date':
+                    return `<input type="date" class="form-control" ${field.required ? 'required' : ''}>`;
+
+                case 'textarea':
+                    return `<textarea class="form-control" rows="3" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}></textarea>`;
+
+                case 'select':
+                    const selectOptions = field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                    return `<select class="form-select" ${field.required ? 'required' : ''}><option value="">Selecciona una opción</option>${selectOptions}</select>`;
+
+                case 'radio':
+                    return field.options.map((opt, index) => `
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${field.id}" value="${opt}" id="${field.id}_${index}" ${field.required ? 'required' : ''}>
+                            <label class="form-check-label" for="${field.id}_${index}">${opt}</label>
+                        </div>
+                    `).join('');
+
+                case 'checkbox':
+                    return field.options.map((opt, index) => `
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="${opt}" id="${field.id}_${index}">
+                            <label class="form-check-label" for="${field.id}_${index}">${opt}</label>
+                        </div>
+                    `).join('');
+
+                case 'file':
+                    return `<input type="file" class="form-control" ${field.required ? 'required' : ''}>`;
+
+                default:
+                    return `<input type="text" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>`;
+            }
+        }
+
+        function selectField(fieldId) {
+            // Remove previous selection
+            document.querySelectorAll('.form-field').forEach(field => {
+                field.classList.remove('selected');
+            });
+
+            // Add selection to current field
+            const fieldElement = document.querySelector(`[data-field-id="${fieldId}"]`);
+            fieldElement.classList.add('selected');
+
+            selectedField = formFields.find(field => field.id === fieldId);
+            showFieldProperties(selectedField);
+        }
+
+        function showFieldProperties(field) {
+            const propertiesPanel = document.getElementById('propertiesPanel');
+            const propertiesContent = document.getElementById('propertiesContent');
+
+            let optionsHtml = '';
+            if (field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') {
+                optionsHtml = `
+                    <div class="mb-3">
+                        <label class="form-label">Opciones</label>
+                        <div id="optionsList">
+                            ${field.options.map((option, index) => `
+                                <div class="option-item">
+                                    <input type="text" class="form-control" value="${option}" onchange="updateOption(${index}, this.value)">
+                                    <button class="remove-option" onclick="removeOption(${index})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="add-option mt-2" onclick="addOption()">
+                            <i class="fas fa-plus me-1"></i> Agregar Opción
+                        </button>
+                    </div>
+                `;
+            }
+
+            propertiesContent.innerHTML = `
+                <div class="mb-3">
+                    <label class="form-label">Etiqueta</label>
+                    <input type="text" class="form-control" value="${field.label}" onchange="updateFieldProperty('label', this.value)">
+                </div>
+                ${field.type !== 'radio' && field.type !== 'checkbox' && field.type !== 'select' && field.type !== 'file' && field.type !== 'date' ? `
+                <div class="mb-3">
+                    <label class="form-label">Placeholder</label>
+                    <input type="text" class="form-control" value="${field.placeholder}" onchange="updateFieldProperty('placeholder', this.value)">
+                </div>
+                ` : ''}
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" ${field.required ? 'checked' : ''} onchange="updateFieldProperty('required', this.checked)">
+                        <label class="form-check-label">Campo obligatorio</label>
+                    </div>
+                </div>
+                ${optionsHtml}
+            `;
+
+            propertiesPanel.style.display = 'block';
+        }
+
+        function updateFieldProperty(property, value) {
+            if (selectedField) {
+                selectedField[property] = value;
+                renderFormBuilder();
+                renderPreview();
+            }
+        }
+
+        function updateOption(index, value) {
+            if (selectedField && selectedField.options) {
+                selectedField.options[index] = value;
+                renderFormBuilder();
+                renderPreview();
+            }
+        }
+
+        function addOption() {
+            if (selectedField && selectedField.options) {
+                selectedField.options.push(`Opción ${selectedField.options.length + 1}`);
+                showFieldProperties(selectedField);
+                renderFormBuilder();
+                renderPreview();
+            }
+        }
+
+        function removeOption(index) {
+            if (selectedField && selectedField.options && selectedField.options.length > 1) {
+                selectedField.options.splice(index, 1);
+                showFieldProperties(selectedField);
+                renderFormBuilder();
+                renderPreview();
+            }
+        }
+
+        function editField(fieldId) {
+            selectField(fieldId);
+        }
+
+        function deleteField(fieldId) {
+            formFields = formFields.filter(field => field.id !== fieldId);
+            renderFormBuilder();
+            renderPreview();
+
+            if (selectedField && selectedField.id === fieldId) {
+                document.getElementById('propertiesPanel').style.display = 'none';
+                selectedField = null;
+            }
+
+            if (formFields.length === 0) {
+                showEmptyMessage();
+            }
+        }
+
+        function reorderFields(oldIndex, newIndex) {
+            const [movedField] = formFields.splice(oldIndex, 1);
+            formFields.splice(newIndex, 0, movedField);
+            renderPreview();
+        }
+
+        function clearForm() {
+            if (confirm('¿Estás seguro de que quieres limpiar todo el formulario?')) {
+                formFields = [];
+                selectedField = null;
+                document.getElementById('formName').value = '';
+                document.getElementById('propertiesPanel').style.display = 'none';
+                renderFormBuilder();
+                renderPreview();
+                showEmptyMessage();
+            }
+        }
+
+        function previewForm() {
+            if (formFields.length === 0) {
+                showToast('error', 'Agrega al menos un campo antes de ver la vista previa');
+                return;
+            }
+
+            const previewSection = document.querySelector('.preview-section');
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideEmptyMessage() {
+            const emptyMessage = document.getElementById('builderEmpty');
+            if (emptyMessage) {
+                emptyMessage.style.display = 'none';
+            }
+        }
+
+        function showEmptyMessage() {
+            const formBuilder = document.getElementById('formBuilder');
+            formBuilder.innerHTML = `
+                <div class="form-builder-empty" id="builderEmpty">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <div>Arrastra campos desde la caja de herramientas</div>
+                    <small>para comenzar a construir tu formulario</small>
+                </div>
+            `;
+        }
+
+        function saveForm() {
+            if (formFields.length === 0) {
+                showToast('error', 'Agrega al menos un campo antes de guardar el formulario');
+                return;
+            }
+
+            const formName = document.getElementById('formName').value.trim();
+            if (!formName) {
+                showToast('error', 'Ingresa un nombre para el formulario');
+                document.getElementById('formName').focus();
+                return;
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('saveFormModal'));
+            modal.show();
+        }
+
+        function confirmSaveForm() {
+            const formName = document.getElementById('formName').value.trim();
+            const course = document.getElementById('formCourse').value;
+            const description = document.getElementById('formDescription').value.trim();
+            const active = document.getElementById('formActive').checked;
+
+            if (!course) {
+                showToast('error', 'Selecciona un curso para el formulario');
+                return;
+            }
+
+            const formData = {
+                name: formName,
+                course: course,
+                description: description,
+                active: active,
+                fields: formFields,
+                created_at: new Date().toISOString()
+            };
+
+            // Simular guardado - aquí enviarías los datos al backend
+            console.log('Guardando formulario:', formData);
+
+            // Cerrar modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('saveFormModal'));
+            modal.hide();
+
+            // Mostrar mensaje de éxito
+            showToast('success', 'Formulario guardado exitosamente');
+
+            // Aquí podrías redirigir o limpiar el formulario
+            setTimeout(() => {
+                // window.location.href = '/forms-list.php';
+            }, 2000);
+        }
+
+        function showToast(type, message) {
+            const toastElement = document.getElementById(type === 'success' ? 'successToast' : 'errorToast');
+            const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+
+            messageElement.textContent = message;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // Update preview when form name changes
+        document.getElementById('formName').addEventListener('input', renderPreview);
+
+        // Initialize preview
+        renderPreview();
+    </script>
+</body>
+
+</html>

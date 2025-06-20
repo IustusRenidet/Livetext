@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Formularios de Pago</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/pagos.css">
+</head>
+<style>
+    :root {
+        --primary-color: #000b24;
+        --secondary-color: #e67e22;
+        --dark-bg: #232A40;
+        --light-bg: #D7D7D9;
+        --accent-color: #D94E41;
+        --white: #fff;
+        --border-blue: #3498db;
+        --border-purple: #9b59b6;
+        --border-green: #2ecc71;
+        --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--white);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .navbar {
+        background-color: var(--primary-color) !important;
+        padding: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar-brand {
+        font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+        font-size: 2rem;
+        color: var(--white) !important;
+    }
+
+    .logo-image {
+        width: 100px;
+        margin-right: 15px;
+        transition: transform 0.3s ease;
+    }
+
+    .logo-image:hover {
+        transform: scale(1.1);
+    }
+
+    .nav-link {
+        color: var(--white) !important;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: var(--secondary-color) !important;
+    }
+
+    .login-btn {
+        background: var(--secondary-color);
+        color: var(--white);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .main-container {
+        flex: 1;
+        padding-top: 2rem;
+    }
+
+    .form-card {
+        background: var(--light-bg);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        color: var(--primary-color);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Bordes superiores coloridos */
+    .form-card.border-blue {
+        border-top: 4px solid var(--border-blue);
+    }
+
+    .form-card.border-purple {
+        border-top: 4px solid var(--border-purple);
+    }
+
+    .form-card.border-green {
+        border-top: 4px solid var(--border-green);
+    }
+
+    /* Alternativa: Bordes completos (descomentar para usar) */
+    /*
+    .form-card.border-blue {
+        border: 2px solid var(--border-blue);
+    }
+
+    .form-card.border-purple {
+        border: 2px solid var(--border-purple);
+    }
+
+    .form-card.border-green {
+        border: 2px solid var(--border-green);
+    }
+    */
+
+    .form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        animation: pulse 0.5s ease;
+    }
+
+    .form-card:hover.border-blue {
+        border-top-width: 5px; /* Aumenta el grosor al hacer hover */
+        /* border-width: 3px; */ /* Para borde completo */
+    }
+
+    .form-card:hover.border-purple {
+        border-top-width: 5px;
+        /* border-width: 3px; */
+    }
+
+    .form-card:hover.border-green {
+        border-top-width: 5px;
+        /* border-width: 3px; */
+    }
+
+    .form-card h5 {
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .form-card p {
+        margin: 0.5rem 0;
+        font-size: 0.95rem;
+    }
+
+    .btn-open-form {
+        background: var(--secondary-color);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        color: var(--white);
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-open-form:hover {
+        background: var(--accent-color);
+        transform: scale(1.1);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        filter: brightness(1.2);
+        animation: bounceIn 0.3s ease;
+    }
+
+    .modal-content {
+        background: var(--white);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border: none;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: var(--gradient-bg);
+        color: var(--white);
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modal-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 200%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: shine 3s infinite;
+    }
+
+    .modal-body {
+        background: var(--white);
+        color: var(--primary-color);
+        padding: 1.5rem;
+        border-radius: 0 0 20px 20px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .modal-footer {
+        background: var(--white);
+        border-radius: 0 0 20px 20px;
+        border-top: none;
+    }
+
+    .btn-close {
+        filter: invert(1);
+        transition: transform 0.3s ease;
+    }
+
+    .btn-close:hover {
+        transform: rotate(90deg);
+    }
+
+    .form-control, .form-select {
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 0.6rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control:hover, .form-select:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        border-color: var(--secondary-color);
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 10px rgba(230, 126, 34, 0.3);
+    }
+
+    .form-check-input {
+        margin-top: 0.5rem;
+        accent-color: var(--secondary-color);
+    }
+
+    .form-check-label {
+        margin-left: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .file-input {
+        padding: 0.6rem;
+    }
+
+    .file-preview {
+        max-width: 100%;
+        max-height: 100px;
+        object-fit: cover;
+        margin-top: 0.5rem;
+        border-radius: 10px;
+        display: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .pdf-preview {
+        max-height: 100px;
+        margin-top: 0.5rem;
+        border-radius: 10px;
+        display: none;
+        border: 1px solid #e0e0e0;
+    }
+
+    .btn-submit {
+        background: var(--secondary-color);
+        border: none;
+        padding: 0.7rem 2rem;
+        border-radius: 10px;
+        color: var(--white);
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-submit:hover {
+        background: var(--accent-color);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        filter: brightness(1.2);
+        animation: bounceIn 0.3s ease;
+    }
+
+    .btn-submit:active {
+        transform: scale(0.95);
+    }
+
+    .modal-field {
+        animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .modal-field:nth-child(1) { animation-delay: 0.1s; }
+    .modal-field:nth-child(2) { animation-delay: 0.2s; }
+    .modal-field:nth-child(3) { animation-delay: 0.3s; }
+    .modal-field:nth-child(4) { animation-delay: 0.4s; }
+    .modal-field:nth-child(5) { animation-delay: 0.5s; }
+    .modal-field:nth-child(6) { animation-delay: 0.6s; }
+    .modal-field:nth-child(7) { animation-delay: 0.7s; }
+    .modal-field:nth-child(8) { animation-delay: 0.8s; }
+    .modal-field:nth-child(9) { animation-delay: 0.9s; }
+
+    .confirmation-icon {
+        font-size: 2.5rem;
+        color: var(--secondary-color);
+        animation: rotateIn 0.5s ease;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        color: var(--secondary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .footer {
+        background: var(--accent-color);
+        color: var(--white);
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+    @keyframes shine {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    @media (max-width: 1200px) {
+        .form-card { padding: 1rem; }
+        .modal-body { padding: 1.2rem; }
+    }
+
+    @media (max-width: 768px) {
+        .form-card { 
+            margin-bottom: 1rem;
+            border-top-width: 3px; /* Reducir grosor en pantallas pequeñas */
+        }
+        .form-card:hover {
+            border-top-width: 4px;
+        }
+        /* Para borde completo */
+        /*
+        .form-card { border-width: 1.5px; }
+        .form-card:hover { border-width: 2px; }
+        */
+        .modal-dialog { max-width: 95%; }
+        .form-control, .form-select {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 0.6rem;
+        }
+        .file-preview, .pdf-preview { max-height: 80px; }
+    }
+
+    @media (max-width: 576px) {
+        .navbar-brand { font-size: 1.5rem; }
+        .logo-image { width: 80px; }
+        .section-title { font-size: 1.5rem; }
+        .form-card { 
+            padding: 0.75rem;
+            border-top-width: 2.5px;
+        }
+        .form-card:hover {
+            border-top-width: 3.5px;
+        }
+        /* Para borde completo */
+        /*
+        .form-card { border-width: 1px; }
+        .form-card:hover { border-width: 1.5px; }
+        */
+        .modal-body { padding: 1rem; }
+    }
+</style>
+<body>
+    <!-- Navbar (sin cambios) -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image">
+                LIVETEXT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/recursos.html"><i class="fas fa-book"></i> Recursos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/calendario.html"><i class="fas fa-calendar-alt"></i> Calendario</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/pagos.html"><i class="fas fa-credit-card"></i> Pagos</a></li>
+                </ul>
+                <div class="d-flex">
+                    <a href="/login.html" class="btn login-btn"><i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="main-container">
+        <div class="container-fluid">
+            <!-- Título -->
+            <div class="row mb-4 animate__animated animate__fadeInDown">
+                <div class="col-12">
+                    <h2 class="section-title">Formularios de Pago Disponibles</h2>
+                </div>
+            </div>
+
+            <!-- Lista de formularios -->
+            <div class="row animate__animated animate__fadeInUp" style="animation-duration: 1.2s;">
+                <div class="col-12">
+                    <div class="row" id="formsContainer">
+                        <!-- Ejemplo de tarjeta -->
+                        <div class="col-12 col-md-6 col-lg-4 mb-4">
+                            <div class="form-card border-blue">
+                                <h5>Inglés Avanzado - Grupo A</h5>
+                                <p><strong>Fecha límite:</strong> 30/05/2025</p>
+                                <p><strong>Monto:</strong> $500 MXN</p>
+                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="1">Subir Pago</button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-4 mb-4">
+                            <div class="form-card border-purple">
+                                <h5>Francés Básico - Grupo B</h5>
+                                <p><strong>Fecha límite:</strong> 31/05/2025</p>
+                                <p><strong>Monto:</strong> $450 MXN</p>
+                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="2">Subir Pago</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de formulario de pago (sin cambios) -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content animate__animated animate__fadeInUp">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Subir Formulario de Pago</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" enctype="multipart/form-data">
+                        <input type="hidden" id="formId">
+                        <div class="mb-3 modal-field">
+                            <label for="curso" class="form-label">Curso</label>
+                            <select class="form-select" id="curso" name="curso" required>
+                                <option value="" disabled selected>Selecciona un curso</option>
+                                <option value="ingles">Inglés</option>
+                                <option value="frances">Francés</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label for="grupo" class="form-label">Grupo</label>
+                            <select class="form-select" id="grupo" name="grupo" required>
+                                <option value="" disabled selected>Selecciona un grupo</option>
+                                <option value="A">Grupo A</option>
+                                <option value="B">Grupo B</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" required>
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingresa tu nombre completo" required>
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label class="form-label">Tipo de estudiante</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipoEstudiante" id="interno" value="interno" required>
+                                <label class="form-check-label" for="interno">Interno</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="tipoEstudiante" id="externo" value="externo">
+                                <label class="form-check-label" for="externo">Externo</label>
+                            </div>
+                        </div>
+                        <div class="mb-3 modal-field" id="controlNumberGroup" style="display: none;">
+                            <label for="numeroControl" class="form-label">Número de control</label>
+                            <input type="text" class="form-control" id="numeroControl" name="numeroControl" placeholder="Ingresa tu número de control">
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label for="lineaCaptura" class="form-label">Línea de captura</label>
+                            <input type="text" class="form-control" id="lineaCaptura" name="lineaCaptura" placeholder="Ingresa la línea de captura" required>
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label for="formatoPago" class="form-label">Formato universal de pago (JPG/PNG/PDF)</label>
+                            <input type="file" class="form-control file-input" id="formatoPago" name="formatoPago" accept="image/jpeg,image/png" required>
+                            <img id="formatoPagoPreview" class="file-preview" alt="Vista previa del formato de pago">
+                        </div>
+                        <div class="mb-3 modal-field">
+                            <label for="ticket" class="form-label">Ticket (JPG/PNG/PDF)</label>
+                            <input type="file" class="form-control file-input" id="ticket" name="ticket" accept="image/jpeg,image/png" required>
+                            <img id="ticketPreview" class="file-preview" alt="Vista previa del ticket">
+                        </div>
+                        <button type="submit" class="btn btn-submit modal-field">Enviar formulario</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación (sin cambios) -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content animate__animated animate__rotateIn">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Formulario Enviado</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <i class="fas fa-check-circle confirmation-icon"></i>
+                    <p>Tu formulario de pago ha sido enviado exitosamente. Será revisado pronto.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (sin cambios) -->
+    <footer class="footer mt-5 py-4">
+        <div class="container">
+            <!-- Logos y redes sociales -->
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="text-white fs-4">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información de contacto -->
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 | 
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740, Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/pagos.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const paymentForm = document.getElementById('paymentForm');
+            const tipoEstudianteInputs = document.querySelectorAll('input[name="tipoEstudiante"]');
+            const controlNumberGroup = document.getElementById('controlNumberGroup');
+            const pdfFileInput = document.getElementById('pdfFile');
+            const formatoPagoInput = document.getElementById('formatoPago');
+            const ticketInput = document.getElementById('ticket');
+            const pdfPreview = document.getElementById('pdfPreview');
+            const formatoPagoPreview = document.getElementById('formatoPagoPreview');
+            const ticketPreview = document.getElementById('ticketPreview');
+            const formsContainer = document.getElementById('formsContainer');
+            const paymentModal = document.getElementById('paymentModal');
+
+            // Cargar formularios dinámicamente
+            const loadForms = async () => {
+                try {
+                    // Simulación de datos de la API
+                    const response = {
+                        data: [
+                            { _id: '1', curso: 'Inglés Avanzado', grupo: 'Grupo A', fechaLimite: '2025-05-30', monto: 500, color: 'border-blue' },
+                            { _id: '2', curso: 'Francés Básico', grupo: 'Grupo B', fechaLimite: '2025-05-31', monto: 450, color: 'border-purple' }
+                        ]
+                    };
+                    // const response = await axios.get('/api/formularios');
+                    formsContainer.innerHTML = response.data.map(form => `
+                        <div class="col-12 col-md-6 col-lg-4 mb-4">
+                            <div class="form-card ${form.color}">
+                                <h5>${form.curso} - ${form.grupo}</h5>
+                                <p><strong>Fecha límite:</strong> ${new Date(form.fechaLimite).toLocaleDateString('es')}</p>
+                                <p><strong>Monto:</strong> $${form.monto} MXN</p>
+                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="${form._id}">Subir Pago</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error('Error al cargar formularios:', error);
+                }
+            };
+
+            loadForms();
+
+            // Habilitar/deshabilitar número de control
+            tipoEstudianteInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    if (input.value === 'interno') {
+                        controlNumberGroup.style.display = 'block';
+                        document.getElementById('numeroControl').required = true;
+                    } else {
+                        controlNumberGroup.style.display = 'none';
+                        document.getElementById('numeroControl').required = false;
+                        document.getElementById('numeroControl').value = '';
+                    }
+                });
+            });
+
+            // Vista previa de archivos
+            pdfFileInput.addEventListener('change', () => {
+                const file = pdfFileInput.files[0];
+                if (file && file.type === 'application/pdf' && file.size <= 5 * 1024 * 1024) {
+                    const url = URL.createObjectURL(file);
+                    pdfPreview.src = url;
+                    pdfPreview.style.display = 'block';
+                    pdfPreview.classList.add('animate__animated', 'animate__zoomIn');
+                } else {
+                    alert('Por favor, sube un archivo PDF válido (máximo 5MB).');
+                    pdfFileInput.value = '';
+                    pdfPreview.style.display = 'none';
+                }
+            });
+
+            formatoPagoInput.addEventListener('change', () => {
+                const file = formatoPagoInput.files[0];
+                if (file && ['image/jpeg', 'image/png'].includes(file.type) && file.size <= 5 * 1024 * 1024) {
+                    const url = URL.createObjectURL(file);
+                    formatoPagoPreview.src = url;
+                    formatoPagoPreview.style.display = 'block';
+                    formatoPagoPreview.classList.add('animate__animated', 'animate__zoomIn');
+                } else {
+                    alert('Por favor, sube una imagen JPG o PNG válida (máximo 5MB).');
+                    formatoPagoInput.value = '';
+                    formatoPagoPreview.style.display = 'none';
+                }
+            });
+
+            ticketInput.addEventListener('change', () => {
+                const file = ticketInput.files[0];
+                if (file && ['image/jpeg', 'image/png'].includes(file.type) && file.size <= 5 * 1024 * 1024) {
+                    const url = URL.createObjectURL(file);
+                    ticketPreview.src = url;
+                    ticketPreview.style.display = 'block';
+                    ticketPreview.classList.add('animate__animated', 'animate__zoomIn');
+                } else {
+                    alert('Por favor, sube una imagen JPG o PNG válida (máximo 5MB).');
+                    ticketInput.value = '';
+                    ticketPreview.style.display = 'none';
+                }
+            });
+
+            // Envío del formulario
+            paymentForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(paymentForm);
+                formData.append('formId', document.getElementById('formId').value);
+
+                try {
+                    // Simulación de envío a la API
+                    // const response = await axios.post('/api/pagos', formData, {
+                    //     headers: { 'Content-Type': 'multipart/form-data' }
+                    // });
+                    const confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+                    confirmationModal.show();
+                    paymentForm.reset();
+                    [pdfPreview, formatoPagoPreview, ticketPreview].forEach(preview => {
+                        preview.style.display = 'none';
+                        preview.src = '';
+                        preview.classList.remove('animate__animated', 'animate__zoomIn');
+                    });
+                    controlNumberGroup.style.display = 'none';
+                    bootstrap.Modal.getInstance(paymentModal).hide();
+                } catch (error) {
+                    alert('Error al enviar el formulario. Por favor, intenta de nuevo.');
+                    console.error(error);
+                }
+            });
+
+            // Configurar modal al abrir
+            paymentModal.addEventListener('show.bs.modal', (event) => {
+                const button = event.relatedTarget;
+                const formId = button.getAttribute('data-form-id');
+                document.getElementById('formId').value = formId;
+                paymentForm.reset();
+                [pdfPreview, formatoPagoPreview, ticketPreview].forEach(preview => {
+                    preview.style.display = 'none';
+                    preview.src = '';
+                    preview.classList.remove('animate__animated', 'animate__zoomIn');
+                });
+                controlNumberGroup.style.display = 'none';
+                document.querySelector('.modal-body').style.opacity = '1';
+                document.querySelector('.modal-body').style.display = 'block';
+                const modalContent = document.querySelector('#paymentModal .modal-content');
+                modalContent.classList.remove('animate__fadeOutDown');
+                modalContent.classList.add('animate__fadeInUp');
+                modalContent.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    modalContent.style.transform = 'scale(1)';
+                }, 100);
+            });
+
+            paymentModal.addEventListener('hide.bs.modal', () => {
+                const modalContent = document.querySelector('#paymentModal .modal-content');
+                modalContent.classList.remove('animate__fadeInUp');
+                modalContent.classList.add('animate__fadeOutDown');
+                modalContent.style.transform = 'scale(1.05)';
+            });
+
+            // Animaciones de modal de confirmación
+            document.getElementById('confirmationModal').addEventListener('hide.bs.modal', () => {
+                const modalContent = document.querySelector('#confirmationModal .modal-content');
+                modalContent.classList.remove('animate__rotateIn');
+                modalContent.classList.add('animate__rotateOut');
+            });
+
+            document.getElementById('confirmationModal').addEventListener('show.bs.modal', () => {
+                const modalContent = document.querySelector('#confirmationModal .modal-content');
+                modalContent.classList.remove('animate__rotateOut');
+                modalContent.classList.add('animate__rotateIn');
+            });
+        });
+    </script>
+</body>
+</html>

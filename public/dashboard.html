@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Dashboard Maestro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+    <script src="https://unpkg.com/infinite-scroll@4.0.1/dist/infinite-scroll.pkgd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/imagesloaded@5.0.0/imagesloaded.pkgd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --light-hover: rgba(255, 255, 255, 0.05);
+            --sidebar-width: 260px;
+            --card-highlight: #2c3859;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            --card-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            flex: 1;
+            min-height: calc(100vh - 76px - 90px);
+            display: flex;
+            flex-direction: row;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color);
+        }
+
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        .preloader .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid transparent;
+            border-top: 4px solid var(--secondary-color);
+            border-right: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+        }
+
+        .preloader .spinner::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 3px solid transparent;
+            border-bottom: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite reverse;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .navbar {
+            background-color: var(--primary-color) !important;
+            opacity: 1;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
+
+        .navbar-dark {
+            background-color: var(--primary-color) !important;
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 1.75rem;
+            color: var(--white) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-image {
+            width: 80px;
+            margin-right: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px rgba(230, 126, 34, 0.6));
+        }
+
+        .navbar .btn {
+            transition: all 0.3s ease;
+        }
+
+        .navbar .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+
+            .logo-image {
+                width: 60px;
+            }
+
+            .navbar .d-flex {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .navbar .btn {
+                width: 100%;
+                text-align: left;
+            }
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            position: sticky;
+            top: 76px;
+            height: calc(100vh - 76px);
+        }
+
+        .sidebar-collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            margin-bottom: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+        }
+
+        .sidebar-menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.2rem;
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu-link:hover {
+            background-color: rgba(230, 126, 34, 0.1);
+            color: var(--secondary-color);
+            border-left-color: var(--secondary-color);
+        }
+
+        .sidebar-menu-link.active {
+            background-color: rgba(230, 126, 34, 0.2);
+            color: var(--secondary-color);
+            border-left-color: var(--secondary-color);
+        }
+
+        .sidebar-menu-icon {
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .sidebar-menu-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: absolute;
+            top: 1.5rem;
+            right: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-sidebar:hover {
+            color: var(--secondary-color);
+            transform: rotate(180deg);
+        }
+
+        .sidebar-collapsed .sidebar-menu-text,
+        .sidebar-collapsed .sidebar-title,
+        .sidebar-collapsed .sidebar-subtitle {
+            display: none;
+        }
+
+        .sidebar-collapsed .sidebar-menu-link {
+            justify-content: center;
+            padding: 0.8rem;
+        }
+
+        .sidebar-collapsed .sidebar-menu-icon {
+            margin-right: 0;
+            font-size: 1.4rem;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-x: hidden;
+        }
+
+        .right-panel {
+            width: 300px;
+            background-color: var(--primary-color);
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 76px;
+            height: calc(100vh - 76px);
+            transition: all 0.3s ease;
+        }
+
+        .feed-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .feed-grid {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .grid-sizer,
+        .grid-item {
+            width: calc(33.333% - 20px);
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+
+        @media (max-width: 1400px) {
+            .grid-sizer,
+            .grid-item {
+                width: calc(50% - 20px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: relative;
+                top: 0;
+                height: auto;
+                margin-bottom: 1.5rem;
+            }
+
+            .sidebar-collapsed {
+                width: auto;
+                padding: 0.5rem;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+
+            .sidebar-menu-item {
+                margin: 0;
+            }
+
+            .sidebar-menu-link {
+                padding: 0.6rem 1rem;
+                border-radius: 8px;
+                border-left: none;
+                min-width: 50px;
+                text-align: center;
+            }
+
+            .sidebar-collapsed .sidebar-menu {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+
+            .sidebar-collapsed .sidebar-menu-link {
+                padding: 0.5rem;
+                min-width: 40px;
+            }
+
+            .sidebar-collapsed .sidebar-menu-icon {
+                margin: 0;
+            }
+
+            .main-content {
+                order: 2;
+                width: 100%;
+            }
+
+            .right-panel {
+                order: 3;
+                width: 100%;
+                position: relative;
+                top: 0;
+                height: auto;
+                margin-top: 1.5rem;
+            }
+
+            .grid-sizer,
+            .grid-item {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .stats-container {
+                flex-direction: column;
+            }
+
+            .stats-card {
+                width: 100%;
+            }
+
+            .sidebar-menu-link {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .sidebar-collapsed .sidebar-menu-link {
+                padding: 0.4rem;
+                min-width: 35px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar-menu {
+                gap: 0.3rem;
+            }
+
+            .sidebar-menu-link {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .sidebar-collapsed .sidebar-menu-link {
+                padding: 0.3rem;
+                min-width: 30px;
+            }
+        }
+
+        .grid-item {
+            background: var(--light-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: var(--card-transition);
+            color: var(--primary-color);
+            transform-origin: center center;
+            animation: cardAppear 0.5s forwards;
+            position: relative;
+            float: left;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .grid-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .post-header {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 0.8rem;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .post-author {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .post-date {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .post-content {
+            padding: 1.25rem;
+        }
+
+        .post-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .post-text {
+            margin-bottom: 1rem;
+        }
+
+        .post-media {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .post-actions {
+            padding: 0.75rem 1.25rem;
+            background: rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .post-action-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .post-action-btn i {
+            margin-right: 0.4rem;
+        }
+
+        .post-action-btn:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-tag {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--primary-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(145deg, #2a3653, #1c273d);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--card-transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-card h4 {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .stats-card h4 i {
+            margin-right: 0.5rem;
+        }
+
+        .stats-card .value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-card .trend {
+            font-size: 0.9rem;
+            color: #4cd964;
+            display: flex;
+            align-items: center;
+        }
+
+        .stats-card .trend.down {
+            color: #ff3b30;
+        }
+
+        .stats-card .trend i {
+            margin-right: 0.3rem;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(230, 126, 34, 0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .chart-container {
+            background: linear-gradient(145deg, #2a3653, #1c273d);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-container h4 {
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        canvas {
+            position: relative;
+            z-index: 1;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+        }
+
+        .toast {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            border-left: 4px solid var(--secondary-color);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            animation: toastIn 0.5s forwards;
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.hide {
+            animation: toastOut 0.5s forwards;
+        }
+
+        @keyframes toastOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .toast-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 0.6rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast-body {
+            padding: 1rem;
+        }
+
+        .footer {
+            background: var(--accent-color);
+            color: var(--white);
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: auto;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .social-icons i {
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons i:hover {
+            color: var(--secondary-color);
+            transform: scale(1.2);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.5s forwards;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.5s forwards;
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in-up {
+            animation: slideInUp 0.5s forwards;
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+        }
+
+        @keyframes bounceIn {
+            from { transform: scale(0.8); opacity: 0; }
+            40% { transform: scale(1.05); opacity: 1; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--dark-bg);
+            color: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: var(--white);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.2rem 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.2rem 1.5rem;
+        }
+
+        #publicationsModal .card {
+            transition: all 0.3s ease;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        #publicationsModal .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #publicationsModal .row {
+            margin: 0 -10px;
+        }
+
+        #publicationsModal .col {
+            padding: 10px;
+        }
+
+        .floating-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: var(--white);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1050;
+            cursor: pointer;
+        }
+
+        .floating-button:hover {
+            transform: scale(1.1) rotate(5deg);
+            background: var(--accent-color);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: var(--dark-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+            flex-direction: column;
+            z-index: 1050;
+            overflow: hidden;
+            animation: chatAppear 0.3s forwards;
+        }
+
+        @keyframes chatAppear {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .infinite-scroll-error,
+        .infinite-scroll-last {
+            text-align: center;
+            color: var(--white);
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse"
+                    style="animation-iteration-count: infinite; animation-duration: 2s;">
+                LIVETEXT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto">
+                    <span class="me-3 d-none d-lg-block animate__animated animate__fadeIn" id="userName"></span>
+                    <a href="/logout" class="btn btn-danger animate__animated animate__bounceIn"
+                        style="animation-delay: 0.5s;">
+                        <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Modal de Publicaciones -->
+    <div class="modal fade" id="publicationsModal" tabindex="-1" aria-labelledby="publicationsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content animate__animated animate__zoomIn">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="publicationsModalLabel">Gestionar Publicaciones</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <div class="col">
+                            <a href="crear_form.html"
+                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
+                                style="animation-delay: 0.1s; text-decoration: none;">
+                                <div class="card-body">
+                                    <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+                                    <h5 class="card-title">Crear Formulario</h5>
+                                    <p class="card-text small">Crea formularios para recopilar información de tus
+                                        estudiantes.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="crear_post.html"
+                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
+                                style="animation-delay: 0.2s; text-decoration: none;">
+                                <div class="card-body">
+                                    <i class="fas fa-bullhorn fa-3x mb-3"></i>
+                                    <h5 class="card-title">Crear Publicación</h5>
+                                    <p class="card-text small">Comparte anuncios, noticias y eventos con toda la
+                                        comunidad.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="crear_calendario.html"
+                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
+                                style="animation-delay: 0.3s; text-decoration: none;">
+                                <div class="card-body">
+                                    <i class="fas fa-calendar-alt fa-3x mb-3"></i>
+                                    <h5 class="card-title">Gestionar Calendario</h5>
+                                    <p class="card-text small">Programa y visualiza eventos, clases y actividades.</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col">
+                            <a href="subir_recurso.html"
+                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
+                                style="animation-delay: 0.4s; text-decoration: none;">
+                                <div class="card-body">
+                                    <i class="fas fa-upload fa-3x mb-3"></i>
+                                    <h5 class="card-title">Subir Recurso</h5>
+                                    <p class="card-text small">Agrega materiales educativos para compartir con los
+                                        estudiantes.</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar izquierdo -->
+        <div class="sidebar slide-in-left" id="sidebar">
+            <div class="sidebar-header">
+                <h5 class="sidebar-title">Menú</h5>
+                <button class="toggle-sidebar" id="toggleSidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="#" class="sidebar-menu-link active">
+                        <i class="fas fa-tachometer-alt sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="perfil.html" class="sidebar-menu-link">
+                        <i class="fas fa-user sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Perfil</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#publicationsModal" class="sidebar-menu-link">
+                        <i class="fas fa-edit sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Crear</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="dashboard_pagos.html" class="sidebar-menu-link">
+                        <i class="fas fa-credit-card sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Pagos</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="dashboard_documentos.html" class="sidebar-menu-link">
+                        <i class="fas fa-file-alt sidebar-menu-icon"></i>
+                        <span class="sidebar-menu-text">Editor de Documentos</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <!-- Encabezado del contenido -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fade-in">Dashboard</h2>
+            </div>
+
+            <!-- Feed de actividad -->
+            <div class="feed-container">
+                <div class="feed-grid" id="feed-grid">
+                    <div class="stats-container">
+                        <div class="stats-card bounce-in" style="animation-delay: 0.1s;">
+                            <h4><i class="fas fa-credit-card"></i> Pagos Pendientes</h4>
+                            <div class="value">8</div>
+                            <div class="trend"><i class="fas fa-arrow-up"></i> 12% esta semana</div>
+                        </div>
+
+                        <div class="stats-card bounce-in" style="animation-delay: 0.2s;">
+                            <h4><i class="fas fa-bullhorn"></i> Publicaciones</h4>
+                            <div class="value">12</div>
+                            <div class="trend down"><i class="fas fa-arrow-down"></i> 5% este mes</div>
+                        </div>
+
+                        <div class="stats-card bounce-in" style="animation-delay: 0.3s;">
+                            <h4><i class="fas fa-file-alt"></i> Usuarios en boletín</h4>
+                            <div class="value">25</div>
+                            <div class="trend"><i class="fas fa-arrow-up"></i> 18% este mes</div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de actividad -->
+                    <div class="chart-container bounce-in" style="animation-delay: 0.4s;">
+                        <h4>Actividad Reciente</h4>
+                        <canvas id="activityChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank"
+                            class="text-white fs-4">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                            target="_blank" class="text-white fs-4">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740,
+                        Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div class="toast-container">
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">Error al procesar la solicitud.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Preloader
+            setTimeout(() => {
+                const preloader = document.querySelector('.preloader');
+                preloader.style.opacity = '0';
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 800);
+            }, 1000);
+
+            // Animación para el colapso del navbar en móviles
+            const navbarCollapse = document.getElementById('navbarNav');
+            navbarCollapse.addEventListener('show.bs.collapse', () => {
+                navbarCollapse.classList.add('animate__animated', 'animate__slideInDown');
+            });
+            navbarCollapse.addEventListener('hide.bs.collapse', () => {
+                navbarCollapse.classList.remove('animate__animated', 'animate__slideInDown');
+            });
+
+            // Inicializar Masonry para el feed
+            const grid = document.querySelector('.feed-grid');
+            let masonry;
+
+            // Inicializar gráfico de actividad
+            try {
+                const activityChart = new Chart(document.getElementById('activityChart'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                        datasets: [{
+                            label: 'Actividad',
+                            data: [12, 19, 10, 15, 25, 17, 8],
+                            backgroundColor: 'rgba(230, 126, 34, 0.2)',
+                            borderColor: '#e67e22',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointBackgroundColor: '#e67e22',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#e67e22',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#232A40',
+                                titleColor: '#e67e22',
+                                bodyColor: '#fff',
+                                borderColor: '#e67e22',
+                                borderWidth: 1,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                callbacks: {
+                                    title: function(tooltipItem) { return 'Día: ' + tooltipItem[0].label; },
+                                    label: function(context) { return 'Actividad: ' + context.raw; }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } },
+                            y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error al inicializar el gráfico:', error);
+            }
+
+            // Toggle sidebar
+            const toggleSidebar = document.getElementById('toggleSidebar');
+            const sidebar = document.getElementById('sidebar');
+
+            toggleSidebar.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-collapsed');
+                toggleSidebar.querySelector('i').classList.toggle('fa-chevron-left');
+                toggleSidebar.querySelector('i').classList.toggle('fa-chevron-right');
+
+                setTimeout(() => {
+                    if (masonry) masonry.layout();
+                }, 300);
+            });
+
+            // Ajuste para resoluciones móviles y redimensionamiento
+            function adjustLayout() {
+                sidebar.style.display = 'block';
+                if (masonry) {
+                    setTimeout(() => {
+                        masonry.layout();
+                    }, 100);
+                }
+            }
+
+            adjustLayout();
+            window.addEventListener('resize', adjustLayout);
+
+            // Cargar nombre del usuario
+            const userNameSpan = document.getElementById('userName');
+            if (userNameSpan) {
+                fetch('/get-session')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.user && data.user.name) {
+                            userNameSpan.textContent = `Bienvenido, ${data.user.name}`;
+                        } else {
+                            userNameSpan.textContent = 'Bienvenido, Invitado';
+                        }
+                    })
+                    .catch(error => console.error('Error al cargar el nombre:', error));
+            }
+        });
+    </script>
+</body>
+
+</html>

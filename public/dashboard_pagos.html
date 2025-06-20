@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Dashboard de Pagos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --frosted-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
+            --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            
+            /* Estados de pago */
+            --status-pending: #f39c12;
+            --status-verified: #27ae60;
+            --status-rejected: #e74c3c;
+            --status-reviewing: #3498db;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--dark-bg), #1a1f2e);
+            color: var(--white);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: var(--gradient-bg) !important;
+            padding: 1.3rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 2.3rem;
+            color: var(--white) !important;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--secondary-color) !important;
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .logo-image {
+            width: 120px;
+            margin-right: 15px;
+            transition: transform 0.4s ease, filter 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.2) rotate(8deg);
+            filter: drop-shadow(0 0 10px var(--secondary-color));
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .stats-row {
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--gradient-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border-gradient);
+            z-index: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filters-section {
+            background: var(--gradient-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filters-section * {
+            color: var(--white) !important;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            color: var(--white) !important;
+            border-radius: 8px;
+            padding: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--white);
+            box-shadow: var(--input-glow);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        .form-select, .form-select option {
+            color: var(--primary-color) !important;
+            background: var(--white) !important;
+        }
+
+        .table-container {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .table-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border-gradient);
+            z-index: 1;
+        }
+
+        .table {
+            margin-bottom: 0;
+            color: var(--primary-color);
+        }
+
+        .table thead th {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(230, 126, 34, 0.1);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: var(--status-pending);
+            color: var(--white);
+        }
+
+        .status-verified {
+            background: var(--status-verified);
+            color: var(--white);
+        }
+
+        .status-rejected {
+            background: var(--status-rejected);
+            color: var(--white);
+        }
+
+        .status-reviewing {
+            background: var(--status-reviewing);
+            color: var(--white);
+        }
+
+        .validation-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .validation-valid {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--status-verified);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+
+        .validation-invalid {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--status-rejected);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .validation-pending {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--status-reviewing);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-action {
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin: 0.1rem;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-view {
+            background: var(--status-reviewing);
+            color: var(--white);
+        }
+
+        .btn-approve {
+            background: var(--status-verified);
+            color: var(--white);
+        }
+
+        .btn-reject {
+            background: var(--status-rejected);
+            color: var(--white);
+        }
+
+        .btn-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .file-preview {
+            max-width: 40px;
+            max-height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .file-preview:hover {
+            transform: scale(1.2);
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-icon:hover {
+            color: var(--accent-color);
+            transform: scale(1.2);
+        }
+
+        .modal-content {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .observation-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .observation-meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .toast {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            background: var(--gradient-bg);
+            border: 1px solid var(--secondary-color);
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .page-item.active .page-link {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.8rem;
+            }
+            
+            .btn-action {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.7rem;
+            }
+            
+            .stat-card {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse">
+                LIVETEXT
+            </a>
+            <div class="d-flex align-items-center ms-auto gap-3">
+                <a href="/logout.php" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Statistics Row -->
+        <div class="row stats-row">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stat-card animate__animated animate__fadeInUp">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="stat-number" id="totalPayments">0</div>
+                    <div class="stat-label">Total Pagos</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" id="pendingPayments">0</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number" id="verifiedPayments">0</div>
+                    <div class="stat-label">Verificados</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stat-card animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-number" id="rejectedPayments">0</div>
+                    <div class="stat-label">Rechazados</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section animate__animated animate__fadeInUp" style="animation-delay: 0.4s;">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Formulario</label>
+                    <select class="form-select" id="formFilter">
+                        <option value="">Todos los formularios</option>
+                        <option value="ingles-basico">Inglés Básico</option>
+                        <option value="ingles-intermedio">Inglés Intermedio</option>
+                        <option value="frances-basico">Francés Básico</option>
+                        <option value="curso-verano">Curso de Verano</option>
+                        <option value="intensivo-sabatino">Intensivo Sabatino</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Validación de Línea</label>
+                    <select class="form-select" id="validationFilter">
+                        <option value="">Todas las validaciones</option>
+                        <option value="valid">Válida</option>
+                        <option value="invalid">Inválida</option>
+                        <option value="pending">Pendiente</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Nombre, línea de captura...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Table -->
+        <div class="table-container animate__animated animate__fadeInUp" style="animation-delay: 0.5s;">
+            <div class="table-responsive">
+                <table class="table" id="paymentsTable">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Formulario</th>
+                            <th>Línea de Captura</th>
+                            <th>Validación Gov.</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Archivos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTableBody">
+                        <!-- Content will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <nav aria-label="Paginación de pagos">
+                <ul class="pagination" id="pagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Detalles del Pago</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="paymentModalBody">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-approve" onclick="approvePayment()">
+                        <i class="fas fa-check me-2"></i> Aprobar
+                    </button>
+                    <button type="button" class="btn btn-reject" onclick="rejectPayment()">
+                        <i class="fas fa-times me-2"></i> Rechazar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Viewer Modal -->
+    <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fileModalLabel">Visualizar Archivo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center" id="fileModalBody">
+                    <!-- File content will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Observation Modal -->
+    <div class="modal fade" id="observationModal" tabindex="-1" aria-labelledby="observationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="observationModalLabel">Agregar Observación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea class="form-control" id="observationText" rows="4" placeholder="Escribe tu observación..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="saveObservation()">
+                        <i class="fas fa-save me-2"></i> Guardar
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage">Operación completada exitosamente</div>
+        </div>
+
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">Error al procesar la solicitud</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample data for demonstration
+        let paymentsData = [
+            {
+                id: 1,
+                student: "María González",
+                form: "ingles-basico",
+                formName: "Inglés Básico",
+                captureNumber: "1234567890123456789",
+                govValidation: "valid",
+                date: "2024-05-20",
+                status: "verified",
+                files: [
+                    { name: "formato_pago.jpg", type: "image", url: "#" },
+                    { name: "ticket.pdf", type: "pdf", url: "#" }
+                ],
+                observations: [
+                    { author: "Prof. Juan", date: "2024-05-20", text: "Documentos correctos, pago verificado." }
+                ],
+                studentType: "interno",
+                controlNumber: "19120345"
+            },
+            {
+                id: 2,
+                student: "Carlos Rodríguez",
+                form: "frances-basico",
+                formName: "Francés Básico",
+                captureNumber: "9876543210987654321",
+                govValidation: "pending",
+                date: "2024-05-21",
+                status: "reviewing",
+                files: [
+                    { name: "formato_pago.png", type: "image", url: "#" },
+                    { name: "ticket.jpg", type: "image", url: "#" }
+                ],
+                observations: [],
+                studentType: "externo",
+                controlNumber: ""
+            },
+            {
+                id: 3,
+                student: "Ana Martínez",
+                form: "ingles-intermedio",
+                formName: "Inglés Intermedio",
+                captureNumber: "5555444433332222111",
+                govValidation: "invalid",
+                date: "2024-05-19",
+                status: "rejected",
+                files: [
+                    { name: "formato_pago.jpg", type: "image", url: "#" }
+                ],
+                observations: [
+                    { author: "Prof. María", date: "2024-05-19", text: "Línea de captura no válida, favor de verificar." }
+                ],
+                studentType: "interno",
+                controlNumber: "19120346"
+            },
+            {
+                id: 4,
+                student: "Luis Hernández",
+                form: "curso-verano",
+                formName: "Curso de Verano",
+                captureNumber: "1111222233334444555",
+                govValidation: "valid",
+                date: "2024-05-22",
+                status: "pending",
+                files: [
+                    { name: "formato_pago.pdf", type: "pdf", url: "#" },
+                    { name: "ticket.png", type: "image", url: "#" }
+                ],
+                observations: [],
+                studentType: "interno",
+                controlNumber: "19120347"
+            }
+        ];
+
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let filteredData = [...paymentsData];
+        let selectedPaymentId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatistics();
+            renderTable();
+            setupFilters();
+            setupSearch();
+        });
+
+        function updateStatistics() {
+            const total = paymentsData.length;
+            const pending = paymentsData.filter(p => p.status === 'pending').length;
+            const verified = paymentsData.filter(p => p.status === 'verified').length;
+            const rejected = paymentsData.filter(p => p.status === 'rejected').length;
+
+            document.getElementById('totalPayments').textContent = total;
+            document.getElementById('pendingPayments').textContent = pending;
+            document.getElementById('verifiedPayments').textContent = verified;
+            document.getElementById('rejectedPayments').textContent = rejected;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('paymentsTableBody');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            tbody.innerHTML = '';
+
+            pageData.forEach(payment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="fw-bold">${payment.student}</div>
+                        <small class="text-muted">${payment.studentType === 'interno' ? `Control: ${payment.controlNumber}` : 'Estudiante Externo'}</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary">${payment.formName}</span>
+                    </td>
+                    <td>
+                        <div class="font-monospace" style="font-size: 0.8rem;">${payment.captureNumber}</div>
+                        <button class="btn btn-link btn-sm p-0 mt-1" onclick="validateCaptureNumber('${payment.captureNumber}', ${payment.id})" title="Validar con Sistema Gov.">
+                            <i class="fas fa-sync-alt"></i> Validar
+                        </button>
+                    </td>
+                    <td>
+                        ${getValidationBadge(payment.govValidation)}
+                    </td>
+                    <td>${formatDate(payment.date)}</td>
+                    <td>
+                        ${getStatusBadge(payment.status)}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            ${payment.files.map(file => `
+                                <span class="file-icon" onclick="viewFile('${file.url}', '${file.name}', '${file.type}')" title="${file.name}">
+                                    <i class="fas fa-${file.type === 'image' ? 'image' : 'file-pdf'}"></i>
+                                </span>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            <button class="btn btn-action btn-view" onclick="viewPaymentDetails(${payment.id})" title="Ver Detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-action" style="background: var(--secondary-color); color: white;" onclick="addObservation(${payment.id})" title="Agregar Observación">
+                                <i class="fas fa-comment"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevItem = document.createElement('li');
+            prevItem.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Anterior</a>`;
+            pagination.appendChild(prevItem);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    const pageItem = document.createElement('li');
+                    pageItem.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                    pageItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+                    pagination.appendChild(pageItem);
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    const dotsItem = document.createElement('li');
+                    dotsItem.className = 'page-item disabled';
+                    dotsItem.innerHTML = `<span class="page-link">...</span>`;
+                    pagination.appendChild(dotsItem);
+                }
+            }
+
+            // Next button
+            const nextItem = document.createElement('li');
+            nextItem.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextItem.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Siguiente</a>`;
+            pagination.appendChild(nextItem);
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTable();
+        }
+
+        function setupFilters() {
+            const formFilter = document.getElementById('formFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const validationFilter = document.getElementById('validationFilter');
+
+            [formFilter, statusFilter, validationFilter].forEach(filter => {
+                filter.addEventListener('change', applyFilters);
+            });
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 300);
+            });
+        }
+
+        function applyFilters() {
+            const formFilter = document.getElementById('formFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const validationFilter = document.getElementById('validationFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredData = paymentsData.filter(payment => {
+                const matchesForm = !formFilter || payment.form === formFilter;
+                const matchesStatus = !statusFilter || payment.status === statusFilter;
+                const matchesValidation = !validationFilter || payment.govValidation === validationFilter;
+                const matchesSearch = !searchTerm || 
+                    payment.student.toLowerCase().includes(searchTerm) ||
+                    payment.captureNumber.includes(searchTerm) ||
+                    payment.controlNumber.toLowerCase().includes(searchTerm);
+
+                return matchesForm && matchesStatus && matchesValidation && matchesSearch;
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="status-badge status-pending">Pendiente</span>',
+                'reviewing': '<span class="status-badge status-reviewing">En Revisión</span>',
+                'verified': '<span class="status-badge status-verified">Verificado</span>',
+                'rejected': '<span class="status-badge status-rejected">Rechazado</span>'
+            };
+            return badges[status] || badges['pending'];
+        }
+
+        function getValidationBadge(validation) {
+            const badges = {
+                'valid': '<div class="validation-indicator validation-valid"><i class="fas fa-check-circle"></i> Válida</div>',
+                'invalid': '<div class="validation-indicator validation-invalid"><i class="fas fa-exclamation-circle"></i> Inválida</div>',
+                'pending': '<div class="validation-indicator validation-pending"><i class="fas fa-clock"></i> Pendiente</div>'
+            };
+            return badges[validation] || badges['pending'];
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Validation of government capture number (simulated)
+        function validateCaptureNumber(captureNumber, paymentId) {
+            showToast('info', 'Validando línea de captura con sistema gubernamental...');
+            
+            // Simulate API call to government system
+            setTimeout(() => {
+                // Simulated validation logic
+                const isValid = captureNumber.length === 19 && !captureNumber.includes('555');
+                
+                // Update payment data
+                const payment = paymentsData.find(p => p.id === paymentId);
+                if (payment) {
+                    payment.govValidation = isValid ? 'valid' : 'invalid';
+                    
+                    // Show result
+                    if (isValid) {
+                        showToast('success', 'Línea de captura válida - Pago confirmado en sistema gubernamental');
+                    } else {
+                        showToast('error', 'Línea de captura inválida - No se encontró el pago en sistema gubernamental');
+                    }
+                    
+                    // Re-render table to show updated validation
+                    applyFilters();
+                }
+            }, 2000);
+        }
+
+        function viewPaymentDetails(paymentId) {
+            const payment = paymentsData.find(p => p.id === paymentId);
+            if (!payment) return;
+
+            selectedPaymentId = paymentId;
+            
+            const modalBody = document.getElementById('paymentModalBody');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-secondary mb-3">Información del Estudiante</h6>
+                        <p><strong>Nombre:</strong> ${payment.student}</p>
+                        <p><strong>Tipo:</strong> ${payment.studentType === 'interno' ? 'Interno' : 'Externo'}</p>
+                        ${payment.controlNumber ? `<p><strong>Número de Control:</strong> ${payment.controlNumber}</p>` : ''}
+                        <p><strong>Formulario:</strong> ${payment.formName}</p>
+                        <p><strong>Fecha de Envío:</strong> ${formatDate(payment.date)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-secondary mb-3">Información del Pago</h6>
+                        <p><strong>Línea de Captura:</strong><br><code>${payment.captureNumber}</code></p>
+                        <p><strong>Validación Gubernamental:</strong><br>${getValidationBadge(payment.govValidation)}</p>
+                        <p><strong>Estado Actual:</strong><br>${getStatusBadge(payment.status)}</p>
+                        <button class="btn btn-primary btn-sm" onclick="validateCaptureNumber('${payment.captureNumber}', ${payment.id})">
+                            <i class="fas fa-sync-alt me-1"></i> Re-validar
+                        </button>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-secondary mb-3">Archivos Adjuntos</h6>
+                        <div class="d-flex gap-3 mb-4">
+                            ${payment.files.map(file => `
+                                <div class="text-center">
+                                    <div class="file-icon mb-2" onclick="viewFile('${file.url}', '${file.name}', '${file.type}')" style="font-size: 2rem;">
+                                        <i class="fas fa-${file.type === 'image' ? 'image' : 'file-pdf'}"></i>
+                                    </div>
+                                    <small>${file.name}</small>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-secondary mb-0">Observaciones</h6>
+                            <button class="btn btn-primary btn-sm" onclick="addObservation(${payment.id})">
+                                <i class="fas fa-plus me-1"></i> Agregar
+                            </button>
+                        </div>
+                        <div id="observationsList">
+                            ${payment.observations.length === 0 ? 
+                                '<p class="text-muted">No hay observaciones registradas.</p>' :
+                                payment.observations.map(obs => `
+                                    <div class="observation-item">
+                                        <div class="observation-meta">
+                                            <strong>${obs.author}</strong> - ${formatDate(obs.date)}
+                                        </div>
+                                        <div>${obs.text}</div>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            modal.show();
+        }
+
+        function viewFile(url, filename, type) {
+            const modalBody = document.getElementById('fileModalBody');
+            const modalLabel = document.getElementById('fileModalLabel');
+            
+            modalLabel.textContent = `Visualizar: ${filename}`;
+            
+            if (type === 'image') {
+                modalBody.innerHTML = `<img src="${url}" class="img-fluid" alt="${filename}" style="max-height: 70vh;">`;
+            } else {
+                modalBody.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-file-pdf" style="font-size: 5rem; color: var(--accent-color); margin-bottom: 1rem;"></i>
+                        <h5>${filename}</h5>
+                        <p class="text-muted">Los archivos PDF se abrirán en una nueva ventana</p>
+                        <button class="btn btn-primary" onclick="window.open('${url}', '_blank')">
+                            <i class="fas fa-external-link-alt me-2"></i> Abrir PDF
+                        </button>
+                    </div>
+                `;
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('fileModal'));
+            modal.show();
+        }
+
+        function addObservation(paymentId) {
+            selectedPaymentId = paymentId;
+            document.getElementById('observationText').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('observationModal'));
+            modal.show();
+        }
+
+        function saveObservation() {
+            const text = document.getElementById('observationText').value.trim();
+            if (!text) {
+                showToast('error', 'Por favor ingresa una observación');
+                return;
+            }
+
+            const payment = paymentsData.find(p => p.id === selectedPaymentId);
+            if (payment) {
+                payment.observations.push({
+                    author: 'Prof. Actual', // In real app, get from session
+                    date: new Date().toISOString().split('T')[0],
+                    text: text
+                });
+
+                showToast('success', 'Observación agregada exitosamente');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('observationModal'));
+                modal.hide();
+                
+                // Refresh details modal if open
+                if (document.getElementById('paymentModal').classList.contains('show')) {
+                    viewPaymentDetails(selectedPaymentId);
+                }
+            }
+        }
+
+        function quickApprove(paymentId) {
+            const payment = paymentsData.find(p => p.id === paymentId);
+            if (payment && payment.status !== 'verified') {
+                payment.status = 'verified';
+                payment.observations.push({
+                    author: 'Prof. Actual',
+                    date: new Date().toISOString().split('T')[0],
+                    text: 'Pago aprobado mediante aprobación rápida'
+                });
+                
+                showToast('success', 'Pago aprobado exitosamente');
+                updateStatistics();
+                applyFilters();
+            }
+        }
+
+        function quickReject(paymentId) {
+            const payment = paymentsData.find(p => p.id === paymentId);
+            if (payment && payment.status !== 'rejected') {
+                const reason = prompt('Motivo del rechazo (opcional):');
+                payment.status = 'rejected';
+                payment.observations.push({
+                    author: 'Prof. Actual',
+                    date: new Date().toISOString().split('T')[0],
+                    text: `Pago rechazado. ${reason ? 'Motivo: ' + reason : ''}`
+                });
+                
+                showToast('success', 'Pago rechazado');
+                updateStatistics();
+                applyFilters();
+            }
+        }
+
+        function approvePayment() {
+            if (selectedPaymentId) {
+                quickApprove(selectedPaymentId);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+                modal.hide();
+            }
+        }
+
+        function rejectPayment() {
+            if (selectedPaymentId) {
+                quickReject(selectedPaymentId);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+                modal.hide();
+            }
+        }
+
+        function showToast(type, message) {
+            const toastElement = document.getElementById(type === 'success' ? 'successToast' : 'errorToast');
+            const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            
+            messageElement.textContent = message;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // Prevent form submission on Enter key in search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

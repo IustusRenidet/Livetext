@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Editor de Documentos</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery UI CSS -->
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --navbar-height: 80px;
+            --toolbar-height: 60px;
+            --sidebar-width: 250px;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --default-margin: 25.4mm;
+            --header-margin: 12.7mm;
+            --footer-margin: 12.7mm;
+            --header-height: 50mm;
+            --footer-height: 20mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--gradient-bg);
+            font-family: 'Poppins', sans-serif;
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: calc(var(--navbar-height) + var(--toolbar-height));
+            transition: padding-left 0.3s ease;
+        }
+
+        .navbar {
+            background: var(--primary-color) !important;
+            height: var(--navbar-height);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar .container-fluid {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .logo-image {
+            max-height: 60px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.1);
+        }
+
+        .logo-text {
+            color: var(--white);
+            font-size: 2rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .navbar-actions .btn {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-actions .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .toolbar {
+            background: var(--white);
+            height: var(--toolbar-height);
+            position: fixed;
+            top: var(--navbar-height);
+            left: 0;
+            right: 0;
+            z-index: 1020;
+            padding: 10px 15px;
+            border-bottom: 2px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            animation: slideInDown 0.5s ease;
+        }
+
+        .toolbar-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .toolbar-group .form-select {
+            width: auto;
+            max-width: 150px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+        }
+
+        .toolbar-group .btn {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar-group .btn:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: calc(var(--navbar-height) + var(--toolbar-height));
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height) - var(--toolbar-height));
+            background: var(--light-bg);
+            padding: 15px;
+            overflow-y: auto;
+            z-index: 1019;
+            transition: transform 0.3s ease;
+            border-right: 1px solid #dee2e6;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            animation: slideInLeft 0.5s ease;
+        }
+
+        .sidebar h5 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .draggable-element {
+            padding: 10px;
+            margin: 8px 0;
+            background: var(--white);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease;
+            color: var(--primary-color);
+        }
+
+        .draggable-element:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .document-container {
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+            min-height: calc(100vh - var(--navbar-height) - var(--toolbar-height));
+            transition: margin-left 0.3s ease;
+        }
+
+        .document-page {
+            width: 215.9mm;
+            min-height: 279.4mm;
+            margin: 20px auto;
+            background: var(--white);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: fadeInUp 0.5s ease;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            padding: var(--default-margin);
+            overflow: hidden;
+        }
+
+        .document-page.landscape {
+            width: 279.4mm;
+            min-height: 215.9mm;
+        }
+
+        /* Estilo Word 365 para encabezado y pie */
+        .page-header, .page-footer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            background: transparent;
+            border: 1px dashed transparent;
+            transition: all 0.3s ease;
+            cursor: text;
+            z-index: 10;
+        }
+
+        .page-header {
+            top: 0;
+            height: var(--header-height);
+            padding: 10px var(--default-margin);
+            min-height: 40px;
+        }
+
+        .page-footer {
+            bottom: 0;
+            height: var(--footer-height);
+            padding: 10px var(--default-margin);
+            min-height: 30px;
+        }
+
+        .page-header:hover, .page-footer:hover,
+        .page-header.editing, .page-footer.editing {
+            border-color: #0078d4;
+            background: rgba(0, 120, 212, 0.05);
+        }
+
+        .page-header.editing {
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+        }
+
+        .page-footer.editing {
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+        }
+
+        /* Área de contenido editable del encabezado */
+        .header-content, .footer-content {
+            position: relative;
+            min-height: 30px;
+            width: 100%;
+            height: 100%;
+            color: #333;
+            font-size: 11pt;
+            line-height: 1.4;
+            outline: none;
+            border: none;
+            background: transparent;
+        }
+
+        .header-content:focus, .footer-content:focus {
+            outline: none;
+        }
+
+        /* Elementos flotantes en el encabezado - estilo Word */
+        .header-element, .footer-element {
+            position: absolute;
+            border: 1px solid transparent;
+            cursor: move;
+            z-index: 15;
+            outline: none;
+        }
+
+        .header-element:hover, .footer-element:hover,
+        .header-element.selected, .footer-element.selected {
+            border-color: #0078d4;
+            box-shadow: 0 0 0 1px #0078d4;
+        }
+
+        .header-element.selected::after, .footer-element.selected::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px solid #0078d4;
+            pointer-events: none;
+        }
+
+        /* Imagen en encabezado */
+        .header-image, .footer-image {
+            max-width: 200px;
+            max-height: 80px;
+            border-radius: 4px;
+            display: block;
+        }
+
+        /* Texto en encabezado */
+        .header-text, .footer-text {
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            resize: none;
+            overflow: hidden;
+            min-width: 50px;
+            min-height: 20px;
+            padding: 2px 4px;
+        }
+
+        .header-text:focus, .footer-text:focus {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #0078d4;
+        }
+
+        /* Controles de redimensionamiento estilo Word */
+        .resize-handle {
+            position: absolute;
+            background: #0078d4;
+            border: 1px solid #fff;
+            width: 8px;
+            height: 8px;
+            z-index: 20;
+            display: none;
+        }
+
+        .header-element.selected .resize-handle,
+        .footer-element.selected .resize-handle {
+            display: block;
+        }
+
+        .resize-handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
+        .resize-handle.n { top: -4px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .resize-handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
+        .resize-handle.e { top: 50%; right: -4px; transform: translateY(-50%); cursor: e-resize; }
+        .resize-handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+        .resize-handle.s { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .resize-handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+        .resize-handle.w { top: 50%; left: -4px; transform: translateY(-50%); cursor: w-resize; }
+
+        /* Área de contenido principal */
+        .content-area {
+            margin-top: calc(var(--header-height) + 10px);
+            margin-bottom: calc(var(--footer-height) + 10px);
+            min-height: calc(279.4mm - var(--header-height) - var(--footer-height) - 2 * var(--default-margin) - 20px);
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px;
+            z-index: 1;
+        }
+
+        .document-page.landscape .content-area {
+            min-height: calc(215.9mm - var(--header-height) - var(--footer-height) - 2 * var(--default-margin) - 20px);
+        }
+
+        /* Controles del encabezado */
+        .header-controls {
+            position: absolute;
+            top: -35px;
+            right: 0;
+            background: var(--white);
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 25;
+            border: 1px solid #dee2e6;
+        }
+
+        .page-header:hover .header-controls,
+        .page-header.editing .header-controls {
+            display: flex;
+            gap: 5px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .header-controls .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border: 1px solid #dee2e6;
+            background: var(--white);
+            color: var(--primary-color);
+        }
+
+        .header-controls .btn:hover {
+            background: var(--secondary-color);
+            color: var(--white);
+        }
+
+        /* Resto de estilos (manteniendo los originales para otras funcionalidades) */
+        .dropzone {
+            grid-column: span 12;
+            min-height: 50px;
+            border: 2px dashed #dee2e6;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .dropzone.active {
+            border-color: var(--secondary-color);
+            background: rgba(230, 126, 34, 0.1);
+            animation: pulse 1s infinite;
+        }
+
+        .element-wrapper {
+            grid-column: span 12;
+            position: relative;
+            padding: 10px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .element-wrapper:hover {
+            border-color: var(--secondary-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .element-controls {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            display: none;
+            background: var(--white);
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        .element-wrapper:hover .element-controls {
+            display: flex;
+            gap: 5px;
+            animation: bounceIn 0.3s ease;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-collapse: collapse;
+        }
+
+        .table td, .table th {
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            min-width: 100px;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            background: var(--white);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .page-number {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .page-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 15;
+        }
+
+        .page-controls .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        .toggle-sidebar {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 50%;
+            z-index: 1021;
+            padding: 10px;
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-sidebar:hover {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        .mode-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            animation: bounceIn 0.5s ease;
+            z-index: 1000;
+        }
+
+        .mode-toggle:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Modal styles */
+        .modal-content {
+            color: var(--primary-color);
+        }
+
+        .modal-content .form-label,
+        .modal-content .form-text,
+        .modal-content .modal-title,
+        .modal-content .modal-body,
+        .modal-content .modal-footer {
+            color: var(--primary-color);
+        }
+
+        /* Preview Mode */
+        body.preview-mode {
+            padding-left: 0;
+        }
+
+        body.preview-mode .sidebar,
+        body.preview-mode .toolbar,
+        body.preview-mode .toggle-sidebar,
+        body.preview-mode .page-controls,
+        body.preview-mode .header-controls {
+            display: none;
+        }
+
+        body.preview-mode .document-container {
+            margin-left: 0;
+            padding: 20px;
+        }
+
+        body.preview-mode .navbar {
+            display: none;
+        }
+
+        /* Scrollbars */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #adb5bd;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .document-container {
+                margin-left: 0;
+            }
+
+            .toggle-sidebar {
+                display: block;
+            }
+
+            .toolbar-group {
+                gap: 6px;
+            }
+
+            .toolbar-group .form-select {
+                max-width: 120px;
+            }
+
+            .toolbar-group .btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --navbar-height: 100px;
+                --toolbar-height: 80px;
+                --default-margin: 10mm;
+                --header-margin: 5mm;
+                --footer-margin: 5mm;
+            }
+
+            .navbar .container-fluid {
+                flex-wrap: wrap;
+                padding: 10px;
+            }
+
+            .logo-text {
+                font-size: 1.5rem;
+            }
+
+            .logo-image {
+                max-height: 40px;
+            }
+
+            .navbar-actions {
+                gap: 5px;
+            }
+
+            .navbar-actions .btn {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            .toolbar {
+                height: var(--toolbar-height);
+                padding: 8px 10px;
+            }
+
+            .toolbar-group {
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 4px;
+            }
+
+            .toolbar-group .form-select {
+                max-width: 100px;
+                font-size: 0.8rem;
+            }
+
+            .toolbar-group .btn {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+            }
+
+            .document-page {
+                width: 100%;
+                padding: var(--default-margin);
+                margin: 10px;
+            }
+
+            .document-page.landscape {
+                width: 100%;
+                min-height: 140mm;
+            }
+
+            .page-header, .page-footer {
+                padding: 10px;
+            }
+
+            .content-area {
+                margin-top: calc(var(--header-height) + 5px);
+                margin-bottom: calc(var(--footer-height) + 5px);
+            }
+
+            .draggable-element {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .toolbar-group {
+                flex-wrap: wrap;
+            }
+
+            .toolbar-group .btn {
+                padding: 3px 6px;
+                font-size: 0.65rem;
+            }
+
+            .navbar-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container-fluid animate__animated animate__fadeIn">
+            <div class="d-flex align-items-center">
+                <img src="img/logo_live.jpg" alt="LIVETEXT" class="logo-image">
+                <span class="logo-text">LIVETEXT - EDITOR</span>
+            </div>
+            <div class="navbar-actions">
+                <button class="btn btn-light" id="addPage">
+                    <i class="fas fa-plus"></i> Nueva Página
+                </button>
+                <button class="btn btn-success" id="saveDocument">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <select class="form-select font-family animate__animated animate__fadeIn">
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Calibri">Calibri</option>
+                <option value="Helvetica">Helvetica</option>
+                <option value="Poppins">Poppins</option>
+            </select>
+            <select class="form-select font-size animate__animated animate__fadeIn">
+                <option value="1">8pt</option>
+                <option value="2">10pt</option>
+                <option value="3">12pt</option>
+                <option value="4">14pt</option>
+                <option value="5">18pt</option>
+                <option value="6">24pt</option>
+                <option value="7">36pt</option>
+            </select>
+            <div class="btn-group animate__animated animate__fadeIn">
+                <button class="btn btn-light" data-command="bold"><i class="fas fa-bold"></i></button>
+                <button class="btn btn-light" data-command="italic"><i class="fas fa-italic"></i></button>
+                <button class="btn btn-light" data-command="underline"><i class="fas fa-underline"></i></button>
+                <button class="btn btn-light" data-command="justifyLeft"><i class="fas fa-align-left"></i></button>
+                <button class="btn btn-light" data-command="justifyCenter"><i class="fas fa-align-center"></i></button>
+                <button class="btn btn-light" data-command="justifyRight"><i class="fas fa-align-right"></i></button>
+                <button class="btn btn-light" data-command="justifyFull"><i class="fas fa-align-justify"></i></button>
+                <button class="btn btn-light" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                <button class="btn btn-light" data-command="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
+                <button class="btn btn-light" data-command="createLink"><i class="fas fa-link"></i></button>
+                <button class="btn btn-light" id="headerEditBtn"><i class="fas fa-edit"></i> Editar Encabezado</button>
+                <button class="btn btn-light" id="footerEditBtn"><i class="fas fa-edit"></i> Editar Pie</button>
+                <button class="btn btn-light" id="pageSetupBtn"><i class="fas fa-cog"></i> Configurar Página</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="toggle-sidebar d-md-none animate__animated animate__fadeIn" aria-label="Toggle sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h5>Elementos</h5>
+        <div class="draggable-element" data-type="text"><i class="fas fa-paragraph"></i> Texto</div>
+        <div class="draggable-element" data-type="heading"><i class="fas fa-heading"></i> Título</div>
+        <div class="draggable-element" data-type="image"><i class="fas fa-image"></i> Imagen</div>
+        <div class="draggable-element" data-type="table"><i class="fas fa-table"></i> Tabla</div>
+        <div class="draggable-element" data-type="chart"><i class="fas fa-chart-bar"></i> Gráfica</div>
+        <div class="draggable-element" data-type="list"><i class="fas fa-list"></i> Lista</div>
+    </div>
+
+    <!-- Document Container -->
+    <div class="document-container">
+        <div class="document-page" data-orientation="portrait" data-size="carta">
+            <div class="page-controls">
+                <button class="btn btn-sm btn-light toggle-orientation" title="Cambiar orientación" aria-label="Toggle page orientation">
+                    <i class="fas fa-retweet"></i>
+                </button>
+            </div>
+            
+            <!-- Encabezado estilo Word 365 -->
+            <div class="page-header" contenteditable="true">
+                <div class="header-controls">
+                    <button class="btn btn-sm btn-light add-header-image" title="Insertar imagen">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light add-header-text" title="Insertar texto">
+                        <i class="fas fa-font"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light header-alignment" title="Alinear elementos">
+                        <i class="fas fa-align-center"></i>
+                    </button>
+                </div>
+                <div class="header-content">
+                    <div class="header-element header-text" style="position: absolute; top: 10px; left: 10px;">
+                        <textarea class="header-text" placeholder="Escriba aquí el encabezado...">Encabezado del documento</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="dropzone"></div>
+            </div>
+
+            <!-- Pie de página estilo Word 365 -->
+            <div class="page-footer" contenteditable="true">
+                <div class="header-controls">
+                    <button class="btn btn-sm btn-light add-footer-image" title="Insertar imagen">
+                        <i class="fas fa-image"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light add-footer-text" title="Insertar texto">
+                        <i class="fas fa-font"></i>
+                    </button>
+                    <button class="btn btn-sm btn-light footer-alignment" title="Alinear elementos">
+                        <i class="fas fa-align-center"></i>
+                    </button>
+                </div>
+                <div class="footer-content">
+                    <div class="footer-element footer-text" style="position: absolute; bottom: 10px; left: 10px;">
+                        <textarea class="footer-text" placeholder="Escriba aquí el pie de página...">Pie de página</textarea>
+                    </div>
+                    <div class="footer-element page-number" style="position: absolute; bottom: 10px; right: 10px;">
+                        <span class="page-number">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mode Toggle Button -->
+    <button class="mode-toggle" id="modeToggle" aria-label="Toggle preview mode">
+        <i class="fas fa-eye me-2"></i>Modo Vista Previa
+    </button>
+
+    <!-- Table Modal -->
+    <div class="modal fade" id="tableModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configurar Tabla</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Filas</label>
+                        <input type="number" class="form-control" id="tableRows" value="3" min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Columnas</label>
+                        <input type="number" class="form-control" id="tableCols" value="3" min="1">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="tableHeader">
+                            <label class="form-check-label">Incluir encabezado</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="createTable">Crear Tabla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Modal -->
+    <div class="modal fade" id="chartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configurar Gráfica</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Gráfica</label>
+                        <select class="form-select" id="chartType">
+                            <option value="bar">Barras</option>
+                            <option value="line">Línea</option>
+                            <option value="pie">Circular</option>
+                            <option value="doughnut">Dona</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Datos</label>
+                        <div id="chartData">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" placeholder="Etiqueta">
+                                <input type="number" class="form-control" placeholder="Valor">
+                                <button class="btn btn-outline-danger remove-data">×</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" id="addChartData">Añadir Dato</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="createChart">Crear Gráfica</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Setup Modal -->
+    <div class="modal fade" id="pageSetupModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configuración de Página</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tamaño de Página</label>
+                        <select class="form-select" id="pageSize">
+                            <option value="carta" selected>Carta (215.9 x 279.4 mm)</option>
+                            <option value="oficio">Oficio (215.9 x 355.6 mm)</option>
+                            <option value="a4">A4 (210 x 297 mm)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Formato de Numeración</label>
+                        <select class="form-select" id="pageNumberFormat">
+                            <option value="none" selected>Sin Numeración</option>
+                            <option value="numeric">1, 2, 3, ...</option>
+                            <option value="pageX">Page X</option>
+                            <option value="pageXofY">Page X of Y</option>
+                            <option value="roman">I, II, III, ...</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="customNumberFormat" style="display: none;">
+                        <label class="form-label">Formato Personalizado</label>
+                        <input type="text" class="form-control" id="customFormat" placeholder="Ej: {n}, Prefijo{n}, {n}/Y">
+                        <small class="form-text">Use {n} para número, {y} para total de páginas</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número Inicial</label>
+                        <input type="number" class="form-control" id="startNumber" value="1" min="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Márgenes (mm)</label>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Superior</label>
+                                <input type="number" class="form-control" id="marginTop" value="25.4" min="10" step="0.1">
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Inferior</label>
+                                <input type="number" class="form-control" id="marginBottom" value="25.4" min="10" step="0.1">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Izquierdo</label>
+                                <input type="number" class="form-control" id="marginLeft" value="25.4" min="10" step="0.1">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Derecho</label>
+                                <input type="number" class="form-control" id="marginRight" value="25.4" min="10" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="applyPageSetup">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let charts = {};
+            let pageSettings = {
+                numberFormat: 'numeric',
+                startNumber: 1,
+                customFormat: '',
+                margins: { top: 25.4, bottom: 25.4, left: 25.4, right: 25.4 },
+                pageSize: 'carta'
+            };
+            let selectedElement = null;
+            let isDragging = false;
+            let isResizing = false;
+            let dragStart = { x: 0, y: 0 };
+            let elementStart = { x: 0, y: 0 };
+
+            // Initialize
+            initializeDraggable();
+            setupDropzones();
+            setupHeaderFooterEditing();
+            updatePageNumbers();
+            setupModeToggle();
+            setupPageSettings();
+            setupPageControls();
+
+            // Funciones para números romanos
+            function romanNumerals(number) {
+                const values = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+                const symbols = ['M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I'];
+                let result = '';
+                for (let i = 0; i < values.length; i++) {
+                    while (number >= values[i]) {
+                        result += symbols[i];
+                        number -= values[i];
+                    }
+                }
+                return result;
+            }
+
+            // Sistema de edición de encabezado y pie estilo Word 365
+            function setupHeaderFooterEditing() {
+                // Activar/desactivar modo de edición de encabezado
+                $('#headerEditBtn').click(function() {
+                    toggleHeaderFooterEditMode('.page-header');
+                });
+
+                $('#footerEditBtn').click(function() {
+                    toggleHeaderFooterEditMode('.page-footer');
+                });
+
+                // Función para alternar modo de edición
+                function toggleHeaderFooterEditMode(selector) {
+                    const element = $(selector);
+                    const isEditing = element.hasClass('editing');
+                    
+                    // Limpiar otros modos de edición
+                    $('.page-header, .page-footer').removeClass('editing');
+                    $('.header-element, .footer-element').removeClass('selected');
+                    
+                    if (!isEditing) {
+                        element.addClass('editing');
+                        setupHeaderFooterInteractions(element);
+                    }
+                }
+
+                // Configurar interacciones en modo de edición
+                function setupHeaderFooterInteractions(container) {
+                    const elements = container.find('.header-element, .footer-element');
+                    
+                    elements.each(function() {
+                        makeElementDraggable($(this));
+                        makeElementResizable($(this));
+                        makeElementSelectable($(this));
+                    });
+                }
+
+                // Hacer elemento arrastrable
+                function makeElementDraggable(element) {
+                    element.off('mousedown.drag').on('mousedown.drag', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if ($(e.target).hasClass('resize-handle')) return;
+                        
+                        selectedElement = element;
+                        isDragging = true;
+                        
+                        element.addClass('selected').siblings().removeClass('selected');
+                        
+                        const offset = element.offset();
+                        const containerOffset = element.parent().offset();
+                        
+                        dragStart.x = e.pageX;
+                        dragStart.y = e.pageY;
+                        elementStart.x = offset.left - containerOffset.left;
+                        elementStart.y = offset.top - containerOffset.top;
+                        
+                        $(document).on('mousemove.drag', function(e) {
+                            if (!isDragging) return;
+                            
+                            const deltaX = e.pageX - dragStart.x;
+                            const deltaY = e.pageY - dragStart.y;
+                            
+                            const newX = Math.max(0, elementStart.x + deltaX);
+                            const newY = Math.max(0, elementStart.y + deltaY);
+                            
+                            element.css({
+                                left: newX + 'px',
+                                top: newY + 'px'
+                            });
+                        });
+                        
+                        $(document).on('mouseup.drag', function() {
+                            isDragging = false;
+                            $(document).off('mousemove.drag mouseup.drag');
+                        });
+                    });
+                }
+
+                // Hacer elemento redimensionable
+                function makeElementResizable(element) {
+                    if (!element.find('.resize-handle').length) {
+                        const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+                        handles.forEach(handle => {
+                            element.append(`<div class="resize-handle ${handle}"></div>`);
+                        });
+                    }
+                    
+                    element.find('.resize-handle').off('mousedown.resize').on('mousedown.resize', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        isResizing = true;
+                        const handle = $(this);
+                        const direction = handle.attr('class').split(' ')[1];
+                        
+                        const startWidth = element.width();
+                        const startHeight = element.height();
+                        const startX = e.pageX;
+                        const startY = e.pageY;
+                        const startLeft = parseInt(element.css('left'));
+                        const startTop = parseInt(element.css('top'));
+                        
+                        $(document).on('mousemove.resize', function(e) {
+                            const deltaX = e.pageX - startX;
+                            const deltaY = e.pageY - startY;
+                            
+                            let newWidth = startWidth;
+                            let newHeight = startHeight;
+                            let newLeft = startLeft;
+                            let newTop = startTop;
+                            
+                            if (direction.includes('e')) newWidth = Math.max(20, startWidth + deltaX);
+                            if (direction.includes('w')) {
+                                newWidth = Math.max(20, startWidth - deltaX);
+                                newLeft = startLeft + deltaX;
+                            }
+                            if (direction.includes('s')) newHeight = Math.max(20, startHeight + deltaY);
+                            if (direction.includes('n')) {
+                                newHeight = Math.max(20, startHeight - deltaY);
+                                newTop = startTop + deltaY;
+                            }
+                            
+                            element.css({
+                                width: newWidth + 'px',
+                                height: newHeight + 'px',
+                                left: newLeft + 'px',
+                                top: newTop + 'px'
+                            });
+                        });
+                        
+                        $(document).on('mouseup.resize', function() {
+                            isResizing = false;
+                            $(document).off('mousemove.resize mouseup.resize');
+                        });
+                    });
+                }
+
+                // Hacer elemento seleccionable
+                function makeElementSelectable(element) {
+                    element.off('click.select').on('click.select', function(e) {
+                        e.stopPropagation();
+                        $('.header-element, .footer-element').removeClass('selected');
+                        element.addClass('selected');
+                        selectedElement = element;
+                    });
+                }
+
+                // Agregar imagen al encabezado
+                $('.add-header-image').click(function() {
+                    const input = $('<input type="file" accept="image/*">');
+                    input.change(function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const headerContent = $('.page-header .header-content');
+                                const imageElement = $(`
+                                    <div class="header-element" style="position: absolute; top: 20px; left: 50px; width: 100px; height: 50px;">
+                                        <img src="${e.target.result}" class="header-image" style="width: 100%; height: 100%; object-fit: contain;">
+                                    </div>
+                                `);
+                                
+                                headerContent.append(imageElement);
+                                setupHeaderFooterInteractions($('.page-header'));
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                    input.click();
+                });
+
+                // Agregar texto al encabezado
+                $('.add-header-text').click(function() {
+                    const headerContent = $('.page-header .header-content');
+                    const textElement = $(`
+                        <div class="header-element" style="position: absolute; top: 30px; left: 200px; width: 200px; height: 30px;">
+                            <textarea class="header-text" style="width: 100%; height: 100%; resize: none; border: none; background: transparent;">Nuevo texto</textarea>
+                        </div>
+                    `);
+                    
+                    headerContent.append(textElement);
+                    setupHeaderFooterInteractions($('.page-header'));
+                });
+
+                // Agregar imagen al pie
+                $('.add-footer-image').click(function() {
+                    const input = $('<input type="file" accept="image/*">');
+                    input.change(function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const footerContent = $('.page-footer .footer-content');
+                                const imageElement = $(`
+                                    <div class="footer-element" style="position: absolute; bottom: 10px; left: 50px; width: 60px; height: 30px;">
+                                        <img src="${e.target.result}" class="footer-image" style="width: 100%; height: 100%; object-fit: contain;">
+                                    </div>
+                                `);
+                                
+                                footerContent.append(imageElement);
+                                setupHeaderFooterInteractions($('.page-footer'));
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    });
+                    input.click();
+                });
+
+                // Agregar texto al pie
+                $('.add-footer-text').click(function() {
+                    const footerContent = $('.page-footer .footer-content');
+                    const textElement = $(`
+                        <div class="footer-element" style="position: absolute; bottom: 10px; left: 200px; width: 150px; height: 20px;">
+                            <textarea class="footer-text" style="width: 100%; height: 100%; resize: none; border: none; background: transparent;">Nuevo texto</textarea>
+                        </div>
+                    `);
+                    
+                    footerContent.append(textElement);
+                    setupHeaderFooterInteractions($('.page-footer'));
+                });
+
+                // Alineación de elementos
+                $('.header-alignment, .footer-alignment').click(function() {
+                    if (selectedElement) {
+                        const container = selectedElement.closest('.page-header, .page-footer');
+                        const containerWidth = container.width();
+                        const elementWidth = selectedElement.width();
+                        const centerX = (containerWidth - elementWidth) / 2;
+                        
+                        selectedElement.css('left', centerX + 'px');
+                    }
+                });
+
+                // Desactivar edición al hacer clic fuera
+                $(document).click(function(e) {
+                    if (!$(e.target).closest('.page-header, .page-footer, .header-controls').length) {
+                        $('.page-header, .page-footer').removeClass('editing');
+                        $('.header-element, .footer-element').removeClass('selected');
+                        selectedElement = null;
+                    }
+                });
+
+                // Tecla Delete para eliminar elemento seleccionado
+                $(document).keydown(function(e) {
+                    if (e.key === 'Delete' && selectedElement) {
+                        selectedElement.remove();
+                        selectedElement = null;
+                    }
+                });
+            }
+
+            // Editor Commands
+            $('.toolbar-group button[data-command]').click(function () {
+                const command = $(this).data('command');
+                if (command === 'createLink') {
+                    const url = prompt('Ingrese la URL:', 'http://');
+                    if (url) document.execCommand(command, false, url);
+                } else {
+                    document.execCommand(command, false, null);
+                }
+            });
+
+            $('.font-family, .font-size').change(function () {
+                const command = $(this).hasClass('font-family') ? 'fontName' : 'fontSize';
+                document.execCommand(command, false, $(this).val());
+            });
+
+            // Draggable Elements
+            function initializeDraggable() {
+                $('.draggable-element').draggable({
+                    helper: 'clone',
+                    revert: 'invalid',
+                    cursor: 'move',
+                    opacity: 0.7,
+                    zIndex: 1000,
+                    start: function (event, ui) {
+                        ui.helper.addClass('animate__animated animate__pulse');
+                    },
+                    stop: function (event, ui) {
+                        ui.helper.removeClass('animate__animated animate__pulse');
+                    }
+                });
+            }
+
+            // Setup Dropzones
+            function setupDropzones() {
+                $('.dropzone').each(function () {
+                    $(this).droppable({
+                        accept: '.draggable-element, .element-wrapper',
+                        classes: {
+                            'ui-droppable-active': 'active'
+                        },
+                        drop: function (event, ui) {
+                            const type = ui.helper.data('type');
+                            if (ui.helper.hasClass('draggable-element')) {
+                                createNewElement(type, this);
+                            }
+                        }
+                    }).sortable({
+                        items: '.element-wrapper',
+                        handle: '.element-controls',
+                        placeholder: 'sort-placeholder',
+                        connectWith: '.dropzone',
+                        update: function () {
+                            $(this).find('.element-wrapper').each(function () {
+                                $(this).css('grid-column', `span ${$(this).data('columns') || 12}`);
+                            });
+                        }
+                    });
+                });
+            }
+
+            // Page Controls
+            function setupPageControls() {
+                $('.toggle-orientation').click(function () {
+                    const page = $(this).closest('.document-page');
+                    const isLandscape = page.hasClass('landscape');
+                    page.toggleClass('landscape');
+                    page.attr('data-orientation', isLandscape ? 'portrait' : 'landscape');
+                    updatePageDimensions(page);
+                    page.addClass('animate__animated animate__pulse');
+                    setTimeout(() => page.removeClass('animate__animated animate__pulse'), 500);
+                });
+            }
+
+            // Update Page Dimensions
+            function updatePageDimensions(page) {
+                const size = pageSettings.pageSize;
+                const isLandscape = page.hasClass('landscape');
+                let width, height;
+                switch (size) {
+                    case 'carta':
+                        width = isLandscape ? '279.4mm' : '215.9mm';
+                        height = isLandscape ? '215.9mm' : '279.4mm';
+                        break;
+                    case 'oficio':
+                        width = isLandscape ? '355.6mm' : '215.9mm';
+                        height = isLandscape ? '215.9mm' : '355.6mm';
+                        break;
+                    case 'a4':
+                        width = isLandscape ? '297mm' : '210mm';
+                        height = isLandscape ? '210mm' : '297mm';
+                        break;
+                }
+                page.css({
+                    'width': width,
+                    'min-height': height
+                });
+            }
+
+            // Create New Element
+            function createNewElement(type, dropzone) {
+                const wrapper = $('<div class="element-wrapper animate__animated animate__fadeIn" data-columns="12"></div>');
+                const controls = createElementControls();
+                let content;
+
+                switch (type) {
+                    case 'text':
+                        content = $('<div class="editor-content" contenteditable="true">Escriba su texto aquí...</div>');
+                        break;
+                    case 'heading':
+                        content = $('<div class="editor-content" contenteditable="true" style="font-size: 24px; font-weight: bold;">Título</div>');
+                        break;
+                    case 'image':
+                        content = createImageElement();
+                        break;
+                    case 'table':
+                        content = createTableElement();
+                        break;
+                    case 'chart':
+                        content = createChartElement();
+                        break;
+                    case 'list':
+                        content = $('<div class="editor-content" contenteditable="true"><ul><li>Elemento 1</li><li>Elemento 2</li><li>Elemento 3</li></ul></div>');
+                        break;
+                }
+
+                wrapper.append(content).append(controls);
+                $(dropzone).append(wrapper);
+                initializeElementFunctionality(wrapper, type);
+                makeResizable(wrapper);
+            }
+
+            // Create Element Controls
+            function createElementControls() {
+                return $(`
+                    <div class="element-controls">
+                        <button class="btn btn-sm btn-light edit-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-light column-btn" title="Ajustar columnas"><i class="fas fa-columns"></i></button>
+                        <button class="btn btn-sm btn-light delete-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    </div>
+                `);
+            }
+
+            // Create Image Element
+            function createImageElement() {
+                const container = $('<div class="image-container"></div>');
+                const input = $('<input type="file" accept="image/*" style="display: none">');
+                const img = $('<img style="max-width: 100%; height: auto; display: none;">');
+                const placeholder = $(`
+                    <div class="image-placeholder" style="padding: 20px; border: 2px dashed #ccc; text-align: center; cursor: pointer;">
+                        <i class="fas fa-image fa-2x"></i>
+                        <p>Haga clic para agregar imagen</p>
+                    </div>
+                `);
+
+                container.append(input).append(img).append(placeholder);
+                placeholder.on('click', () => input.trigger('click'));
+                img.on('click', () => input.trigger('click'));
+                input.on('change', function (e) {
+                    const file = this.files[0];
+                    if (file && file.type.match('image.*')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            img.attr('src', e.target.result).css('display', 'block');
+                            placeholder.hide();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                return container;
+            }
+
+            // Create Table Element
+            function createTableElement() {
+                $('#tableModal').modal('show');
+                const tableContainer = $('<div class="table-container"></div>');
+                const tableControls = $(`
+                    <div class="table-controls mb-2">
+                        <button class="btn btn-sm btn-primary add-row">Añadir Fila</button>
+                        <button class="btn btn-sm btn-primary add-col">Añadir Columna</button>
+                        <button class="btn btn-sm btn-danger del-row">Eliminar Fila</button>
+                        <button class="btn btn-sm btn-danger del-col">Eliminar Columna</button>
+                    </div>
+                `);
+                let table;
+
+                $('#createTable').off('click').on('click', function () {
+                    const rows = parseInt($('#tableRows').val()) || 3;
+                    const cols = parseInt($('#tableCols').val()) || 3;
+                    const header = $('#tableHeader').is(':checked');
+
+                    table = $('<table class="table table-bordered"></table>');
+                    const tbody = $('<tbody></tbody>');
+                    if (header) {
+                        const thead = $('<thead><tr></tr></thead>');
+                        for (let i = 0; i < cols; i++) {
+                            thead.find('tr').append($('<th contenteditable="true">Encabezado ' + (i + 1) + '</th>'));
+                        }
+                        table.append(thead);
+                    }
+                    for (let i = 0; i < rows; i++) {
+                        const row = $('<tr></tr>');
+                        for (let j = 0; j < cols; j++) {
+                            row.append($('<td contenteditable="true">Celda ' + (i * cols + j + 1) + '</td>'));
+                        }
+                        tbody.append(row);
+                    }
+                    table.append(tbody);
+                    tableContainer.html('').append(tableControls).append(table);
+                    $('#tableModal').modal('hide');
+                });
+
+                // Table controls event handlers
+                tableControls.find('.add-row').click(function () {
+                    const cols = table.find('tr:first td, tr:first th').length;
+                    const newRow = $('<tr>');
+                    for (let i = 0; i < cols; i++) {
+                        newRow.append($('<td contenteditable="true">Nueva celda</td>'));
+                    }
+                    table.find('tbody').append(newRow);
+                });
+
+                tableControls.find('.add-col').click(function () {
+                    table.find('thead tr').append($('<th contenteditable="true">Nueva columna</th>'));
+                    table.find('tbody tr').each(function () {
+                        $(this).append($('<td contenteditable="true">Nueva celda</td>'));
+                    });
+                });
+
+                tableControls.find('.del-row').click(function () {
+                    if (table.find('tbody tr').length > 1) {
+                        table.find('tbody tr:last').remove();
+                    }
+                });
+
+                tableControls.find('.del-col').click(function () {
+                    if (table.find('tr:first td, tr:first th').length > 1) {
+                        table.find('thead tr th:last').remove();
+                        table.find('tbody tr').each(function () {
+                            $(this).find('td:last').remove();
+                        });
+                    }
+                });
+
+                return tableContainer;
+            }
+
+            // Create Chart Element
+            function createChartElement() {
+                $('#chartModal').modal('show');
+                const chartId = 'chart-' + Date.now();
+                const container = $(`
+                    <div class="chart-container">
+                        <div class="chart-controls mb-2">
+                            <select class="chart-type form-select mb-2">
+                                <option value="bar">Gráfica de Barras</option>
+                                <option value="line">Gráfica de Línea</option>
+                                <option value="pie">Gráfica Circular</option>
+                                <option value="doughnut">Gráfica de Dona</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary edit-data-btn">Editar Datos</button>
+                        </div>
+                        <canvas id="${chartId}"></canvas>
+                    </div>
+                `);
+
+                let chartData = {
+                    labels: ['A', 'B', 'C', 'D'],
+                    data: [12, 19, 3, 5]
+                };
+
+                $('#addChartData').off('click').on('click', function () {
+                    $('#chartData').append(`
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" placeholder="Etiqueta">
+                            <input type="number" class="form-control" placeholder="Valor">
+                            <button class="btn btn-outline-danger remove-data">×</button>
+                        </div>
+                    `);
+                });
+
+                $('#chartData').on('click', '.remove-data', function () {
+                    $(this).closest('.input-group').remove();
+                });
+
+                $('#createChart').off('click').on('click', function () {
+                    chartData.labels = [];
+                    chartData.data = [];
+                    $('#chartData .input-group').each(function () {
+                        const label = $(this).find('input[type="text"]').val();
+                        const value = parseFloat($(this).find('input[type="number"]').val()) || 0;
+                        if (label) {
+                            chartData.labels.push(label);
+                            chartData.data.push(value);
+                        }
+                    });
+
+                    const ctx = container.find('canvas')[0].getContext('2d');
+                    const chart = new Chart(ctx, {
+                        type: $('#chartType').val(),
+                        data: {
+                            labels: chartData.labels,
+                            datasets: [{
+                                label: 'Datos',
+                                data: chartData.data,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(255, 206, 86, 0.2)',
+                                    'rgba(75, 192, 192, 0.2)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+
+                    charts[chartId] = chart;
+                    container.find('.chart-type').change(function () {
+                        chart.config.type = $(this).val();
+                        chart.update();
+                    });
+
+                    container.find('.edit-data-btn').click(function () {
+                        $('#chartModal').modal('show');
+                    });
+
+                    $('#chartModal').modal('hide');
+                });
+
+                return container;
+            }
+
+            // Initialize Element Functionality
+            function initializeElementFunctionality(wrapper, type) {
+                wrapper.find('.edit-btn').click(function () {
+                    if (type === 'image') {
+                        wrapper.find('input[type="file"]').click();
+                    }
+                });
+
+                wrapper.find('.delete-btn').click(function () {
+                    wrapper.addClass('animate__animated animate__fadeOut');
+                    setTimeout(() => wrapper.remove(), 500);
+                });
+
+                wrapper.find('.column-btn').click(function () {
+                    const currentColumns = wrapper.data('columns') || 12;
+                    const newColumns = currentColumns > 6 ? 6 : currentColumns > 4 ? 4 : 12;
+                    wrapper.data('columns', newColumns).css('grid-column', `span ${newColumns}`);
+                    wrapper.addClass('animate__animated animate__pulse');
+                    setTimeout(() => wrapper.removeClass('animate__animated animate__pulse'), 500);
+                });
+            }
+
+            // Make Resizable
+            function makeResizable(wrapper) {
+                wrapper.resizable({
+                    handles: 'e, se, s',
+                    grid: [100 / 12, 10],
+                    stop: function (event, ui) {
+                        const parentWidth = ui.element.parent().width();
+                        const elementWidth = ui.element.width();
+                        const columns = Math.round((elementWidth / parentWidth) * 12);
+                        ui.element.data('columns', columns).css('grid-column', `span ${columns}`);
+                        if (wrapper.find('canvas').length) {
+                            const chartId = wrapper.find('canvas').attr('id');
+                            if (charts[chartId]) {
+                                charts[chartId].resize();
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Add Page
+            $('#addPage').click(function () {
+                const totalPages = $('.document-page').length + 1;
+                const newPage = $(`
+                    <div class="document-page animate__animated animate__fadeInUp" data-orientation="portrait" data-size="${pageSettings.pageSize}">
+                        <div class="page-controls">
+                            <button class="btn btn-sm btn-light toggle-orientation" title="Cambiar orientación" aria-label="Toggle page orientation">
+                                <i class="fas fa-retweet"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Encabezado estilo Word 365 -->
+                        <div class="page-header" contenteditable="true">
+                            <div class="header-controls">
+                                <button class="btn btn-sm btn-light add-header-image" title="Insertar imagen">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light add-header-text" title="Insertar texto">
+                                    <i class="fas fa-font"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light header-alignment" title="Alinear elementos">
+                                    <i class="fas fa-align-center"></i>
+                                </button>
+                            </div>
+                            <div class="header-content">
+                                <div class="header-element header-text" style="position: absolute; top: 10px; left: 10px;">
+                                    <textarea class="header-text" placeholder="Escriba aquí el encabezado...">Encabezado del documento</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-area">
+                            <div class="dropzone"></div>
+                        </div>
+
+                        <!-- Pie de página estilo Word 365 -->
+                        <div class="page-footer" contenteditable="true">
+                            <div class="header-controls">
+                                <button class="btn btn-sm btn-light add-footer-image" title="Insertar imagen">
+                                    <i class="fas fa-image"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light add-footer-text" title="Insertar texto">
+                                    <i class="fas fa-font"></i>
+                                </button>
+                                <button class="btn btn-sm btn-light footer-alignment" title="Alinear elementos">
+                                    <i class="fas fa-align-center"></i>
+                                </button>
+                            </div>
+                            <div class="footer-content">
+                                <div class="footer-element footer-text" style="position: absolute; bottom: 10px; left: 10px;">
+                                    <textarea class="footer-text" placeholder="Escriba aquí el pie de página...">Pie de página</textarea>
+                                </div>
+                                <div class="footer-element page-number" style="position: absolute; bottom: 10px; right: 10px;">
+                                    <span class="page-number">${totalPages}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                $('.document-container').append(newPage);
+                setupDropzones();
+                setupPageControls();
+                updatePageNumbers();
+                setupHeaderFooterInteractionsForNewPage(newPage);
+            });
+
+            // Setup header/footer interactions for new pages
+            function setupHeaderFooterInteractionsForNewPage(page) {
+                const headerElements = page.find('.header-element, .footer-element');
+                headerElements.each(function() {
+                    makeElementDraggable($(this));
+                    makeElementResizable($(this));
+                    makeElementSelectable($(this));
+                });
+            }
+
+            // Update Page Numbers
+            function updatePageNumbers() {
+                const totalPages = $('.document-page').length;
+                $('.document-page').each(function (index) {
+                    const pageNum = index + pageSettings.startNumber;
+                    let text = '';
+                    if (pageSettings.numberFormat !== 'none') {
+                        switch (pageSettings.numberFormat) {
+                            case 'numeric':
+                                text = `${pageNum}`;
+                                break;
+                            case 'pageX':
+                                text = `Page ${pageNum}`;
+                                break;
+                            case 'pageXofY':
+                                text = `Page ${pageNum} of ${totalPages}`;
+                                break;
+                            case 'roman':
+                                text = romanNumerals(pageNum);
+                                break;
+                            case 'custom':
+                                text = pageSettings.customFormat
+                                    .replace('{n}', pageNum)
+                                    .replace('{y}', totalPages);
+                                break;
+                        }
+                    }
+                    $(this).find('.page-number').text(text);
+                });
+            }
+
+            // Page Setup
+            function setupPageSettings() {
+                $('#pageSetupBtn').click(function () {
+                    $('#pageSetupModal').modal('show');
+                });
+
+                $('#pageNumberFormat').change(function () {
+                    $('#customNumberFormat').toggle($(this).val() === 'custom');
+                });
+
+                $('#applyPageSetup').click(function () {
+                    pageSettings.numberFormat = $('#pageNumberFormat').val();
+                    pageSettings.startNumber = parseInt($('#startNumber').val()) || 1;
+                    pageSettings.customFormat = $('#customFormat').val();
+                    pageSettings.margins = {
+                        top: parseFloat($('#marginTop').val()) || 25.4,
+                        bottom: parseFloat($('#marginBottom').val()) || 25.4,
+                        left: parseFloat($('#marginLeft').val()) || 25.4,
+                        right: parseFloat($('#marginRight').val()) || 25.4
+                    };
+                    pageSettings.pageSize = $('#pageSize').val();
+
+                    $(':root').css({
+                        '--default-margin': `${pageSettings.margins.top}mm`
+                    });
+                    $('.document-page').each(function () {
+                        $(this).css({
+                            'padding': `${pageSettings.margins.top}mm ${pageSettings.margins.right}mm ${pageSettings.margins.bottom}mm ${pageSettings.margins.left}mm`
+                        });
+                        updatePageDimensions($(this));
+                    });
+
+                    updatePageNumbers();
+                    $('#pageSetupModal').modal('hide');
+                });
+            }
+
+            // Save Document
+            $('#saveDocument').click(function () {
+                const element = document.createElement('div');
+                const style = document.createElement('style');
+                style.textContent = `
+                    .document-page { position: relative; margin: 0; background: #fff; }
+                    .document-page.carta.portrait { width: 215.9mm; min-height: 279.4mm; }
+                    .document-page.carta.landscape { width: 279.4mm; min-height: 215.9mm; }
+                    .document-page.oficio.portrait { width: 215.9mm; min-height: 355.6mm; }
+                    .document-page.oficio.landscape { width: 355.6mm; min-height: 215.9mm; }
+                    .document-page.a4.portrait { width: 210mm; min-height: 297mm; }
+                    .document-page.a4.landscape { width: 297mm; min-height: 210mm; }
+                    .page-header { position: absolute; top: 0; left: 0; right: 0; height: 50mm; }
+                    .page-footer { position: absolute; bottom: 0; left: 0; right: 0; height: 20mm; }
+                    .content-area { margin: 60mm ${pageSettings.margins.right}mm 30mm ${pageSettings.margins.left}mm; }
+                    .header-element, .footer-element { position: absolute; }
+                    .header-image, .footer-image { max-width: 100%; height: auto; }
+                    table { width: 100%; border-collapse: collapse; }
+                    td, th { border: 1px solid #000; padding: 5px; }
+                    .chart-container { height: 300px; }
+                    .image-container img { max-width: 100%; height: auto; }
+                    .page-number { font-size: 12px; color: #6c757d; }
+                    .header-content, .footer-content { position: relative; height: 100%; }
+                `;
+                element.appendChild(style);
+
+                $('.document-page').each(function () {
+                    const isLandscape = $(this).hasClass('landscape');
+                    const size = $(this).data('size');
+                    const pageClone = $(this).clone();
+                    pageClone
+                        .removeClass('animate__animated animate__fadeInUp')
+                        .addClass(`${size} ${isLandscape ? 'landscape' : 'portrait'}`)
+                        .css({ 'position': 'relative', 'top': '0', 'left': '0' });
+                    pageClone.find('.page-controls, .header-controls, .resize-handle').remove();
+                    pageClone.find('.page-header, .page-footer').removeClass('editing');
+                    pageClone.find('.header-element, .footer-element').removeClass('selected');
+                    $(element).append(pageClone);
+                });
+
+                const opt = {
+                    margin: [pageSettings.margins.top, pageSettings.margins.right, pageSettings.margins.bottom, pageSettings.margins.left],
+                    filename: 'documento.pdf',
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: pageSettings.pageSize === 'carta' ? [215.9, 279.4] :
+                               pageSettings.pageSize === 'oficio' ? [215.9, 355.6] : [210, 297],
+                        orientation: 'portrait',
+                        putOnlyUsedFonts: true
+                    },
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                html2pdf().from(element).set(opt).save();
+            });
+
+            // Mode Toggle
+            function setupModeToggle() {
+                const modeToggle = $('#modeToggle');
+                modeToggle.click(function () {
+                    $('body').toggleClass('preview-mode');
+                    if ($('body').hasClass('preview-mode')) {
+                        modeToggle.html('<i class="fas fa-edit me-2"></i>Modo Edición');
+                        $('.document-container').addClass('animate__animated animate__fadeIn');
+                        $('.page-header, .page-footer').removeClass('editing');
+                        $('.header-element, .footer-element').removeClass('selected');
+                    } else {
+                        modeToggle.html('<i class="fas fa-eye me-2"></i>Modo Vista Previa');
+                        $('.sidebar, .toolbar, .navbar').addClass('animate__animated animate__fadeIn');
+                    }
+                    setTimeout(() => {
+                        $('.document-container, .sidebar, .toolbar, .navbar').removeClass('animate__animated animate__fadeIn');
+                    }, 500);
+                });
+            }
+
+            // Sidebar Toggle
+            $('.toggle-sidebar').click(function () {
+                $('.sidebar').toggleClass('show');
+                $('.sidebar').addClass('animate__animated animate__slideInLeft');
+                setTimeout(() => $('.sidebar').removeClass('animate__animated animate__slideInLeft'), 500);
+            });
+
+            // Helper functions for dragging and resizing (referenced in setupHeaderFooterEditing)
+            function makeElementDraggable(element) {
+                element.off('mousedown.drag').on('mousedown.drag', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if ($(e.target).hasClass('resize-handle')) return;
+                    
+                    selectedElement = element;
+                    isDragging = true;
+                    
+                    element.addClass('selected').siblings().removeClass('selected');
+                    
+                    const offset = element.offset();
+                    const containerOffset = element.parent().offset();
+                    
+                    dragStart.x = e.pageX;
+                    dragStart.y = e.pageY;
+                    elementStart.x = offset.left - containerOffset.left;
+                    elementStart.y = offset.top - containerOffset.top;
+                    
+                    $(document).on('mousemove.drag', function(e) {
+                        if (!isDragging) return;
+                        
+                        const deltaX = e.pageX - dragStart.x;
+                        const deltaY = e.pageY - dragStart.y;
+                        
+                        const newX = Math.max(0, elementStart.x + deltaX);
+                        const newY = Math.max(0, elementStart.y + deltaY);
+                        
+                        element.css({
+                            left: newX + 'px',
+                            top: newY + 'px'
+                        });
+                    });
+                    
+                    $(document).on('mouseup.drag', function() {
+                        isDragging = false;
+                        $(document).off('mousemove.drag mouseup.drag');
+                    });
+                });
+            }
+
+            function makeElementResizable(element) {
+                if (!element.find('.resize-handle').length) {
+                    const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+                    handles.forEach(handle => {
+                        element.append(`<div class="resize-handle ${handle}"></div>`);
+                    });
+                }
+                
+                element.find('.resize-handle').off('mousedown.resize').on('mousedown.resize', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    isResizing = true;
+                    const handle = $(this);
+                    const direction = handle.attr('class').split(' ')[1];
+                    
+                    const startWidth = element.width();
+                    const startHeight = element.height();
+                    const startX = e.pageX;
+                    const startY = e.pageY;
+                    const startLeft = parseInt(element.css('left'));
+                    const startTop = parseInt(element.css('top'));
+                    
+                    $(document).on('mousemove.resize', function(e) {
+                        const deltaX = e.pageX - startX;
+                        const deltaY = e.pageY - startY;
+                        
+                        let newWidth = startWidth;
+                        let newHeight = startHeight;
+                        let newLeft = startLeft;
+                        let newTop = startTop;
+                        
+                        if (direction.includes('e')) newWidth = Math.max(20, startWidth + deltaX);
+                        if (direction.includes('w')) {
+                            newWidth = Math.max(20, startWidth - deltaX);
+                            newLeft = startLeft + deltaX;
+                        }
+                        if (direction.includes('s')) newHeight = Math.max(20, startHeight + deltaY);
+                        if (direction.includes('n')) {
+                            newHeight = Math.max(20, startHeight - deltaY);
+                            newTop = startTop + deltaY;
+                        }
+                        
+                        element.css({
+                            width: newWidth + 'px',
+                            height: newHeight + 'px',
+                            left: newLeft + 'px',
+                            top: newTop + 'px'
+                        });
+                    });
+                    
+                    $(document).on('mouseup.resize', function() {
+                        isResizing = false;
+                        $(document).off('mousemove.resize mouseup.resize');
+                    });
+                });
+            }
+
+            function makeElementSelectable(element) {
+                element.off('click.select').on('click.select', function(e) {
+                    e.stopPropagation();
+                    $('.header-element, .footer-element').removeClass('selected');
+                    element.addClass('selected');
+                    selectedElement = element;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

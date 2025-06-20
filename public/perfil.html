@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Perfil de Usuario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --frosted-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
+            --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--dark-bg), #1a1f2e);
+            color: var(--white);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: var(--gradient-bg) !important;
+            padding: 1.3rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 2.3rem;
+            color: var(--white) !important;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--secondary-color) !important;
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .logo-image {
+            width: 120px;
+            margin-right: 15px;
+            transition: transform 0.4s ease, filter 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.2) rotate(8deg);
+            filter: drop-shadow(0 0 10px var(--secondary-color));
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 3rem 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .form-card {
+            background: var(--gradient-bg);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeInUp 0.7s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border-gradient);
+            z-index: 1;
+        }
+
+        .form-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            color: var(--white);
+            border-radius: 12px;
+            padding: 0.7rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--white);
+            box-shadow: var(--input-glow);
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--light-bg);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .form-label:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-primary i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover i {
+            transform: translateX(6px);
+        }
+
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #c0c0c2;
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .toast {
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            animation: slideInRight 0.3s ease;
+            background: var(--frosted-bg);
+            backdrop-filter: blur(8px);
+        }
+
+        .footer {
+            background: var(--gradient-bg);
+            color: var(--white);
+            padding: 2.5rem;
+            margin-top: 4rem;
+            border-top: 2px solid var(--secondary-color);
+        }
+
+        .social-icons a {
+            transition: transform 0.3s ease, color 0.3s ease, filter 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.3) rotate(10deg);
+            color: var(--secondary-color);
+            filter: drop-shadow(0 0 8px var(--secondary-color));
+        }
+
+        .error-text {
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        @media (max-width: 992px) {
+            .main-container {
+                padding: 2rem 1rem;
+            }
+
+            .form-section {
+                max-width: 600px;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .btn-primary, .btn-secondary {
+                padding: 0.6rem 1.8rem;
+                font-size: 0.9rem;
+            }
+
+            .logo-image {
+                width: 90px;
+            }
+
+            .navbar-brand {
+                font-size: 1.9rem;
+            }
+
+            .form-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 993px) {
+            .form-card {
+                padding: 2rem;
+            }
+
+            .main-container {
+                padding: 3.5rem 2rem;
+            }
+
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .form-grid .full-width {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse">
+                LIVETEXT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto">
+                    <a href="/logout" class="btn btn-danger animate__animated animate__bounceIn"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="form-card">
+                <h2 class="mb-4 animate__animated animate__fadeIn">Editar Perfil</h2>
+                <form id="profileForm">
+                    <div class="form-grid">
+                        <div class="mb-4">
+                            <label for="nombre" class="form-label">Nombres</label>
+                            <input type="text" class="form-control animate__animated animate__fadeInUp" id="nombre" name="name" required>
+                            <div class="error-text" id="nombreError">El nombre solo debe contener letras y espacios.</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="P_apellido" class="form-label">Primer Apellido</label>
+                            <input type="text" class="form-control animate__animated animate__fadeInUp" id="P_apellido" name="surname" required>
+                            <div class="error-text" id="surnameError">El apellido solo debe contener letras y espacios.</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="S_apellido" class="form-label">Segundo Apellido</label>
+                            <input type="text" class="form-control animate__animated animate__fadeInUp" id="S_apellido" name="secondSurname" required>
+                            <div class="error-text" id="secondSurnameError">El apellido solo debe contener letras y espacios.</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="correo" class="form-label">Correo</label>
+                            <input type="email" class="form-control animate__animated animate__fadeInUp" id="correo" name="email" required>
+                            <div class="error-text" id="correoError">Por favor, ingresa un correo válido.</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Nueva Contraseña (opcional)</label>
+                            <input type="password" class="form-control animate__animated animate__fadeInUp" id="password" name="password">
+                            <div class="error-text" id="passwordError">La contraseña debe tener al menos 8 caracteres, incluyendo letras y números, y coincidir con la confirmación.</div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="Cpassword" class="form-label">Confirmar Contraseña (opcional)</label>
+                            <input type="password" class="form-control animate__animated animate__fadeInUp" id="Cpassword" name="confirmPassword">
+                        </div>
+                        <div class="d-flex gap-3 flex-wrap full-width">
+                            <button type="submit" class="btn btn-primary animate__animated animate__bounceIn">
+                                <i class="fas fa-save me-2"></i> Guardar Cambios
+                            </button>
+                            <a href="/dashboard.html" class="btn btn-secondary animate__animated animate__bounceIn">
+                                <i class="fas fa-times me-2"></i> Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container">
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">Error al procesar la solicitud.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Perfil actualizado exitosamente.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740, Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileForm = document.getElementById('profileForm');
+            const nombreInput = document.getElementById('nombre');
+            const surnameInput = document.getElementById('P_apellido');
+            const secondSurnameInput = document.getElementById('S_apellido');
+            const emailInput = document.getElementById('correo');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('Cpassword');
+            const nombreError = document.getElementById('nombreError');
+            const surnameError = document.getElementById('surnameError');
+            const secondSurnameError = document.getElementById('secondSurnameError');
+            const emailError = document.getElementById('correoError');
+            const passwordError = document.getElementById('passwordError');
+            const errorToast = bootstrap.Toast.getOrCreateInstance(document.getElementById('errorToast'));
+            const successToast = bootstrap.Toast.getOrCreateInstance(document.getElementById('successToast'));
+
+            // Cargar datos del perfil desde la sesión
+            fetch('/get-session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.user) {
+                        nombreInput.value = data.user.name || '';
+                        surnameInput.value = data.user.surname || '';
+                        secondSurnameInput.value = data.user.secondSurname || '';
+                        emailInput.value = data.user.email || '';
+                        // No rellenar password ni confirmPassword por seguridad
+                    } else {
+                        window.location.href = '/login.html'; // Redirigir si no hay sesión
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar los datos del perfil:', error);
+                    document.getElementById('errorToastBody').textContent = 'Error al cargar los datos del perfil.';
+                    errorToast.show();
+                });
+
+            // Validación y envío del formulario
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                let valid = true;
+
+                // Validar nombre
+                if (!/^[a-zA-Z\s]+$/.test(nombreInput.value)) {
+                    nombreError.style.display = 'block';
+                    valid = false;
+                } else {
+                    nombreError.style.display = 'none';
+                }
+
+                // Validar primer apellido
+                if (!/^[a-zA-Z\s]+$/.test(surnameInput.value)) {
+                    surnameError.style.display = 'block';
+                    valid = false;
+                } else {
+                    surnameError.style.display = 'none';
+                }
+
+                // Validar segundo apellido
+                if (!/^[a-zA-Z\s]+$/.test(secondSurnameInput.value)) {
+                    secondSurnameError.style.display = 'block';
+                    valid = false;
+                } else {
+                    secondSurnameError.style.display = 'none';
+                }
+
+                // Validar correo
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(emailInput.value)) {
+                    emailError.style.display = 'block';
+                    valid = false;
+                } else {
+                    emailError.style.display = 'none';
+                }
+
+                // Validar contraseña si se proporciona
+                if (passwordInput.value || confirmPasswordInput.value) {
+                    if (!/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,}$/.test(passwordInput.value)) {
+                        passwordError.textContent = 'La contraseña debe tener al menos 8 caracteres, incluyendo letras y números.';
+                        passwordError.style.display = 'block';
+                        valid = false;
+                    } else if (passwordInput.value !== confirmPasswordInput.value) {
+                        passwordError.textContent = 'Las contraseñas no coinciden.';
+                        passwordError.style.display = 'block';
+                        valid = false;
+                    } else {
+                        passwordError.style.display = 'none';
+                    }
+                }
+
+                if (valid) {
+                    const formData = {
+                        name: nombreInput.value,
+                        surname: surnameInput.value,
+                        secondSurname: secondSurnameInput.value,
+                        email: emailInput.value,
+                        password: passwordInput.value || undefined,
+                        confirmPassword: confirmPasswordInput.value || undefined
+                    };
+
+                    try {
+                        const response = await fetch('/update-profile', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(formData)
+                        });
+                        const result = await response.json();
+                        if (response.ok) {
+                            successToast.show();
+                        } else {
+                            document.getElementById('errorToastBody').textContent = result.error || 'Error al actualizar el perfil.';
+                            errorToast.show();
+                        }
+                    } catch (error) {
+                        console.error('Error al actualizar el perfil:', error);
+                        document.getElementById('errorToastBody').textContent = 'Error al actualizar el perfil.';
+                        errorToast.show();
+                    }
+                } else {
+                    document.getElementById('errorToastBody').textContent = 'Por favor, corrige los errores en el formulario.';
+                    errorToast.show();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

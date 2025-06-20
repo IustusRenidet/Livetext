@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Crear Evento de Calendario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script> <!-- Añadir Moment.js -->
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --frosted-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --preview-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+            --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
+            --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            
+            /* Colores de eventos */
+            --event-convocatoria: #3498db;
+            --event-clase: #e67e22;
+            --event-evento: #9b59b6;
+            --event-examen: #e74c3c;
+            --event-parcial: #f39c12;
+            --event-intersemestral: #1abc9c;
+            --event-curso-especial: #34495e;
+            --event-intensivo: #e67e22;
+            --event-sabatino: #8e44ad;
+            --event-verano: #f1c40f;
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--dark-bg), #1a1f2e);
+            color: var(--white);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: var(--gradient-bg) !important;
+            padding: 1.3rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 2.3rem;
+            color: var(--white) !important;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--secondary-color) !important;
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .logo-image {
+            width: 120px;
+            margin-right: 15px;
+            transition: transform 0.4s ease, filter 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.2) rotate(8deg);
+            filter: drop-shadow(0 0 10px var(--secondary-color));
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 2rem 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr minmax(0, 400px);
+            gap: 2rem;
+            align-items: flex-start;
+            overflow-x: auto;
+        }
+
+        .form-section {
+            width: 100%;
+        }
+
+        .preview-section {
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--gradient-bg);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeInUp 0.7s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--white) !important;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border-gradient);
+            z-index: 1;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card * {
+            color: var(--white) !important;
+        }
+
+        .card .text-muted {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .card small {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .preview-card {
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-card * {
+            color: var(--primary-color) !important;
+        }
+
+        .preview-card .text-muted {
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+
+        .form-control, .form-select, textarea.form-control {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            color: var(--white);
+            border-radius: 12px;
+            padding: 0.7rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus, textarea.form-control:focus {
+            border-color: var(--white);
+            box-shadow: var(--input-glow);
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .form-control::placeholder, textarea.form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .form-select, .form-select option {
+            color: var(--primary-color) !important;
+            background: var(--white) !important;
+        }
+
+        .form-select:focus {
+            color: var(--primary-color) !important;
+            background: var(--white) !important;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--white) !important;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .form-label:hover {
+            color: var(--secondary-color) !important;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #c0c0c2;
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .event-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .event-type-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-type-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--event-color, var(--secondary-color));
+            z-index: 1;
+        }
+
+        .event-type-card:hover {
+            border-color: var(--event-color, var(--secondary-color));
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .event-type-card.selected {
+            border-color: var(--event-color, var(--secondary-color));
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(var(--event-color-rgb, 230, 126, 34), 0.4);
+        }
+
+        .event-type-card i {
+            font-size: 2rem;
+            color: var(--event-color, var(--secondary-color));
+            margin-bottom: 1rem;
+        }
+
+        .event-type-card h6 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .event-type-card small {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        /* Colores específicos para cada tipo de evento */
+        .event-type-card[data-type="convocatoria"] { --event-color: var(--event-convocatoria); --event-color-rgb: 52, 152, 219; }
+        .event-type-card[data-type="clase"] { --event-color: var(--event-clase); --event-color-rgb: 230, 126, 34; }
+        .event-type-card[data-type="evento"] { --event-color: var(--event-evento); --event-color-rgb: 155, 89, 182; }
+        .event-type-card[data-type="examen"] { --event-color: var(--event-examen); --event-color-rgb: 231, 76, 60; }
+        .event-type-card[data-type="parcial"] { --event-color: var(--event-parcial); --event-color-rgb: 243, 156, 18; }
+        .event-type-card[data-type="intersemestral"] { --event-color: var(--event-intersemestral); --event-color-rgb: 26, 188, 156; }
+        .event-type-card[data-type="curso-especial"] { --event-color: var(--event-curso-especial); --event-color-rgb: 52, 73, 94; }
+        .event-type-card[data-type="intensivo"] { --event-color: var(--event-intensivo); --event-color-rgb: 230, 126, 34; }
+        .event-type-card[data-type="sabatino"] { --event-color: var(--event-sabatino); --event-color-rgb: 142, 68, 173; }
+        .event-type-card[data-type="verano"] { --event-color: var(--event-verano); --event-color-rgb: 241, 196, 15; }
+
+        .form-check-input:checked {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .preview-event {
+            background: var(--event-color, var(--secondary-color));
+            color: var(--white);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .preview-event:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-event h6 {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .preview-event small {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .recurrence-options {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        .day-checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .modal-content {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toast {
+            background: var(--gradient-bg);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        @media (max-width: 992px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .preview-section {
+                position: static;
+                max-height: none;
+            }
+
+            .event-type-selector {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .recurrence-options {
+                padding: 0.75rem;
+            }
+
+            .day-checkboxes {
+                gap: 0.3rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .event-type-selector {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .event-type-card {
+                padding: 1rem;
+            }
+
+            .event-type-card i {
+                font-size: 1.5rem;
+            }
+
+            .day-checkboxes {
+                flex-direction: column;
+                gap: 0.2rem;
+            }
+
+            .form-control, .form-select {
+                font-size: 0.9rem;
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse">
+                LIVETEXT
+            </a>
+            <div class="d-flex align-items-center ms-auto gap-3">
+                <span class="me-3 d-none d-lg-block animate__animated animate__fadeIn" id="userName"></span>
+                <a href="/logout" class="btn btn-danger animate__animated animate__bounceIn" style="animation-delay: 0.5s;">
+                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="card">
+                <h5 class="mb-4 text-center">
+                    <i class="fas fa-calendar-plus me-2"></i> Crear Evento de Calendario
+                </h5>
+
+                <!-- Selector de Tipo de Evento -->
+                <div class="mb-4">
+                    <label class="form-label">Tipo de Evento</label>
+                    <div class="event-type-selector" id="eventTypeSelector">
+                        <div class="event-type-card" data-type="convocatoria">
+                            <i class="fas fa-bullhorn"></i>
+                            <h6>Convocatoria</h6>
+                            <small>Llamados e información oficial</small>
+                        </div>
+                        <div class="event-type-card" data-type="clase">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <h6>Clase</h6>
+                            <small>Clases regulares de idiomas</small>
+                        </div>
+                        <div class="event-type-card" data-type="evento">
+                            <i class="fas fa-star"></i>
+                            <h6>Evento</h6>
+                            <small>Actividades especiales</small>
+                        </div>
+                        <div class="event-type-card" data-type="examen">
+                            <i class="fas fa-file-alt"></i>
+                            <h6>Examen</h6>
+                            <small>Evaluaciones finales</small>
+                        </div>
+                        <div class="event-type-card" data-type="parcial">
+                            <i class="fas fa-clipboard-check"></i>
+                            <h6>Parcial</h6>
+                            <small>Exámenes parciales</small>
+                        </div>
+                        <div class="event-type-card" data-type="intersemestral">
+                            <i class="fas fa-calendar-week"></i>
+                            <h6>Intersemestral</h6>
+                            <small>Cursos entre semestres</small>
+                        </div>
+                        <div class="event-type-card" data-type="curso-especial">
+                            <i class="fas fa-graduation-cap"></i>
+                            <h6>Curso Especial</h6>
+                            <small>Cursos con modalidad especial</small>
+                        </div>
+                        <div class="event-type-card" data-type="intensivo">
+                            <i class="fas fa-bolt"></i>
+                            <h6>Intensivo</h6>
+                            <small>Cursos acelerados</small>
+                        </div>
+                        <div class="event-type-card" data-type="sabatino">
+                            <i class="fas fa-calendar-day"></i>
+                            <h6>Sabatino</h6>
+                            <small>Clases de fin de semana</small>
+                        </div>
+                        <div class="event-type-card" data-type="verano">
+                            <i class="fas fa-sun"></i>
+                            <h6>Verano</h6>
+                            <small>Cursos de temporada</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario Principal -->
+                <form id="eventForm">
+                    <input type="hidden" id="eventType" name="eventType">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="eventTitle" class="form-label">Título del Evento</label>
+                            <input type="text" class="form-control" id="eventTitle" name="eventTitle" placeholder="Ej: Clase de Inglés" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="eventCourse" class="form-label">Curso/Materia</label>
+                            <select class="form-select" id="eventCourse" name="eventCourse" required>
+                                <option value="">Selecciona un curso</option>
+                                <option value="Inglés">Inglés</option>
+                                <option value="Francés">Francés</option>
+                                <option value="Alemán">Alemán</option>
+                                <option value="General">General (Todos los cursos)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="eventDate" class="form-label">Fecha</label>
+                            <input type="date" class="form-control" id="eventDate" name="eventDate" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="eventStartTime" class="form-label">Hora Inicio</label>
+                            <input type="time" class="form-control" id="eventStartTime" name="eventStartTime" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="eventEndTime" class="form-label">Hora Fin</label>
+                            <input type="time" class="form-control" id="eventEndTime" name="eventEndTime" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="eventLocation" class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" id="eventLocation" name="eventLocation" placeholder="Ej: Aula 102, Laboratorio de idiomas">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="eventInstructor" class="form-label">Instructor/Responsable</label>
+                            <input type="text" class="form-control" id="eventInstructor" name="eventInstructor" placeholder="Nombre del profesor o responsable">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="eventDescription" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" placeholder="Describe los detalles del evento..."></textarea>
+                    </div>
+
+                    <!-- Opciones de Recurrencia -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isRecurring" name="isRecurring">
+                            <label class="form-check-label" for="isRecurring">
+                                Evento recurrente
+                            </label>
+                        </div>
+                        
+                        <div class="recurrence-options" id="recurrenceOptions" style="display: none;">
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <label class="form-label">Días de la semana</label>
+                                    <div class="day-checkboxes">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="dayMon" name="recurrenceDays" value="1">
+                                            <label class="form-check-label" for="dayMon">Lunes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="dayTue" name="recurrenceDays" value="2">
+                                            <label class="form-check-label" for="dayTue">Martes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="dayWed" name="recurrenceDays" value="3">
+                                            <label class="form-check-label" for="dayWed">Miércoles</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="dayThu" name="recurrenceDays" value="4">
+                                            <label class="form-check-label" for="dayThu">Jueves</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="dayFri" name="recurrenceDays" value="5">
+                                            <label class="form-check-label" for="dayFri">Viernes</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="daySat" name="recurrenceDays" value="6">
+                                            <label class="form-check-label" for="daySat">Sábado</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="daySun" name="recurrenceDays" value="0">
+                                            <label class="form-check-label" for="daySun">Domingo</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <label for="recurrenceEnd" class="form-label">Hasta</label>
+                                    <input type="date" class="form-control" id="recurrenceEnd" name="recurrenceEnd">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Opciones Adicionales -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sendNotification" name="sendNotification" checked>
+                                <label class="form-check-label" for="sendNotification">
+                                    Enviar notificación a estudiantes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i> Crear Evento
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-broom me-2"></i> Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <div class="card preview-card">
+                <h5 class="mb-4 text-center">
+                    <i class="fas fa-eye me-2"></i> Vista Previa del Evento
+                </h5>
+                
+                <div id="eventPreview">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <div>Selecciona un tipo de evento</div>
+                        <small>y completa los campos para ver la vista previa</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-check-circle text-success me-2"></i>
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage">
+                Evento creado exitosamente
+            </div>
+        </div>
+
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                Error al crear el evento
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script> <!-- Añadir Moment.js -->
+    <script>
+        let selectedEventType = null;
+        const eventColors = {
+            'convocatoria': '#3498db',
+            'clase': '#e67e22',
+            'evento': '#9b59b6',
+            'examen': '#e74c3c',
+            'parcial': '#f39c12',
+            'intersemestral': '#1abc9c',
+            'curso-especial': '#34495e',
+            'intensivo': '#e67e22',
+            'sabatino': '#8e44ad',
+            'verano': '#f1c40f'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventTypeSelector();
+            initializeFormListeners();
+            initializeRecurrenceToggle();
+            initializeTimeValidation();
+            setMinDate();
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').value = today;
+            document.getElementById('eventDate').setAttribute('min', today);
+            document.getElementById('recurrenceEnd').setAttribute('min', today);
+
+            // Cargar nombre del usuario
+            const userNameSpan = document.getElementById('userName');
+            if (userNameSpan) {
+                fetch('/get-session')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.user && data.user.name) {
+                            userNameSpan.textContent = `Bienvenido, ${data.user.name}`;
+                        } else {
+                            userNameSpan.textContent = 'Bienvenido, Invitado';
+                        }
+                    })
+                    .catch(error => console.error('Error al cargar el nombre:', error));
+            }
+        });
+
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').setAttribute('min', today);
+            document.getElementById('recurrenceEnd').setAttribute('min', today);
+        }
+
+        function initializeEventTypeSelector() {
+            const eventTypeCards = document.querySelectorAll('.event-type-card');
+            
+            eventTypeCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    eventTypeCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedEventType = this.dataset.type;
+                    document.getElementById('eventType').value = selectedEventType;
+                    updatePreview();
+                });
+            });
+        }
+
+        function initializeFormListeners() {
+            const formInputs = document.querySelectorAll('#eventForm input, #eventForm select, #eventForm textarea');
+            formInputs.forEach(input => {
+                input.addEventListener('input', updatePreview);
+                input.addEventListener('change', updatePreview);
+            });
+        }
+
+        function initializeRecurrenceToggle() {
+            const recurringCheckbox = document.getElementById('isRecurring');
+            const recurrenceOptions = document.getElementById('recurrenceOptions');
+            
+            recurringCheckbox.addEventListener('change', function() {
+                recurrenceOptions.style.display = this.checked ? 'block' : 'none';
+                if (this.checked) recurrenceOptions.classList.add('animate__animated', 'animate__fadeIn');
+                updatePreview();
+            });
+        }
+
+        function initializeTimeValidation() {
+            const startTime = document.getElementById('eventStartTime');
+            const endTime = document.getElementById('eventEndTime');
+
+            startTime.addEventListener('change', function() {
+                const start = this.value;
+                if (endTime.value && start > endTime.value) {
+                    endTime.value = start; // Establecer hora de fin igual a inicio si es menor
+                }
+                endTime.setAttribute('min', start); // Restringir hora de fin a no ser anterior a inicio
+                updatePreview();
+            });
+
+            endTime.addEventListener('change', function() {
+                const end = this.value;
+                if (startTime.value && end < startTime.value) {
+                    this.value = startTime.value; // Restablecer si es anterior a inicio
+                    showToast('error', 'La hora de fin no puede ser anterior a la hora de inicio.');
+                }
+                updatePreview();
+            });
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('eventPreview');
+            
+            if (!selectedEventType) {
+                preview.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <div>Selecciona un tipo de evento</div>
+                        <small>y completa los campos para ver la vista previa</small>
+                    </div>
+                `;
+                return;
+            }
+
+            const title = document.getElementById('eventTitle').value || 'Título del evento';
+            const course = document.getElementById('eventCourse').value || 'Curso no especificado';
+            const date = document.getElementById('eventDate').value || 'Fecha no especificada';
+            const startTime = document.getElementById('eventStartTime').value || '00:00';
+            const endTime = document.getElementById('eventEndTime').value || '00:00';
+            const location = document.getElementById('eventLocation').value || 'Ubicación no especificada';
+            const instructor = document.getElementById('eventInstructor').value || 'Instructor no especificado';
+            const description = document.getElementById('eventDescription').value || 'Sin descripción';
+            const isRecurring = document.getElementById('isRecurring').checked;
+            const recurrenceDays = Array.from(document.querySelectorAll('input[name="recurrenceDays"]:checked')).map(cb => cb.value);
+            const recurrenceEnd = document.getElementById('recurrenceEnd')?.value;
+            
+            const eventColor = eventColors[selectedEventType];
+            const eventTypeText = getEventTypeText(selectedEventType);
+            
+            let formattedDate = 'Fecha no especificada';
+            if (date) {
+                formattedDate = moment(date).format('dddd, DD [de] MMMM [de] YYYY');
+            }
+
+            // Determinar si es "Temprano" o "Tarde"
+            const startHour = parseInt(startTime.split(':')[0]);
+            const timeOfDay = startHour < 12 ? 'Temprano' : 'Tarde';
+
+            let recurrenceText = '';
+            if (isRecurring && recurrenceDays.length > 0) {
+                const daysText = recurrenceDays.map(day => {
+                    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+                    return days[parseInt(day)];
+                }).join(', ');
+                recurrenceText = `Se repite los ${daysText} hasta ${moment(recurrenceEnd).format('DD [de] MMMM [de] YYYY')}`;
+            }
+
+            preview.innerHTML = `
+                <div class="preview-event" style="--event-color: ${eventColor};">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">${title}</h6>
+                        <span class="badge bg-light text-dark">${eventTypeText}</span>
+                    </div>
+                    <div class="mb-2">
+                        <small><i class="fas fa-graduation-cap me-1"></i> ${course}</small>
+                    </div>
+                    <div class="mb-2">
+                        <small><i class="fas fa-calendar me-1"></i> ${formattedDate}</small>
+                    </div>
+                    <div class="mb-2">
+                        <small><i class="fas fa-clock me-1"></i> ${startTime} - ${endTime} (${timeOfDay})</small>
+                    </div>
+                    ${location !== 'Ubicación no especificada' ? `
+                    <div class="mb-2">
+                        <small><i class="fas fa-map-marker-alt me-1"></i> ${location}</small>
+                    </div>
+                    ` : ''}
+                    ${instructor !== 'Instructor no especificado' ? `
+                    <div class="mb-2">
+                        <small><i class="fas fa-user me-1"></i> ${instructor}</small>
+                    </div>
+                    ` : ''}
+                    ${recurrenceText ? `
+                    <div class="mb-2">
+                        <small><i class="fas fa-redo me-1"></i> ${recurrenceText}</small>
+                    </div>
+                    ` : ''}
+                    ${description !== 'Sin descripción' ? `
+                    <div class="mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.2);">
+                        <small>${description}</small>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function getEventTypeText(type) {
+            const types = {
+                'convocatoria': 'Convocatoria',
+                'clase': 'Clase',
+                'evento': 'Evento',
+                'examen': 'Examen',
+                'parcial': 'Parcial',
+                'intersemestral': 'Intersemestral',
+                'curso-especial': 'Curso Especial',
+                'intensivo': 'Intensivo',
+                'sabatino': 'Sabatino',
+                'verano': 'Verano'
+            };
+            return types[type] || 'Evento';
+        }
+
+        function clearForm() {
+            if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
+                document.getElementById('eventForm').reset();
+                document.querySelectorAll('.event-type-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                selectedEventType = null;
+                document.getElementById('recurrenceOptions').style.display = 'none';
+                
+                // Reset date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('eventDate').value = today;
+                document.getElementById('eventStartTime').value = '';
+                document.getElementById('eventEndTime').value = '';
+                setMinDate();
+                
+                updatePreview();
+            }
+        }
+
+        async function saveEvent() {
+            const now = new Date(); // Hora actual con minutos y segundos
+            const eventDate = new Date(document.getElementById('eventDate').value);
+            const startTime = document.getElementById('eventStartTime').value;
+            const endTime = document.getElementById('eventEndTime').value;
+            const recurrenceEnd = document.getElementById('recurrenceEnd')?.value;
+            const recurrenceDays = Array.from(document.querySelectorAll('input[name="recurrenceDays"]:checked')).map(cb => cb.value);
+
+            // Combinar fecha y hora de inicio para comparación
+            const eventStartDateTime = new Date(`${document.getElementById('eventDate').value}T${startTime}`);
+            
+            // Validar fecha (permitir eventos en el día actual si la hora es futura o igual)
+            if (eventStartDateTime < now) {
+                showToast('error', 'No puedes crear un evento con una fecha u hora pasada.');
+                return;
+            }
+
+            // Validar horas (inicio antes que fin y dentro de 24 horas)
+            const startHour = parseInt(startTime.split(':')[0]);
+            const endHour = parseInt(endTime.split(':')[0]);
+            if (startHour > endHour || startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23) {
+                showToast('error', 'La hora de inicio debe ser anterior a la hora de fin y ambas deben estar dentro de las 24 horas (00:00-23:59).');
+                return;
+            }
+
+            // Validar recurrencia (si está activada)
+            if (document.getElementById('isRecurring').checked && recurrenceEnd) {
+                const endRecurDate = new Date(recurrenceEnd);
+                if (endRecurDate <= eventDate) {
+                    showToast('error', 'La fecha de fin de recurrencia debe ser posterior a la fecha del evento.');
+                    return;
+                }
+                if (recurrenceDays.length === 0) {
+                    showToast('error', 'Selecciona al menos un día para la recurrencia.');
+                    return;
+                }
+            }
+
+            if (!selectedEventType) {
+                showToast('error', 'Selecciona un tipo de evento');
+                return;
+            }
+
+            const form = document.getElementById('eventForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const formData = new FormData(form);
+            const eventData = {
+                type: selectedEventType,
+                title: formData.get('eventTitle'),
+                course: formData.get('eventCourse'),
+                date: formData.get('eventDate'),
+                startTime: formData.get('eventStartTime'),
+                endTime: formData.get('eventEndTime'),
+                location: formData.get('eventLocation'),
+                instructor: formData.get('eventInstructor'),
+                description: formData.get('eventDescription'),
+                isRecurring: formData.get('isRecurring') === 'on',
+                recurrenceDays: recurrenceDays,
+                recurrenceEnd: formData.get('recurrenceEnd'),
+                sendNotification: formData.get('sendNotification') === 'on'
+            };
+
+            try {
+                const response = await fetch('/create-event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(eventData)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    showToast('success', result.message);
+                    // Opcional: limpiar formulario después de guardar
+                    setTimeout(clearForm, 2000);
+                } else {
+                    showToast('error', result.error || 'Error al crear el evento');
+                }
+            } catch (error) {
+                console.error('Error al guardar el evento:', error);
+                showToast('error', 'Error al crear el evento');
+            }
+        }
+
+        function showToast(type, message) {
+            const toastElement = document.getElementById(type === 'success' ? 'successToast' : 'errorToast');
+            const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            
+            messageElement.textContent = message;
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // Form submission handler
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveEvent();
+        });
+
+        // Initialize preview
+        updatePreview();
+    </script>
+</body>
+</html>
