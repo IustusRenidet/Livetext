@@ -338,6 +338,89 @@
         margin-top: 2rem;
     }
 
+    /* Estilo para la ventana emergente de darse de baja */
+    .modal-unsubscribe {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--gradient-bg);
+        color: var(--white);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        z-index: 1060;
+        padding: 2rem;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .modal-unsubscribe .modal-header {
+        background: var(--primary-color);
+        border-radius: 15px 15px 0 0;
+        padding: 1rem;
+        margin: -2rem -2rem 1rem -2rem;
+    }
+
+    .modal-unsubscribe .modal-body {
+        padding: 1rem;
+    }
+
+    .modal-unsubscribe .modal-footer {
+        padding: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: #f0f0f0;
+        border-radius: 0 0 15px 15px;
+        color: var(--primary-color);
+    }
+
+    .modal-unsubscribe .btn-close {
+        filter: invert(1);
+    }
+
+    .modal-unsubscribe .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+
+    .modal-unsubscribe .btn-primary {
+        background: var(--secondary-color);
+        border: none;
+        color: var(--white);
+        transition: all 0.3s ease;
+    }
+
+    .modal-unsubscribe .btn-primary:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-unsubscribe .btn-secondary {
+        background: var(--light-bg);
+        color: var(--primary-color);
+        border: none;
+    }
+
+    .modal-unsubscribe .btn-secondary:hover {
+        background: #c0c0c2;
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        display: none;
+    }
+
     @media (max-width: 768px) {
         .content-grid {
             column-count: 1;
@@ -361,6 +444,10 @@
         .newsletter-card .btn-subscribe {
             max-width: 100%;
             padding: 0.5rem 1rem;
+        }
+
+        .modal-unsubscribe {
+            width: 95%;
         }
     }
 
@@ -386,7 +473,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
+            <a class="navbar-brand d-flex align-items-center" href="index.html">
                 <img src="img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image">
                 LIVETEXT
             </a>
@@ -395,18 +482,13 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-home"></i>
-                            Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link" href="recursos.html"><i class="fas fa-book"></i>
-                            Recursos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="calendario.html"><i class="fas fa-calendar-alt"></i>
-                            Calendario</a></li>
-                    <li class="nav-item"><a class="nav-link" href="pagos.html"><i class="fas fa-credit-card"></i>
-                            Pagos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fas fa-home"></i> Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="recursos.html"><i class="fas fa-book"></i> Recursos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="calendario.html"><i class="fas fa-calendar-alt"></i> Calendario</a></li>
+                    <li class="nav-item"><a class="nav-link" href="pagos.html"><i class="fas fa-credit-card"></i> Pagos</a></li>
                 </ul>
                 <div class="d-flex">
-                    <a href="login.html" class="btn login-btn"><i class="fas fa-sign-in-alt me-2"></i> Iniciar
-                        Sesión</a>
+                    <a href="login.html" class="btn login-btn"><i class="fas fa-sign-in-alt me-2"></i> Iniciar Sesión</a>
                 </div>
             </div>
         </div>
@@ -420,8 +502,8 @@
                 <div class="col-md-8 mx-auto">
                     <div class="card newsletter-card">
                         <div class="card-body p-4 text-center">
-                            <h4 class="card-title">¡Únete a nuestro boletín!</h4>
-                            <p class="card-text mb-4">Recibe un resumen semanal de nuevas publicaciones directamente en tu correo.</p>
+                            <h4 class="card-title">¡Únete a nuestras notificaciones!</h4>
+                            <p class="card-text mb-4">Recibe notificaciones inmediatas sobre nuevos eventos y actualizaciones directamente en tu correo.</p>
                             <form id="newsletterForm" class="row g-3 justify-content-center newsletter-form">
                                 <div class="col-md-5">
                                     <input type="text" class="form-control" id="nombreNewsletter" placeholder="Nombre" required>
@@ -431,13 +513,7 @@
                                 </div>
                                 <div class="col-12">
                                     <div style="margin-left: 20px;">
-                                        <label><input type="radio" name="notificationFrequency" value="weekly" checked> Resumen semanal</label>
-                                    </div>
-                                    <div>
-                                        <label><input type="checkbox" name="notificationTypes" value="posts" checked> Posts</label>
-                                        <label><input type="checkbox" name="notificationTypes" value="resources" checked> Recursos académicos</label>
-                                        <label><input type="checkbox" name="notificationTypes" value="events" checked> Eventos de calendario</label>
-                                        <label><input type="checkbox" name="notificationTypes" value="payments" checked> Formularios de pago</label>
+                                        <label><input type="checkbox" name="notificationTypes" value="events" checked> Notificaciones de eventos</label>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -521,17 +597,7 @@
             aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
-                    ¡Suscripción exitosa! Recibirás un resumen semanal los lunes.
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
-                    aria-label="Close"></button>
-            </div>
-        </div>
-        <div id="unsubscribeToast" class="toast align-items-center text-white bg-success border-0" role="alert"
-            aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    ¡Te has dado de baja exitosamente!
+                    ¡Suscripción exitosa! Recibirás notificaciones sobre eventos.
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
@@ -546,6 +612,23 @@
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
             </div>
+        </div>
+    </div>
+
+    <!-- Ventana emergente para darse de baja -->
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-unsubscribe" id="unsubscribeModal">
+        <div class="modal-header">
+            <h5 class="modal-title">Darse de baja</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" id="closeUnsubscribeModal"></button>
+        </div>
+        <div class="modal-body">
+            <p>Por favor, ingresa tu correo para darte de baja de las notificaciones.</p>
+            <input type="email" class="form-control mb-3" id="unsubscribeEmail" placeholder="Correo electrónico" required>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelUnsubscribe">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="confirmUnsubscribe">Confirmar</button>
         </div>
     </div>
 
@@ -648,14 +731,17 @@
             // Validación y suscripción al boletín
             const newsletterForm = document.getElementById('newsletterForm');
             const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-            const unsubscribeToast = new bootstrap.Toast(document.getElementById('unsubscribeToast'));
             const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+            const unsubscribeModal = document.getElementById('unsubscribeModal');
+            const modalBackdrop = document.getElementById('modalBackdrop');
+            const closeUnsubscribeModal = document.getElementById('closeUnsubscribeModal');
+            const cancelUnsubscribe = document.getElementById('cancelUnsubscribe');
+            const confirmUnsubscribe = document.getElementById('confirmUnsubscribe');
 
             newsletterForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const nombre = document.getElementById('nombreNewsletter').value;
                 const email = document.getElementById('emailNewsletter').value;
-                const notificationFrequency = document.querySelector('input[name="notificationFrequency"]:checked')?.value || 'weekly';
                 const notificationTypes = Array.from(document.querySelectorAll('input[name="notificationTypes"]:checked')).map(cb => cb.value);
 
                 if (nombre && email) {
@@ -668,7 +754,6 @@
                             body: JSON.stringify({
                                 name: nombre,
                                 email,
-                                notificationFrequency,
                                 notificationTypes
                             })
                         });
@@ -688,10 +773,29 @@
                 }
             });
 
-            // Lógica para darse de baja
-            unsubscribeLink.addEventListener('click', async (e) => {
+            // Mostrar ventana emergente para darse de baja
+            unsubscribeLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                const email = prompt('Por favor, ingresa tu correo para darte de baja:');
+                unsubscribeModal.style.display = 'block';
+                modalBackdrop.style.display = 'block';
+            });
+
+            // Cerrar ventana emergente
+            closeUnsubscribeModal.addEventListener('click', () => {
+                unsubscribeModal.style.display = 'none';
+                modalBackdrop.style.display = 'none';
+                document.getElementById('unsubscribeEmail').value = '';
+            });
+
+            cancelUnsubscribe.addEventListener('click', () => {
+                unsubscribeModal.style.display = 'none';
+                modalBackdrop.style.display = 'none';
+                document.getElementById('unsubscribeEmail').value = '';
+            });
+
+            // Confirmar darse de baja
+            confirmUnsubscribe.addEventListener('click', async () => {
+                const email = document.getElementById('unsubscribeEmail').value;
                 if (email) {
                     try {
                         const response = await fetch('/unsubscribe-newsletter', {
@@ -703,7 +807,12 @@
                         });
                         const result = await response.json();
                         if (response.ok) {
+                            unsubscribeModal.style.display = 'none';
+                            modalBackdrop.style.display = 'none';
+                            const unsubscribeToast = new bootstrap.Toast(document.getElementById('successToast'));
+                            document.getElementById('successToast').querySelector('.toast-body').textContent = '¡Te has dado de baja exitosamente!';
                             unsubscribeToast.show();
+                            document.getElementById('unsubscribeEmail').value = '';
                         } else {
                             document.getElementById('errorToastBody').textContent = result.error || 'Error al darte de baja. Inténtalo de nuevo.';
                             errorToast.show();
@@ -713,6 +822,9 @@
                         document.getElementById('errorToastBody').textContent = 'Error al darte de baja. Inténtalo de nuevo.';
                         errorToast.show();
                     }
+                } else {
+                    document.getElementById('errorToastBody').textContent = 'Por favor, ingresa un correo válido.';
+                    errorToast.show();
                 }
             });
 

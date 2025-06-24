@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVETEXT - Crear Evento de Calendario</title>
+    <title>LIVETEXT - Editar Evento</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -21,11 +21,8 @@
             --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
             --frosted-bg: rgba(255, 255, 255, 0.1);
             --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            --preview-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
             --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
             --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
-            
-            /* Colores de eventos */
             --event-convocatoria: #3498db;
             --event-clase: #e67e22;
             --event-evento: #9b59b6;
@@ -36,6 +33,8 @@
             --event-intensivo: #e67e22;
             --event-sabatino: #8e44ad;
             --event-verano: #f1c40f;
+            --custom-purple: #8e44ad; /* Color morado personalizado, ajustable si deseas otro */
+            --toast-blue: #1e90ff;
         }
 
         body {
@@ -171,12 +170,6 @@
             box-shadow: var(--input-glow);
             background: rgba(255, 255, 255, 0.15);
             transform: scale(1.02);
-        }
-
-        .form-control::placeholder, textarea.form-control::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-            font-style: italic;
-            font-weight: 300;
         }
 
         .form-select, .form-select option {
@@ -339,7 +332,7 @@
         }
 
         .preview-event {
-            background: var(--event-color, var(--secondary-color)); /* Asegurar fondo completo */
+            background: var(--event-color, var(--secondary-color)); /* Asegurar que el fondo completo use el color */
             color: var(--white);
             padding: 1rem;
             border-radius: 12px;
@@ -376,24 +369,6 @@
             flex-wrap: wrap;
             gap: 0.5rem;
             margin-top: 1rem;
-        }
-
-        .modal-content {
-            background: var(--gradient-bg);
-            color: var(--white);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toast {
-            background: var(--gradient-bg);
-            color: var(--white);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
         }
 
         @media (max-width: 992px) {
@@ -444,6 +419,35 @@
                 padding: 0.5rem;
             }
         }
+
+        .toast {
+            background: var(--toast-blue);
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+            animation: toastIn 0.5s ease-out forwards;
+        }
+
+        .toast-header {
+            background: rgba(30, 144, 255, 0.2);
+            color: var(--white);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.hide {
+            animation: toastOut 0.5s ease-out forwards;
+        }
+
+        @keyframes toastOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
     </style>
 </head>
 
@@ -470,80 +474,28 @@
         <div class="form-section">
             <div class="card">
                 <h5 class="mb-4 text-center">
-                    <i class="fas fa-calendar-plus me-2"></i> Crear Evento de Calendario
+                    <i class="fas fa-calendar-edit me-2"></i> Editar Evento
                 </h5>
 
-                <!-- Selector de Tipo de Evento -->
-                <div class="mb-4">
-                    <label class="form-label">Tipo de Evento</label>
-                    <div class="event-type-selector" id="eventTypeSelector">
-                        <div class="event-type-card" data-type="convocatoria">
-                            <i class="fas fa-bullhorn"></i>
-                            <h6>Convocatoria</h6>
-                            <small>Llamados e información oficial</small>
-                        </div>
-                        <div class="event-type-card" data-type="clase">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                            <h6>Clase</h6>
-                            <small>Clases regulares de idiomas</small>
-                        </div>
-                        <div class="event-type-card" data-type="evento">
-                            <i class="fas fa-star"></i>
-                            <h6>Evento</h6>
-                            <small>Actividades especiales</small>
-                        </div>
-                        <div class="event-type-card" data-type="examen">
-                            <i class="fas fa-file-alt"></i>
-                            <h6>Examen</h6>
-                            <small>Evaluaciones finales</small>
-                        </div>
-                        <div class="event-type-card" data-type="parcial">
-                            <i class="fas fa-clipboard-check"></i>
-                            <h6>Parcial</h6>
-                            <small>Exámenes parciales</small>
-                        </div>
-                        <div class="event-type-card" data-type="intersemestral">
-                            <i class="fas fa-calendar-week"></i>
-                            <h6>Intersemestral</h6>
-                            <small>Cursos entre semestres</small>
-                        </div>
-                        <div class="event-type-card" data-type="curso-especial">
-                            <i class="fas fa-graduation-cap"></i>
-                            <h6>Curso Especial</h6>
-                            <small>Cursos con modalidad especial</small>
-                        </div>
-                        <div class="event-type-card" data-type="intensivo">
-                            <i class="fas fa-bolt"></i>
-                            <h6>Intensivo</h6>
-                            <small>Cursos acelerados</small>
-                        </div>
-                        <div class="event-type-card" data-type="sabatino">
-                            <i class="fas fa-calendar-day"></i>
-                            <h6>Sabatino</h6>
-                            <small>Clases de fin de semana</small>
-                        </div>
-                        <div class="event-type-card" data-type="verano">
-                            <i class="fas fa-sun"></i>
-                            <h6>Verano</h6>
-                            <small>Cursos de temporada</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Formulario Principal -->
                 <form id="eventForm">
-                    <input type="hidden" id="eventType" name="eventType">
-                    
+                    <input type="hidden" id="eventId" name="eventId">
+
+                    <div class="mb-4">
+                        <label class="form-label">Tipo de Evento</label>
+                        <div class="event-type-selector" id="eventTypeSelector"></div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="eventTitle" class="form-label">Título del Evento</label>
-                            <input type="text" class="form-control" id="eventTitle" name="eventTitle" placeholder="Ej: Clase de Inglés" required>
+                            <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="eventCourse" class="form-label">Curso/Materia</label>
                             <select class="form-select" id="eventCourse" name="eventCourse" required>
                                 <option value="">Selecciona un curso</option>
                                 <option value="Inglés">Inglés</option>
+                                <option value="Inglés-básico">Inglés-básico</option>
                                 <option value="Francés">Francés</option>
                                 <option value="Alemán">Alemán</option>
                                 <option value="General">General (Todos los cursos)</option>
@@ -569,17 +521,17 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="eventLocation" class="form-label">Ubicación</label>
-                            <input type="text" class="form-control" id="eventLocation" name="eventLocation" placeholder="Ej: Aula 102, Laboratorio de idiomas">
+                            <input type="text" class="form-control" id="eventLocation" name="eventLocation">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="eventInstructor" class="form-label">Instructor/Responsable</label>
-                            <input type="text" class="form-control" id="eventInstructor" name="eventInstructor" placeholder="Nombre del profesor o responsable">
+                            <input type="text" class="form-control" id="eventInstructor" name="eventInstructor">
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="eventDescription" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" placeholder="Describe los detalles del evento..."></textarea>
+                        <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3"></textarea>
                     </div>
 
                     <!-- Opciones de Recurrencia -->
@@ -635,20 +587,18 @@
                     </div>
 
                     <!-- Opciones Adicionales -->
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="sendNotification" name="sendNotification" checked>
-                                <label class="form-check-label" for="sendNotification">
-                                    Enviar notificación a estudiantes
-                                </label>
-                            </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sendNotification" name="sendNotification">
+                            <label class="form-check-label" for="sendNotification">
+                                Enviar notificación a estudiantes
+                            </label>
                         </div>
                     </div>
 
                     <div class="d-flex gap-3 flex-wrap">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i> Crear Evento
+                            <i class="fas fa-save me-2"></i> Guardar Cambios
                         </button>
                         <button type="button" class="btn btn-secondary" onclick="clearForm()">
                             <i class="fas fa-broom me-2"></i> Limpiar
@@ -664,12 +614,10 @@
                 <h5 class="mb-4 text-center">
                     <i class="fas fa-eye me-2"></i> Vista Previa del Evento
                 </h5>
-                
                 <div id="eventPreview">
                     <div class="text-center text-muted">
                         <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                        <div>Selecciona un tipo de evento</div>
-                        <small>y completa los campos para ver la vista previa</small>
+                        <div>Completa los campos para ver la vista previa</div>
                     </div>
                 </div>
             </div>
@@ -680,23 +628,22 @@
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="successToast" class="toast" role="alert">
             <div class="toast-header">
-                <i class="fas fa-check-circle text-success me-2"></i>
-                <strong class="me-auto">Éxito</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                <i class="fas fa-check-circle" style="color: var(--white); margin-right: 0.5rem;"></i>
+                <strong class="me-auto" style="color: var(--white);">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body" id="successMessage">
-                Evento creado exitosamente
+            <div class="toast-body" id="successMessage" style="color: var(--white);">
+                Evento actualizado exitosamente
             </div>
         </div>
-
         <div id="errorToast" class="toast" role="alert">
             <div class="toast-header">
-                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                <strong class="me-auto">Error</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                <i class="fas fa-exclamation-triangle" style="color: var(--white); margin-right: 0.5rem;"></i>
+                <strong class="me-auto" style="color: var(--white);">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body" id="errorMessage">
-                Error al crear el evento
+            <div class="toast-body" id="errorMessage" style="color: var(--white);">
+                Error al actualizar el evento
             </div>
         </div>
     </div>
@@ -705,7 +652,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script>
         let selectedEventType = null;
         const eventColors = {
@@ -721,19 +667,7 @@
             'verano': '#f1c40f'
         };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeEventTypeSelector();
-            initializeFormListeners();
-            initializeRecurrenceToggle();
-            initializeTimeValidation();
-            setMinDate();
-            
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('eventDate').value = today;
-            document.getElementById('eventDate').setAttribute('min', today);
-            document.getElementById('recurrenceEnd').setAttribute('min', today);
-
+        document.addEventListener('DOMContentLoaded', () => {
             // Cargar nombre del usuario
             const userNameSpan = document.getElementById('userName');
             if (userNameSpan) {
@@ -748,267 +682,288 @@
                     })
                     .catch(error => console.error('Error al cargar el nombre:', error));
             }
-        });
 
-        function setMinDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('eventDate').setAttribute('min', today);
-            document.getElementById('recurrenceEnd').setAttribute('min', today);
-        }
+            // Obtener el ID del evento desde la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('id');
+            document.getElementById('eventId').value = eventId;
 
-        function initializeEventTypeSelector() {
-            const eventTypeCards = document.querySelectorAll('.event-type-card');
-            
-            eventTypeCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    eventTypeCards.forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedEventType = this.dataset.type;
-                    document.getElementById('eventType').value = selectedEventType;
+            // Cargar datos del evento para prellenar el formulario
+            async function loadEventData() {
+                try {
+                    const response = await axios.get(`/events/${eventId}`);
+                    const event = response.data;
+                    console.log('Datos recibidos de la API:', event); // Depuración
+                    if (event) {
+                        // Poblar el selector de tipo de evento
+                        const eventTypeSelector = document.getElementById('eventTypeSelector');
+                        Object.keys(eventColors).forEach(type => {
+                            const card = document.createElement('div');
+                            card.className = `event-type-card ${event.type === type ? 'selected' : ''}`;
+                            card.setAttribute('data-type', type);
+                            card.innerHTML = `
+                                <i class="fas fa-${type === 'convocatoria' ? 'bullhorn' : type === 'clase' ? 'chalkboard-teacher' : type === 'evento' ? 'star' : type === 'examen' ? 'file-alt' : type === 'parcial' ? 'clipboard-check' : type === 'intersemestral' ? 'calendar-week' : type === 'curso-especial' ? 'graduation-cap' : type === 'intensivo' ? 'bolt' : type === 'sabatino' ? 'calendar-day' : 'sun'}"></i>
+                                <h6>${type.charAt(0).toUpperCase() + type.slice(1)}</h6>
+                                <small>${type === 'convocatoria' ? 'Llamados e información oficial' : type === 'clase' ? 'Clases regulares de idiomas' : type === 'evento' ? 'Actividades especiales' : type === 'examen' ? 'Evaluaciones finales' : type === 'parcial' ? 'Exámenes parciales' : type === 'intersemestral' ? 'Cursos entre semestres' : type === 'curso-especial' ? 'Cursos con modalidad especial' : type === 'intensivo' ? 'Cursos acelerados' : type === 'sabatino' ? 'Clases de fin de semana' : 'Cursos de temporada'}</small>
+                            `;
+                            card.addEventListener('click', () => {
+                                eventTypeSelector.querySelectorAll('.event-type-card').forEach(c => c.classList.remove('selected'));
+                                card.classList.add('selected');
+                                selectedEventType = type;
+                                updatePreview();
+                            });
+                            if (event.type === type) card.classList.add('selected');
+                            eventTypeSelector.appendChild(card);
+                        });
+                        selectedEventType = event.type;
+
+                        // Poblar campos
+                        document.getElementById('eventTitle').value = event.title || '';
+                        document.getElementById('eventCourse').value = event.course || '';
+                        document.getElementById('eventDate').value = event.start ? moment(event.start).toISOString().split('T')[0] : '';
+                        document.getElementById('eventStartTime').value = event.start ? moment(event.start).format('HH:mm') : '';
+                        document.getElementById('eventEndTime').value = event.end ? moment(event.end).format('HH:mm') : '';
+                        document.getElementById('eventLocation').value = event.location || '';
+                        document.getElementById('eventInstructor').value = event.instructor || '';
+                        document.getElementById('eventDescription').value = event.description || '';
+
+                        // Poblar recurrencia
+                        const isRecurring = event.isRecurring || false;
+                        document.getElementById('isRecurring').checked = isRecurring;
+                        const recurrenceOptions = document.getElementById('recurrenceOptions');
+                        if (isRecurring) {
+                            recurrenceOptions.style.display = 'block';
+                            recurrenceOptions.classList.add('animate__animated', 'animate__fadeIn');
+                            const recurrenceDays = event.recurrenceDays || [];
+                            ['dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat', 'daySun'].forEach(day => {
+                                document.getElementById(day).checked = recurrenceDays.includes(parseInt(day.replace('day', '')));
+                            });
+                            document.getElementById('recurrenceEnd').value = event.recurrenceEnd ? moment(event.recurrenceEnd).toISOString().split('T')[0] : '';
+                        } else {
+                            recurrenceOptions.style.display = 'none';
+                        }
+
+                        document.getElementById('sendNotification').checked = event.sendNotification || false;
+                        updatePreview();
+                    } else {
+                        showToast('error', 'Evento no encontrado.');
+                    }
+                } catch (error) {
+                    console.error('Error al cargar el evento:', error);
+                    if (error.response && error.response.status === 404) {
+                        showToast('error', 'Evento no encontrado en el servidor.');
+                    } else {
+                        showToast('error', 'Error al conectar con el servidor. Intenta de nuevo.');
+                    }
+                }
+            }
+
+            loadEventData();
+
+            // Actualizar vista previa
+            function updatePreview() {
+                const preview = document.getElementById('eventPreview');
+                if (!selectedEventType) {
+                    preview.innerHTML = `
+                        <div class="text-center text-muted">
+                            <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <div>Selecciona un tipo de evento</div>
+                            <small>y completa los campos para ver la vista previa</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const title = document.getElementById('eventTitle').value || '';
+                const course = document.getElementById('eventCourse').value || '';
+                const date = document.getElementById('eventDate').value || '';
+                const startTime = document.getElementById('eventStartTime').value || '';
+                const endTime = document.getElementById('eventEndTime').value || '';
+                const location = document.getElementById('eventLocation').value || '';
+                const instructor = document.getElementById('eventInstructor').value || '';
+                const description = document.getElementById('eventDescription').value || '';
+                const isRecurring = document.getElementById('isRecurring').checked;
+                const recurrenceDays = Array.from(document.querySelectorAll('input[name="recurrenceDays"]:checked')).map(cb => cb.value);
+                const recurrenceEnd = document.getElementById('recurrenceEnd')?.value || '';
+
+                const eventColor = eventColors[selectedEventType] || '#e67e22';
+                const eventTypeText = getEventTypeText(selectedEventType) || 'Evento';
+
+                let formattedDate = date ? moment(date).format('dddd, DD [de] MMMM [de] YYYY') : '';
+                const startHour = startTime ? parseInt(startTime.split(':')[0]) : 0;
+                const timeOfDay = startTime ? (startHour < 12 ? 'Temprano' : 'Tarde') : '';
+                let timeDisplay = startTime && endTime ? `${startTime} - ${endTime} (${timeOfDay})` : startTime ? `${startTime} (${timeOfDay})` : '';
+
+                let recurrenceText = '';
+                if (isRecurring && recurrenceDays.length > 0 && recurrenceEnd) {
+                    const daysText = recurrenceDays.map(day => ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][parseInt(day)]).join(', ');
+                    recurrenceText = `Recurrente: ${daysText} hasta ${moment(recurrenceEnd).format('DD [de] MMMM [de] YYYY')}`;
+                }
+
+                preview.innerHTML = `
+                    <div class="preview-event" style="background: ${eventColor};"> <!-- Asegurar fondo completo -->
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="mb-0">${title}</h6>
+                            <span class="badge bg-light text-dark">${eventTypeText}</span>
+                        </div>
+                        ${course ? `<div class="mb-2"><small><i class="fas fa-graduation-cap me-1"></i> ${course}</small></div>` : ''}
+                        ${formattedDate ? `<div class="mb-2"><small><i class="fas fa-calendar me-1"></i> ${formattedDate}</small></div>` : ''}
+                        ${timeDisplay ? `<div class="mb-2"><small><i class="fas fa-clock me-1"></i> ${timeDisplay}</small></div>` : ''}
+                        ${location ? `<div class="mb-2"><small><i class="fas fa-map-marker-alt me-1"></i> ${location}</small></div>` : ''}
+                        ${instructor ? `<div class="mb-2"><small><i class="fas fa-user me-1"></i> ${instructor}</small></div>` : ''}
+                        ${recurrenceText ? `<div class="mb-2"><small><i class="fas fa-redo me-1"></i> ${recurrenceText}</small></div>` : ''}
+                        ${description ? `<div class="mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.2);"><small>${description}</small></div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Validación de tiempo
+            function initializeTimeValidation() {
+                const startTime = document.getElementById('eventStartTime');
+                const endTime = document.getElementById('eventEndTime');
+
+                startTime.addEventListener('change', function() {
+                    const start = this.value;
+                    if (endTime.value && start > endTime.value) {
+                        endTime.value = start;
+                    }
+                    endTime.setAttribute('min', start);
                     updatePreview();
                 });
-            });
-        }
 
-        function initializeFormListeners() {
-            const formInputs = document.querySelectorAll('#eventForm input, #eventForm select, #eventForm textarea');
-            formInputs.forEach(input => {
-                input.addEventListener('input', updatePreview);
-                input.addEventListener('change', updatePreview);
-            });
-        }
+                endTime.addEventListener('change', function() {
+                    const end = this.value;
+                    if (startTime.value && end < startTime.value) {
+                        this.value = startTime.value;
+                        showToast('error', 'La hora de fin no puede ser anterior a la hora de inicio.');
+                    }
+                    updatePreview();
+                });
+            }
 
-        function initializeRecurrenceToggle() {
-            const recurringCheckbox = document.getElementById('isRecurring');
-            const recurrenceOptions = document.getElementById('recurrenceOptions');
-            
-            recurringCheckbox.addEventListener('change', function() {
+            initializeTimeValidation();
+
+            // Recurrencia toggle
+            document.getElementById('isRecurring').addEventListener('change', function() {
+                const recurrenceOptions = document.getElementById('recurrenceOptions');
                 recurrenceOptions.style.display = this.checked ? 'block' : 'none';
                 if (this.checked) recurrenceOptions.classList.add('animate__animated', 'animate__fadeIn');
                 updatePreview();
             });
-        }
 
-        function initializeTimeValidation() {
-            const startTime = document.getElementById('eventStartTime');
-            const endTime = document.getElementById('eventEndTime');
-
-            startTime.addEventListener('change', function() {
-                const start = this.value;
-                if (endTime.value && start > endTime.value) {
-                    endTime.value = start;
+            // Limpiar formulario
+            function clearForm() {
+                if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
+                    document.getElementById('eventForm').reset();
+                    document.querySelectorAll('.event-type-card').forEach(card => card.classList.remove('selected'));
+                    selectedEventType = null;
+                    document.getElementById('recurrenceOptions').style.display = 'none';
+                    updatePreview();
                 }
-                endTime.setAttribute('min', start);
-                updatePreview();
-            });
-
-            endTime.addEventListener('change', function() {
-                const end = this.value;
-                if (startTime.value && end < startTime.value) {
-                    this.value = startTime.value;
-                    showToast('error', 'La hora de fin no puede ser anterior a la hora de inicio.');
-                }
-                updatePreview();
-            });
-        }
-
-        function updatePreview() {
-            const preview = document.getElementById('eventPreview');
-            
-            if (!selectedEventType) {
-                preview.innerHTML = `
-                    <div class="text-center text-muted">
-                        <i class="fas fa-calendar" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                        <div>Selecciona un tipo de evento</div>
-                        <small>y completa los campos para ver la vista previa</small>
-                    </div>
-                `;
-                return;
             }
 
-            const title = document.getElementById('eventTitle').value || 'Título del evento';
-            const course = document.getElementById('eventCourse').value || 'Curso no especificado';
-            const date = document.getElementById('eventDate').value || 'Fecha no especificada';
-            const startTime = document.getElementById('eventStartTime').value || '00:00';
-            const endTime = document.getElementById('eventEndTime').value || '00:00';
-            const location = document.getElementById('eventLocation').value || 'Ubicación no especificada';
-            const instructor = document.getElementById('eventInstructor').value || 'Instructor no especificado';
-            const description = document.getElementById('eventDescription').value || 'Sin descripción';
-            const isRecurring = document.getElementById('isRecurring').checked;
-            const recurrenceDays = Array.from(document.querySelectorAll('input[name="recurrenceDays"]:checked')).map(cb => cb.value);
-            const recurrenceEnd = document.getElementById('recurrenceEnd')?.value;
-            
-            const eventColor = eventColors[selectedEventType];
-            const eventTypeText = getEventTypeText(selectedEventType);
-            
-            let formattedDate = 'Fecha no especificada';
-            if (date) {
-                formattedDate = moment(date).format('dddd, DD [de] MMMM [de] YYYY');
-            }
+            // Guardar cambios
+            document.getElementById('eventForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const now = new Date(); // 02:45 PM CST, 22 de junio de 2025
+                const eventDate = new Date(document.getElementById('eventDate').value);
+                const startTime = document.getElementById('eventStartTime').value;
+                const endTime = document.getElementById('eventEndTime').value;
+                const recurrenceEnd = document.getElementById('recurrenceEnd')?.value;
+                const recurrenceDays = Array.from(document.querySelectorAll('input[name="recurrenceDays"]:checked')).map(cb => cb.value);
 
-            const startHour = parseInt(startTime.split(':')[0]);
-            const timeOfDay = startHour < 12 ? 'Temprano' : 'Tarde';
-
-            let recurrenceText = '';
-            if (isRecurring && recurrenceDays.length > 0 && recurrenceEnd) {
-                const daysText = recurrenceDays.map(day => ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][parseInt(day)]).join(', ');
-                recurrenceText = `Recurrente: ${daysText} hasta ${moment(recurrenceEnd).format('DD [de] MMMM [de] YYYY')}`;
-            }
-
-            preview.innerHTML = `
-                <div class="preview-event" style="background: ${eventColor};"> <!-- Fondo completo con el color -->
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="mb-0">${title}</h6>
-                        <span class="badge bg-light text-dark">${eventTypeText}</span>
-                    </div>
-                    <div class="mb-2"><small><i class="fas fa-graduation-cap me-1"></i> ${course}</small></div>
-                    <div class="mb-2"><small><i class="fas fa-calendar me-1"></i> ${formattedDate}</small></div>
-                    <div class="mb-2"><small><i class="fas fa-clock me-1"></i> ${startTime} - ${endTime} (${timeOfDay})</small></div>
-                    ${location !== 'Ubicación no especificada' ? `<div class="mb-2"><small><i class="fas fa-map-marker-alt me-1"></i> ${location}</small></div>` : ''}
-                    ${instructor !== 'Instructor no especificado' ? `<div class="mb-2"><small><i class="fas fa-user me-1"></i> ${instructor}</small></div>` : ''}
-                    ${recurrenceText ? `<div class="mb-2"><small><i class="fas fa-redo me-1"></i> ${recurrenceText}</small></div>` : ''}
-                    ${description !== 'Sin descripción' ? `<div class="mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.2);"><small>${description}</small></div>` : ''}
-                </div>
-            `;
-        }
-
-        function getEventTypeText(type) {
-            const types = {
-                'convocatoria': 'Convocatoria',
-                'clase': 'Clase',
-                'evento': 'Evento',
-                'examen': 'Examen',
-                'parcial': 'Parcial',
-                'intersemestral': 'Intersemestral',
-                'curso-especial': 'Curso Especial',
-                'intensivo': 'Intensivo',
-                'sabatino': 'Sabatino',
-                'verano': 'Verano'
-            };
-            return types[type] || 'Evento';
-        }
-
-        function clearForm() {
-            if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
-                document.getElementById('eventForm').reset();
-                document.querySelectorAll('.event-type-card').forEach(card => {
-                    card.classList.remove('selected');
-                });
-                selectedEventType = null;
-                document.getElementById('recurrenceOptions').style.display = 'none';
-                
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('eventDate').value = today;
-                document.getElementById('eventStartTime').value = '';
-                document.getElementById('eventEndTime').value = '';
-                setMinDate();
-                
-                updatePreview();
-            }
-        }
-
-        async function saveEvent() {
-            const now = new Date(); // 02:50 PM CST, 22 de junio de 2025
-            const eventDate = document.getElementById('eventDate').value;
-            const startTime = document.getElementById('eventStartTime').value;
-            const endTime = document.getElementById('eventEndTime').value;
-            const recurrenceEnd = document.getElementById('recurrenceEnd')?.value;
-            const recurrenceDays = Array.from(document.querySelectorAll('input[name="recurrenceDays"]:checked')).map(cb => cb.value);
-
-            if (!eventDate || !startTime || !endTime) {
-                showToast('error', 'Fecha, hora de inicio y hora de fin son obligatorios.');
-                return;
-            }
-
-            const eventStartDateTime = new Date(`${eventDate}T${startTime}:00-06:00`);
-            if (eventStartDateTime < now) {
-                showToast('error', 'No puedes crear un evento con una fecha u hora pasada. Por favor, selecciona una hora posterior a las 14:50 PM.');
-                return;
-            }
-
-            const startHour = parseInt(startTime.split(':')[0]);
-            const endHour = parseInt(endTime.split(':')[0]);
-            if (startHour > endHour || startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23) {
-                showToast('error', 'La hora de inicio debe ser anterior a la hora de fin y ambas deben estar dentro de las 24 horas (00:00-23:59).');
-                return;
-            }
-
-            if (document.getElementById('isRecurring').checked && recurrenceEnd) {
-                const endRecurDate = new Date(recurrenceEnd);
-                if (endRecurDate <= new Date(eventDate)) {
-                    showToast('error', 'La fecha de fin de recurrencia debe ser posterior a la fecha del evento.');
+                const eventStartDateTime = new Date(`${document.getElementById('eventDate').value}T${startTime}:00-06:00`);
+                if (eventStartDateTime < now) {
+                    showToast('error', 'No puedes guardar un evento con una fecha u hora pasada. Por favor, selecciona una hora posterior a las 14:45 PM.');
                     return;
                 }
-                if (recurrenceDays.length === 0) {
-                    showToast('error', 'Selecciona al menos un día para la recurrencia.');
+
+                const startHour = parseInt(startTime.split(':')[0]);
+                const endHour = parseInt(endTime.split(':')[0]);
+                if (startHour > endHour || startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23) {
+                    showToast('error', 'La hora de inicio debe ser anterior a la hora de fin y ambas deben estar dentro de las 24 horas (00:00-23:59).');
                     return;
                 }
-            }
 
-            if (!selectedEventType) {
-                showToast('error', 'Selecciona un tipo de evento');
-                return;
-            }
-
-            const form = document.getElementById('eventForm');
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            const formData = new FormData(form);
-            const eventData = {
-                type: selectedEventType,
-                title: formData.get('eventTitle'),
-                course: formData.get('eventCourse'),
-                date: formData.get('eventDate'),
-                startTime: formData.get('startTime'),
-                endTime: formData.get('endTime'),
-                location: formData.get('eventLocation'),
-                instructor: formData.get('eventInstructor'),
-                description: formData.get('eventDescription'),
-                isRecurring: formData.get('isRecurring') === 'on',
-                recurrenceDays: recurrenceDays,
-                recurrenceEnd: formData.get('recurrenceEnd'),
-                sendNotification: formData.get('sendNotification') === 'on',
-                color: eventColors[selectedEventType]
-            };
-
-            console.log('Datos enviados para crear evento:', JSON.stringify(eventData, null, 2));
-            try {
-                const response = await fetch('/create-event', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(eventData)
-                });
-                const result = await response.json();
-                console.log('Respuesta del servidor:', result);
-                if (response.ok) {
-                    showToast('success', result.message);
-                    setTimeout(clearForm, 2000);
-                } else {
-                    showToast('error', result.error || 'Error al crear el evento');
+                if (document.getElementById('isRecurring').checked && recurrenceEnd) {
+                    const endRecurDate = new Date(recurrenceEnd);
+                    if (endRecurDate <= eventDate) {
+                        showToast('error', 'La fecha de fin de recurrencia debe ser posterior a la fecha del evento.');
+                        return;
+                    }
+                    if (recurrenceDays.length === 0) {
+                        showToast('error', 'Selecciona al menos un día para la recurrencia.');
+                        return;
+                    }
                 }
-            } catch (error) {
-                console.error('Error al guardar el evento:', error);
-                showToast('error', 'Error al crear el evento: ' + (error.message || 'Desconocido'));
+
+                if (!selectedEventType) {
+                    showToast('error', 'Selecciona un tipo de evento');
+                    return;
+                }
+
+                const form = document.getElementById('eventForm');
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                const formData = new FormData(form);
+                const eventData = {
+                    type: selectedEventType,
+                    title: formData.get('eventTitle'),
+                    course: formData.get('eventCourse'),
+                    start: formData.get('eventDate') ? moment(`${formData.get('eventDate')} ${formData.get('startTime')}`, 'YYYY-MM-DD HH:mm').toDate() : undefined,
+                    end: formData.get('eventDate') && formData.get('endTime') ? moment(`${formData.get('eventDate')} ${formData.get('endTime')}`, 'YYYY-MM-DD HH:mm').toDate() : undefined,
+                    location: formData.get('eventLocation'),
+                    instructor: formData.get('eventInstructor'),
+                    description: formData.get('eventDescription'),
+                    isRecurring: formData.get('isRecurring') === 'on',
+                    recurrenceDays: recurrenceDays,
+                    recurrenceEnd: formData.get('recurrenceEnd'),
+                    sendNotification: formData.get('sendNotification') === 'on',
+                    color: eventColors[selectedEventType]
+                };
+
+                console.log('Datos enviados para actualizar evento:', JSON.stringify(eventData, null, 2)); // Depuración
+                try {
+                    const response = await axios.put(`/events/${eventId}`, eventData);
+                    if (response.status === 200) {
+                        showToast('success', 'Evento actualizado exitosamente');
+                        setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                    } else {
+                        showToast('error', 'Error al actualizar el evento');
+                    }
+                } catch (error) {
+                    console.error('Error al guardar los cambios:', error.response ? error.response.data : error.message);
+                    showToast('error', 'Error al actualizar el evento: ' + (error.response ? error.response.data.error : error.message));
+                }
+            });
+
+            function showToast(type, message) {
+                const toastElement = document.getElementById(type === 'success' ? 'successToast' : 'errorToast');
+                const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+                messageElement.textContent = message;
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
             }
-        }
 
-        function showToast(type, message) {
-            const toastElement = document.getElementById(type === 'success' ? 'successToast' : 'errorToast');
-            const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
-            messageElement.textContent = message;
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-        }
-
-        document.getElementById('eventForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveEvent();
+            function getEventTypeText(type) {
+                const types = {
+                    'convocatoria': 'Convocatoria',
+                    'clase': 'Clase',
+                    'evento': 'Evento',
+                    'examen': 'Examen',
+                    'parcial': 'Parcial',
+                    'intersemestral': 'Intersemestral',
+                    'curso-especial': 'Curso Especial',
+                    'intensivo': 'Intensivo',
+                    'sabatino': 'Sabatino',
+                    'verano': 'Verano'
+                };
+                return types[type] || 'Evento';
+            }
         });
-
-        updatePreview();
     </script>
 </body>
 

@@ -12,6 +12,7 @@
     <script src="https://unpkg.com/infinite-scroll@4.0.1/dist/infinite-scroll.pkgd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/imagesloaded@5.0.0/imagesloaded.pkgd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <style>
         :root {
             --primary-color: #000b24;
@@ -115,9 +116,7 @@
             z-index: 1030;
         }
 
-        .navbar-dark {
-            background-color: var(--primary-color) !important;
-        }
+        .navbar-dark { background-color: var(--primary-color) !important; }
 
         .navbar-brand {
             font-family: 'Franklin Gothic Medium', Arial, sans-serif;
@@ -148,24 +147,10 @@
         }
 
         @media (max-width: 768px) {
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
-
-            .logo-image {
-                width: 60px;
-            }
-
-            .navbar .d-flex {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.5rem;
-            }
-
-            .navbar .btn {
-                width: 100%;
-                text-align: left;
-            }
+            .navbar-brand { font-size: 1.5rem; }
+            .logo-image { width: 60px; }
+            .navbar .d-flex { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .navbar .btn { width: 100%; text-align: left; }
         }
 
         .sidebar {
@@ -180,14 +165,9 @@
             height: calc(100vh - 76px);
         }
 
-        .sidebar-collapsed {
-            width: 70px;
-        }
+        .sidebar-collapsed { width: 70px; }
 
-        .sidebar-header {
-            padding: 1.5rem 1rem;
-            text-align: center;
-        }
+        .sidebar-header { padding: 1.5rem 1rem; text-align: center; }
 
         .sidebar-title {
             font-size: 1.2rem;
@@ -205,14 +185,9 @@
             text-overflow: ellipsis;
         }
 
-        .sidebar-menu {
-            padding: 0;
-            list-style: none;
-        }
+        .sidebar-menu { padding: 0; list-style: none; }
 
-        .sidebar-menu-item {
-            margin-bottom: 0.5rem;
-        }
+        .sidebar-menu-item { margin-bottom: 0.5rem; }
 
         .sidebar-menu-link {
             display: flex;
@@ -319,16 +294,11 @@
 
         @media (max-width: 1400px) {
             .grid-sizer,
-            .grid-item {
-                width: calc(50% - 20px);
-            }
+            .grid-item { width: calc(50% - 20px); }
         }
 
         @media (max-width: 992px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-
+            .dashboard-container { flex-direction: column; }
             .sidebar {
                 width: 100%;
                 position: relative;
@@ -336,12 +306,7 @@
                 height: auto;
                 margin-bottom: 1.5rem;
             }
-
-            .sidebar-collapsed {
-                width: auto;
-                padding: 0.5rem;
-            }
-
+            .sidebar-collapsed { width: auto; padding: 0.5rem; }
             .sidebar-menu {
                 display: flex;
                 flex-direction: row;
@@ -350,11 +315,7 @@
                 gap: 0.5rem;
                 padding: 0.5rem;
             }
-
-            .sidebar-menu-item {
-                margin: 0;
-            }
-
+            .sidebar-menu-item { margin: 0; }
             .sidebar-menu-link {
                 padding: 0.6rem 1rem;
                 border-radius: 8px;
@@ -362,26 +323,10 @@
                 min-width: 50px;
                 text-align: center;
             }
-
-            .sidebar-collapsed .sidebar-menu {
-                flex-direction: row;
-                gap: 0.5rem;
-            }
-
-            .sidebar-collapsed .sidebar-menu-link {
-                padding: 0.5rem;
-                min-width: 40px;
-            }
-
-            .sidebar-collapsed .sidebar-menu-icon {
-                margin: 0;
-            }
-
-            .main-content {
-                order: 2;
-                width: 100%;
-            }
-
+            .sidebar-collapsed .sidebar-menu { flex-direction: row; gap: 0.5rem; }
+            .sidebar-collapsed .sidebar-menu-link { padding: 0.5rem; min-width: 40px; }
+            .sidebar-collapsed .sidebar-menu-icon { margin: 0; }
+            .main-content { order: 2; width: 100%; }
             .right-panel {
                 order: 3;
                 width: 100%;
@@ -390,51 +335,22 @@
                 height: auto;
                 margin-top: 1.5rem;
             }
-
             .grid-sizer,
-            .grid-item {
-                width: 100%;
-            }
+            .grid-item { width: 100%; }
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
-            }
-
-            .stats-container {
-                flex-direction: column;
-            }
-
-            .stats-card {
-                width: 100%;
-            }
-
-            .sidebar-menu-link {
-                padding: 0.5rem 0.8rem;
-                font-size: 0.9rem;
-            }
-
-            .sidebar-collapsed .sidebar-menu-link {
-                padding: 0.4rem;
-                min-width: 35px;
-            }
+            .main-content { padding: 1rem; }
+            .stats-container { flex-direction: column; }
+            .stats-card { width: 100%; }
+            .sidebar-menu-link { padding: 0.5rem 0.8rem; font-size: 0.9rem; }
+            .sidebar-collapsed .sidebar-menu-link { padding: 0.4rem; min-width: 35px; }
         }
 
         @media (max-width: 576px) {
-            .sidebar-menu {
-                gap: 0.3rem;
-            }
-
-            .sidebar-menu-link {
-                padding: 0.4rem 0.6rem;
-                font-size: 0.8rem;
-            }
-
-            .sidebar-collapsed .sidebar-menu-link {
-                padding: 0.3rem;
-                min-width: 30px;
-            }
+            .sidebar-menu { gap: 0.3rem; }
+            .sidebar-menu-link { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+            .sidebar-collapsed .sidebar-menu-link { padding: 0.3rem; min-width: 30px; }
         }
 
         .grid-item {
@@ -784,23 +700,66 @@
             padding: 1.2rem 1.5rem;
         }
 
-        #publicationsModal .card {
+        #manageContentModal .nav-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        #manageContentModal .nav-link {
+            color: var(--white);
+            border: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            background: transparent;
             transition: all 0.3s ease;
+        }
+
+        #manageContentModal .nav-link.active {
+            background: rgba(230, 126, 34, 0.2);
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        #manageContentModal .nav-link:hover {
+            background: rgba(230, 126, 34, 0.1);
+            color: var(--secondary-color);
+        }
+
+        #manageContentModal .tab-content .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        #manageContentModal .content-card {
+            background: linear-gradient(145deg, #2a3653, #1c273d);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--card-transition);
+            color: var(--white);
             height: 100%;
-            cursor: pointer;
         }
 
-        #publicationsModal .card:hover {
+        #manageContentModal .content-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
-        #publicationsModal .row {
-            margin: 0 -10px;
+        #manageContentModal .content-card h5 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
 
-        #publicationsModal .col {
-            padding: 10px;
+        #manageContentModal .content-card p {
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #manageContentModal .content-card .btn-group {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .floating-button {
@@ -856,6 +815,51 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             margin-top: 1rem;
+        }
+
+        #deleteConfirmationModal .modal-dialog {
+            max-width: 400px;
+        }
+
+        #deleteConfirmationModal .modal-content {
+            background: linear-gradient(145deg, #2a3653, #1c273d);
+        }
+
+        #deleteConfirmationModal .modal-header h5 {
+            font-size: 1.25rem;
+            color: var(--secondary-color);
+        }
+
+        #deleteConfirmationModal .modal-body p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        #deleteConfirmationModal .btn {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+        }
+
+        #deleteConfirmationModal .btn-primary {
+            background: var(--secondary-color);
+            border: none;
+        }
+
+        #deleteConfirmationModal .btn-primary:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        #deleteConfirmationModal .btn-secondary {
+            background: var(--light-bg);
+            color: var(--primary-color);
+            border: none;
+        }
+
+        #deleteConfirmationModal .btn-secondary:hover {
+            background: #c0c0c2;
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -947,6 +951,75 @@
                                         estudiantes.</p>
                                 </div>
                             </a>
+                        </div>
+                        <div class="col-12 text-center mt-4">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#manageContentModal">
+                                <i class="fas fa-cog me-2"></i> Gestionar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para gestionar contenido -->
+    <div class="modal fade" id="manageContentModal" tabindex="-1" aria-labelledby="manageContentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content animate__animated animate__zoomIn">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="manageContentModalLabel">Gestionar Contenido</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="contentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="events-tab" data-bs-toggle="tab"
+                                data-bs-target="#events" type="button" role="tab" aria-controls="events"
+                                aria-selected="true">
+                                Eventos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts"
+                                type="button" role="tab" aria-controls="posts" aria-selected="false">
+                                Publicaciones
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources"
+                                type="button" role="tab" aria-controls="resources" aria-selected="false">
+                                Recursos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="forms-tab" data-bs-toggle="tab" data-bs-target="#forms"
+                                type="button" role="tab" aria-controls="forms" aria-selected="false">
+                                Formularios
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="contentTabContent">
+                        <!-- Pestaña de Eventos -->
+                        <div class="tab-pane fade show active" id="events" role="tabpanel" aria-labelledby="events-tab">
+                            <div class="card-container" id="eventsCardContainer"></div>
+                        </div>
+                        <!-- Pestaña de Publicaciones -->
+                        <div class="tab-pane fade" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+                            <div class="card-container" id="postsCardContainer"></div>
+                        </div>
+                        <!-- Pestaña de Recursos -->
+                        <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab">
+                            <div class="card-container" id="resourcesCardContainer"></div>
+                        </div>
+                        <!-- Pestaña de Formularios -->
+                        <div class="tab-pane fade" id="forms" role="tabpanel" aria-labelledby="forms-tab">
+                            <div class="card-container" id="formsCardContainer"></div>
                         </div>
                     </div>
                 </div>
@@ -1091,6 +1164,25 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación de eliminación -->
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmDelete">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
@@ -1155,8 +1247,8 @@
                                 cornerRadius: 8,
                                 displayColors: false,
                                 callbacks: {
-                                    title: function(tooltipItem) { return 'Día: ' + tooltipItem[0].label; },
-                                    label: function(context) { return 'Actividad: ' + context.raw; }
+                                    title: function (tooltipItem) { return 'Día: ' + tooltipItem[0].label; },
+                                    label: function (context) { return 'Actividad: ' + context.raw; }
                                 }
                             }
                         },
@@ -1211,7 +1303,141 @@
                     })
                     .catch(error => console.error('Error al cargar el nombre:', error));
             }
+
+            // Cargar y gestionar contenido en cards
+            async function loadContent(type) {
+                try {
+                    let endpoint = '';
+                    let container = null;
+                    switch (type) {
+                        case 'events':
+                            endpoint = '/events';
+                            container = document.getElementById('eventsCardContainer');
+                            break;
+                        case 'posts':
+                            endpoint = '/api/posts';
+                            container = document.getElementById('postsCardContainer');
+                            break;
+                        case 'resources':
+                            endpoint = '/api/resources';
+                            container = document.getElementById('resourcesCardContainer');
+                            break;
+                        case 'forms':
+                            endpoint = '/api/forms'; // Ruta asumida, ajusta según tu backend
+                            container = document.getElementById('formsCardContainer');
+                            break;
+                    }
+                    const response = await axios.get(endpoint);
+                    let items = response.data;
+
+                    if (!Array.isArray(items)) {
+                        throw new Error('Datos no válidos recibidos del servidor');
+                    }
+
+                    // Ordenar por createdAt de forma descendente (más recientes primero)
+                    items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                    container.innerHTML = ''; // Limpiar contenedor
+
+                    items.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'content-card animate__animated animate__fadeIn';
+                        card.style.animationDelay = `${items.indexOf(item) * 0.1}s`;
+                        let dateStr = item.start ? moment(item.start).isValid() ? moment(item.start).format('DD/MM/YYYY') : 'Fecha inválida' : 'Sin fecha';
+                        let timeStr = item.start && item.end ? `${moment(item.start).format('HH:mm')} - ${moment(item.end).format('HH:mm')}` : item.start ? `${moment(item.start).format('HH:mm')} - Sin fin` : 'Sin hora';
+                        card.innerHTML = `
+                            <h5>${item.title || 'Sin título'}</h5>
+                            <p><i class="fas fa-calendar me-1"></i> ${dateStr}</p>
+                            ${type === 'events' ? `<p><i class="fas fa-clock me-1"></i> ${timeStr}</p>` : ''}
+                            <p><i class="fas fa-info-circle me-1"></i> ${item.status === 'draft' ? 'Borrador' : 'Publicado'}</p>
+                            <div class="btn-group">
+                                <button class="btn btn-warning btn-sm edit-item" data-id="${item._id}" data-type="${type}">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-sm delete-item" data-id="${item._id}" data-type="${type}">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    });
+
+                    // Añadir eventos a los botones
+                    document.querySelectorAll('.edit-item').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const itemId = button.getAttribute('data-id');
+                            const itemType = button.getAttribute('data-type');
+                            window.location.href = `editar_${itemType}.html?id=${itemId}`;
+                        });
+                    });
+
+                    // Configurar eliminación con modal
+                    document.querySelectorAll('.delete-item').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const itemId = button.getAttribute('data-id');
+                            const itemType = button.getAttribute('data-type');
+                            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+                            document.getElementById('deleteConfirmationModalLabel').textContent = `Confirmar Eliminación de ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`;
+                            document.getElementById('confirmDelete').onclick = async () => {
+                                try {
+                                    await axios.delete(`/${itemType}/${itemId}`); // Ajustado a rutas específicas
+                                    deleteModal.hide();
+                                    loadContent(itemType); // Recargar lista
+                                    showToast('Éxito', 'Eliminación realizada con éxito');
+                                } catch (error) {
+                                    console.error(`Error al eliminar ${itemType}:`, error);
+                                    showToast('Error', `Error al eliminar el ${itemType}: ${error.message}`);
+                                }
+                            };
+                            deleteModal.show();
+                        });
+                    });
+                } catch (error) {
+                    console.error(`Error al cargar ${type}:`, error);
+                    showToast('Error', `Error al cargar los ${type}: ${error.message}`);
+                }
+            }
+
+            // Cargar contenido al abrir el modal
+            const manageContentModal = document.getElementById('manageContentModal');
+            manageContentModal.addEventListener('shown.bs.modal', function (e) {
+                manageContentModal.setAttribute('aria-hidden', 'false');
+                loadContent('events'); // Cargar eventos por defecto
+                const firstTab = manageContentModal.querySelector('.nav-link.active');
+                if (firstTab) firstTab.focus();
+            });
+
+            manageContentModal.addEventListener('hidden.bs.modal', function (e) {
+                manageContentModal.setAttribute('aria-hidden', 'true');
+            });
+
+            // Cambiar pestaña y cargar contenido
+            document.querySelectorAll('.nav-link').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', (e) => {
+                    const type = e.target.getAttribute('data-bs-target').replace('#', '');
+                    loadContent(type);
+                });
+            });
+
+            // Inicializar Masonry después de cargar contenido
+            imagesLoaded(grid, () => {
+                masonry = new Masonry(grid, {
+                    itemSelector: '.grid-item',
+                    columnWidth: '.grid-sizer',
+                    percentPosition: true,
+                    gutter: 20
+                });
+            });
         });
+
+        function showToast(title, message) {
+            const toast = document.getElementById('errorToast');
+            const toastBody = document.getElementById('errorToastBody');
+            toastBody.textContent = `${title}: ${message}`;
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            setTimeout(() => bsToast.hide(), 5000); // Ocultar después de 5 segundos
+        }
     </script>
 </body>
 

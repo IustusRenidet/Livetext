@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIVETEXT - Editar Publicación</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #000b24;
+            --secondary-color: #e67e22;
+            --dark-bg: #232A40;
+            --light-bg: #D7D7D9;
+            --accent-color: #D94E41;
+            --white: #fff;
+            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
+            --frosted-bg: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --preview-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+            --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
+            --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+        }
+
+        body {
+            background: linear-gradient(180deg, var(--dark-bg), #1a1f2e);
+            color: var(--white);
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: var(--gradient-bg) !important;
+            padding: 1.3rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+        }
+
+        .navbar-brand {
+            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
+            font-size: 2.3rem;
+            color: var(--white) !important;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--secondary-color) !important;
+            text-shadow: 0 0 10px var(--secondary-color);
+        }
+
+        .logo-image {
+            width: 120px;
+            margin-right: 15px;
+            transition: transform 0.4s ease, filter 0.3s ease;
+        }
+
+        .logo-image:hover {
+            transform: scale(1.2) rotate(8deg);
+            filter: drop-shadow(0 0 10px var(--secondary-color));
+        }
+
+        .main-container {
+            flex: 1;
+            padding: 3rem 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+
+        .preview-section {
+            width: 450px;
+            position: sticky;
+            top: 3rem;
+            align-self: flex-start;
+        }
+
+        .form-section {
+            flex: 1.5;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .settings-section {
+            width: 350px;
+            position: sticky;
+            top: 3rem;
+            align-self: flex-start;
+        }
+
+        .form-card, .settings-card {
+            background: var(--gradient-bg);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: fadeInUp 0.7s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-card {
+            background: var(--white);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            padding: 2.8rem;
+            box-shadow: var(--preview-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: zoomIn 0.7s ease;
+        }
+
+        .form-card::before, .settings-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--border-gradient);
+            z-index: 1;
+        }
+
+        .preview-card::before {
+            content: none; /* Remove orange bar */
+        }
+
+        .form-card:hover, .settings-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .preview-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .form-control, .form-select, textarea.form-control {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            color: var(--white);
+            border-radius: 12px;
+            padding: 0.7rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus, textarea.form-control:focus {
+            border-color: var(--white);
+            box-shadow: var(--input-glow);
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .form-control::placeholder, textarea.form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .form-select, .form-select option {
+            color: var(--primary-color);
+            background: var(--white);
+        }
+
+        .form-select:focus {
+            color: var(--primary-color);
+        }
+
+        .ql-container {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            border-radius: 12px;
+            color: var(--white);
+            min-height: 250px;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .ql-container.small-screen {
+            word-break: break-all;
+        }
+
+        .ql-toolbar {
+            background: var(--dark-bg);
+            border: 1px solid var(--secondary-color);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .ql-editor {
+            color: var(--white);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .ql-editor.small-screen {
+            word-break: break-all;
+        }
+
+        .ql-editor::before {
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .word-count {
+            font-size: 0.85rem;
+            color: var(--light-bg);
+            margin-top: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .word-count.exceeded {
+            color: var(--accent-color);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--light-bg);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .form-label:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-primary i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover i {
+            transform: translateX(6px);
+        }
+
+        .btn-danger {
+            background: var(--accent-color);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: #b93c34;
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--primary-color);
+            border: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #c0c0c2;
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .media-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            animation: fadeIn 0.7s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .media-preview-item, .existing-media-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            cursor: move;
+            animation: bounceIn 0.4s ease;
+            transition: transform 0.3s ease;
+        }
+
+        .media-preview-item:hover, .existing-media-item:hover {
+            transform: scale(1.05);
+        }
+
+        .media-preview-item img,
+        .media-preview-item video,
+        .existing-media-item img,
+        .existing-media-item video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .media-preview-item video, .existing-media-item video {
+            aspect-ratio: 9/16;
+        }
+
+        .media-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--accent-color);
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .media-remove:hover {
+            transform: scale(1.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .settings-card h5 {
+            color: var(--secondary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+        }
+
+        .form-check-label {
+            color: var(--light-bg);
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .modal-content {
+            background: var(--frosted-bg);
+            backdrop-filter: blur(10px);
+            color: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            animation: zoomIn 0.4s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            background: var(--gradient-bg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .toast {
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            animation: slideInRight 0.3s ease;
+            background: var(--frosted-bg);
+            backdrop-filter: blur(8px);
+        }
+
+        .footer {
+            background: var(--gradient-bg);
+            color: var(--white);
+            padding: 2.5rem;
+            margin-top: 4rem;
+            border-top: 2px solid var(--secondary-color);
+        }
+
+        .social-icons a {
+            transition: transform 0.3s ease, color 0.3s ease, filter 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.3) rotate(10deg);
+            color: var(--secondary-color);
+            filter: drop-shadow(0 0 8px var(--secondary-color));
+        }
+
+        .preview-section h3 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-title {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: capitalize;
+        }
+
+        .preview-content {
+            color: #333;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px dashed var(--light-bg);
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-content.expanded {
+            max-height: none;
+        }
+
+        .preview-content.small { font-size: 0.875rem; }
+        .preview-content.medium { font-size: 1rem; }
+        .preview-content.large { font-size: 1.125rem; }
+
+        .read-more {
+            color: var(--secondary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .preview-media {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .preview-media .carousel-item img,
+        .preview-media .carousel-item video {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+        }
+
+        .preview-media .carousel-item video {
+            aspect-ratio: 9/16;
+        }
+
+        .preview-media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .preview-media-grid img,
+        .preview-media-grid video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .preview-media-grid video {
+            aspect-ratio: 9/16;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            background: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            border-radius: 12px;
+            transition: background 0.3s ease;
+        }
+
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            background: var(--secondary-color);
+        }
+
+        @media (max-width: 992px) {
+            .main-container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .preview-section, .settings-section {
+                width: 100%;
+                position: static;
+                margin-bottom: 1rem;
+            }
+
+            .form-section {
+                max-width: 100%;
+                flex: auto;
+            }
+
+            .form-card, .settings-card, .preview-card {
+                padding: 1rem;
+            }
+
+            .btn-primary, .btn-danger, .btn-secondary {
+                padding: 0.6rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .media-preview-item img,
+            .media-preview-item video,
+            .existing-media-item img,
+            .existing-media-item video,
+            .preview-media-grid img,
+            .preview-media-grid video {
+                height: 140px;
+            }
+
+            .logo-image {
+                width: 80px;
+            }
+
+            .navbar-brand {
+                font-size: 1.7rem;
+            }
+
+            .preview-media .carousel-item img,
+            .preview-media .carousel-item video {
+                max-height: 300px;
+            }
+
+            .ql-container {
+                min-height: 150px;
+                word-break: break-all;
+                overflow-x: auto;
+            }
+
+            .ql-editor {
+                word-break: break-all;
+                overflow-x: auto;
+            }
+
+            .preview-content {
+                max-height: none;
+            }
+
+            .read-more {
+                display: none;
+            }
+        }
+
+        @media (min-width: 993px) {
+            .form-card, .settings-card {
+                padding: 2rem;
+            }
+
+            .preview-card {
+                padding: 2.8rem;
+            }
+
+            .main-container {
+                padding: 3.5rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse">
+                LIVETEXT
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="d-flex align-items-center ms-auto">
+                    <a href="/logout" class="btn btn-danger animate__animated animate__bounceIn"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <div class="preview-card">
+                <h3 class="animate__animated animate__fadeIn">Vista Previa</h3>
+                <div class="preview-title" id="previewTitle"></div>
+                <div class="preview-media" id="previewMedia"></div>
+                <div class="preview-content" id="previewContent"></div>
+                <span class="read-more" id="readMore">Leer más</span>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="form-card">
+                <h2 class="mb-4 animate__animated animate__fadeIn">Editar Publicación</h2>
+                <form id="postForm" enctype="multipart/form-data">
+                    <input type="hidden" id="postId" name="postId" value="">
+                    <div class="mb-4">
+                        <label for="postTitle" class="form-label">Título</label>
+                        <input type="text" class="form-control animate__animated animate__fadeInUp" id="postTitle" name="title" placeholder="Un título impactante..." required maxlength="100">
+                    </div>
+                    <div class="mb-4">
+                        <label for="postMedia" class="form-label">Imágenes o Videos Verticales</label>
+                        <input type="file" class="form-control animate__animated animate__fadeInUp" id="postMedia" name="postMedia" accept="image/*,video/mp4,video/webm" multiple>
+                        <div class="media-preview-grid" id="mediaPreviewGrid"></div>
+                        <div class="media-preview-grid" id="existingMediaGrid"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="postCategory" class="form-label">Categoría</label>
+                        <select class="form-select animate__animated animate__fadeInUp" id="postCategory" name="category" required>
+                            <option value="Anuncios">Anuncios</option>
+                            <option value="Eventos">Eventos</option>
+                            <option value="Recursos">Recursos</option>
+                            <option value="Inglés">Inglés</option>
+                            <option value="Francés">Francés</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="postContent" class="form-label">Contenido</label>
+                        <div id="editor" class="animate__animated animate__fadeInUp"></div>
+                        <input type="hidden" id="postContent" name="content">
+                        <div class="word-count" id="wordCount">0/400 palabras</div>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="schedulePost" name="schedulePost">
+                        <label class="form-check-label" for="schedulePost">Programar publicación</label>
+                    </div>
+                    <div class="mb-4 schedule-fields" style="display: none;">
+                        <label for="postDate" class="form-label">Fecha</label>
+                        <input type="date" class="form-control animate__animated animate__fadeInUp" id="postDate" name="date" value="2025-06-23" min="2025-06-23">
+                    </div>
+                    <div class="mb-4 schedule-fields" style="display: none;">
+                        <label for="postTime" class="form-label">Hora</label>
+                        <input type="time" class="form-control animate__animated animate__fadeInUp" id="postTime" name="time" value="00:18">
+                    </div>
+                    <div class="mb-4">
+                        <label for="postTags" class="form-label">Etiquetas</label>
+                        <input type="text" class="form-control animate__animated animate__fadeInUp" id="postTags" name="tags" placeholder="tag1, tag2, tag3" title="Ingresa etiquetas separadas por comas">
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" class="btn btn-primary animate__animated animate__bounceIn" id="updateButton">
+                            <i class="fas fa-save me-2"></i> Guardar Cambios
+                        </button>
+                        <button type="button" class="btn btn-secondary animate__animated animate__bounceIn" id="draftButton">
+                            <i class="fas fa-save me-2"></i> Guardar Borrador
+                        </button>
+                        <button type="button" class="btn btn-danger animate__animated animate__bounceIn" id="deleteButton" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i> Eliminar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings-section">
+            <div class="settings-card">
+                <h5 class="animate__animated animate__fadeIn">Configuraciones</h5>
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="allowComments" name="allowComments">
+                        <label class="form-check-label" for="allowComments">Permitir comentarios</label>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="mediaMode" class="form-label">Modo de visualización de medios</label>
+                    <select class="form-select animate__animated animate__fadeInUp" id="mediaMode" name="mediaMode">
+                        <option value="auto">Presentación automática</option>
+                        <option value="carousel">Carrusel manual</option>
+                        <option value="gallery">Galería (4+)</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="textFormat" class="form-label">Formato de texto</label>
+                    <select class="form-select animate__animated animate__fadeInUp" id="textFormat" name="textFormat">
+                        <option value="small">Pequeño</option>
+                        <option value="medium">Mediano</option>
+                        <option value="large">Grande</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Publicación actualizada exitosamente.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">Error al actualizar la publicación.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="wordLimitToast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Has alcanzado el límite de 400 palabras.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740, Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let mediaFiles = [];
+            const MAX_WORDS = 400;
+            const postId = new URLSearchParams(window.location.search).get('id');
+            moment.tz.setDefault('America/Mexico_City');
+
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [['bold', 'italic', 'underline']]
+                },
+                placeholder: 'Escribe tu mensaje...'
+            });
+
+            // Apply small-screen class on resize
+            function applyScreenClass() {
+                const qlContainer = document.querySelector('.ql-container');
+                const qlEditor = document.querySelector('.ql-editor');
+                if (window.innerWidth <= 992) {
+                    qlContainer.classList.add('small-screen');
+                    qlEditor.classList.add('small-screen');
+                } else {
+                    qlContainer.classList.remove('small-screen');
+                    qlEditor.classList.remove('small-screen');
+                }
+            }
+            window.addEventListener('resize', applyScreenClass);
+            applyScreenClass(); // Initial application
+
+            async function loadPost() {
+                if (postId) {
+                    try {
+                        const response = await axios.get(`/api/posts/${postId}`);
+                        const post = response.data;
+                        document.getElementById('postId').value = postId;
+                        document.getElementById('postTitle').value = post.title || '';
+                        quill.root.innerHTML = post.content || '';
+                        document.getElementById('postCategory').value = post.category || '';
+                        document.getElementById('allowComments').checked = post.allowComments || false;
+                        document.getElementById('mediaMode').value = post.mediaMode || 'auto';
+                        document.getElementById('textFormat').value = post.textFormat || 'medium';
+                        if (post.date && moment(post.date).isAfter(moment())) {
+                            document.getElementById('schedulePost').checked = true;
+                            document.getElementById('postDate').value = moment(post.date).format('YYYY-MM-DD');
+                            document.getElementById('postTime').value = moment(post.date).format('HH:mm');
+                            document.querySelectorAll('.schedule-fields').forEach(field => {
+                                field.style.display = 'block';
+                                field.querySelector('input').required = true;
+                            });
+                        }
+                        document.getElementById('postTags').value = post.tags ? post.tags.join(', ') : '';
+                        if (post.media) {
+                            const existingMediaGrid = document.getElementById('existingMediaGrid');
+                            existingMediaGrid.innerHTML = '';
+                            post.media.forEach(media => {
+                                const previewItem = document.createElement('div');
+                                previewItem.className = 'existing-media-item';
+                                const mediaElement = media.contentType.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                                mediaElement.src = media.path;
+                                mediaElement.setAttribute('loading', 'lazy');
+                                if (media.contentType.startsWith('video')) mediaElement.controls = true;
+                                previewItem.appendChild(mediaElement);
+                                existingMediaGrid.appendChild(previewItem);
+                            });
+                        }
+                        updatePreview();
+                        updateWordCount();
+                    } catch (error) {
+                        document.getElementById('errorToastBody').textContent = 'Error al cargar la publicación: ' + (error.response?.data?.error || error.message);
+                        new bootstrap.Toast(document.getElementById('errorToast')).show();
+                    }
+                }
+            }
+
+            function updateWordCount() {
+                const content = quill.getText().trim();
+                const words = content ? content.split(/\s+/).length : 0;
+                const wordCountDisplay = document.getElementById('wordCount');
+                wordCountDisplay.textContent = `${words}/${MAX_WORDS} palabras`;
+                if (words > MAX_WORDS) {
+                    wordCountDisplay.classList.add('exceeded');
+                    document.getElementById('updateButton').disabled = true;
+                    document.getElementById('draftButton').disabled = true;
+                    quill.setText(content.split(/\s+/).slice(0, MAX_WORDS).join(' ') + ' ');
+                    new bootstrap.Toast(document.getElementById('wordLimitToast')).show();
+                } else {
+                    wordCountDisplay.classList.remove('exceeded');
+                    document.getElementById('updateButton').disabled = false;
+                    document.getElementById('draftButton').disabled = false;
+                }
+            }
+
+            quill.on('text-change', updateWordCount);
+
+            function updateMediaPreview() {
+                const previewGrid = document.getElementById('mediaPreviewGrid');
+                previewGrid.innerHTML = '';
+                mediaFiles.forEach((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'media-preview-item';
+                    const mediaElement = file.type.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                    mediaElement.src = url;
+                    mediaElement.setAttribute('loading', 'lazy');
+                    if (file.type.startsWith('video')) mediaElement.controls = true;
+                    previewItem.appendChild(mediaElement);
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'media-remove';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.onclick = () => {
+                        mediaFiles.splice(index, 1);
+                        updateMediaPreview();
+                        updatePreview();
+                    };
+                    previewItem.appendChild(removeBtn);
+                    previewGrid.appendChild(previewItem);
+                });
+                new Sortable(previewGrid, {
+                    animation: 150,
+                    onEnd: evt => {
+                        const [moved] = mediaFiles.splice(evt.oldIndex, 1);
+                        mediaFiles.splice(evt.newIndex, 0, moved);
+                        updateMediaPreview();
+                    }
+                });
+                updatePreview();
+            }
+
+            function updatePreview() {
+                const title = document.getElementById('postTitle').value || 'Título de la publicación';
+                const content = quill.root.innerHTML || 'Escribe algo para ver la vista previa...';
+                const category = document.getElementById('postCategory').value || 'Sin categoría';
+                const dateTime = document.getElementById('schedulePost').checked && document.getElementById('postDate').value && document.getElementById('postTime').value 
+                    ? moment(`${document.getElementById('postDate').value} ${document.getElementById('postTime').value}`, 'YYYY-MM-DD HH:mm').format('DD/MM/YYYY HH:mm') 
+                    : moment().tz('America/Mexico_City').format('DD/MM/YYYY HH:mm');
+                const tags = document.getElementById('postTags').value.split(',').map(t => t.trim()).filter(t => t);
+                const allowComments = document.getElementById('allowComments').checked;
+                const mediaMode = document.getElementById('mediaMode').value;
+                const textFormat = document.getElementById('textFormat').value || 'medium';
+                const previewContent = document.getElementById('previewContent');
+                previewContent.innerHTML = `
+                    <div class="${textFormat}">${content}</div>
+                    <p><small>Categoría: ${category}</small></p>
+                    <p><small>Fecha: ${dateTime}</small></p>
+                    ${tags.length ? `<p><small>Etiquetas: ${tags.join(', ')}</small></p>` : ''}
+                    ${allowComments ? `<p><small>Comentarios habilitados</small></p>` : ''}
+                `;
+                const previewMedia = document.getElementById('previewMedia');
+                previewMedia.innerHTML = '';
+                if (mediaFiles.length) {
+                    if (mediaMode === 'gallery' && mediaFiles.length >= 4) {
+                        const grid = document.createElement('div');
+                        grid.className = 'preview-media-grid';
+                        mediaFiles.forEach(file => {
+                            const url = URL.createObjectURL(file);
+                            const mediaElement = file.type.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                            mediaElement.src = url;
+                            mediaElement.setAttribute('loading', 'lazy');
+                            if (file.type.startsWith('video')) {
+                                mediaElement.controls = true;
+                                mediaElement.muted = true;
+                            }
+                            grid.appendChild(mediaElement);
+                        });
+                        previewMedia.appendChild(grid);
+                    } else {
+                        const carousel = document.createElement('div');
+                        carousel.className = 'carousel slide';
+                        carousel.id = 'mediaCarousel';
+                        carousel.setAttribute('data-bs-ride', mediaMode === 'auto' ? 'carousel' : 'false');
+                        const inner = document.createElement('div');
+                        inner.className = 'carousel-inner';
+                        mediaFiles.forEach((file, index) => {
+                            const item = document.createElement('div');
+                            item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                            const url = URL.createObjectURL(file);
+                            const mediaElement = file.type.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                            mediaElement.src = url;
+                            mediaElement.setAttribute('loading', 'lazy');
+                            mediaElement.className = 'd-block w-100';
+                            if (file.type.startsWith('video')) {
+                                mediaElement.controls = true;
+                                mediaElement.muted = true;
+                            }
+                            item.appendChild(mediaElement);
+                            inner.appendChild(item);
+                        });
+                        carousel.appendChild(inner);
+                        if (mediaFiles.length > 1) {
+                            const prev = document.createElement('button');
+                            prev.className = 'carousel-control-prev';
+                            prev.type = 'button';
+                            prev.setAttribute('data-bs-target', '#mediaCarousel');
+                            prev.setAttribute('data-bs-slide', 'prev');
+                            prev.innerHTML = '<span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>';
+                            const next = document.createElement('button');
+                            next.className = 'carousel-control-next';
+                            next.type = 'button';
+                            next.setAttribute('data-bs-target', '#mediaCarousel');
+                            next.setAttribute('data-bs-slide', 'next');
+                            next.innerHTML = '<span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>';
+                            carousel.appendChild(prev);
+                            carousel.appendChild(next);
+                        }
+                        previewMedia.appendChild(carousel);
+                    }
+                }
+                // "Read More" functionality
+                const isTruncated = previewContent.scrollHeight > previewContent.clientHeight;
+                const readMore = document.getElementById('readMore');
+                if (isTruncated) {
+                    previewContent.classList.remove('expanded');
+                    readMore.style.display = 'block';
+                } else {
+                    readMore.style.display = 'none';
+                }
+            }
+
+            document.getElementById('postMedia').addEventListener('change', e => {
+                mediaFiles = [...mediaFiles, ...Array.from(e.target.files)];
+                updateMediaPreview();
+            });
+
+            ['postTitle', 'postCategory', 'postDate', 'postTime', 'postTags', 'textFormat', 'allowComments', 'mediaMode'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.addEventListener('input', updatePreview);
+            });
+
+            document.getElementById('schedulePost').addEventListener('change', () => {
+                const scheduleFields = document.querySelectorAll('.schedule-fields');
+                scheduleFields.forEach(field => {
+                    field.style.display = document.getElementById('schedulePost').checked ? 'block' : 'none';
+                    const input = field.querySelector('input');
+                    input.required = document.getElementById('schedulePost').checked;
+                });
+                updatePreview();
+            });
+
+            document.getElementById('readMore').addEventListener('click', () => {
+                const previewContent = document.getElementById('previewContent');
+                previewContent.classList.toggle('expanded');
+                document.getElementById('readMore').textContent = previewContent.classList.contains('expanded') ? 'Leer menos' : 'Leer más';
+            });
+
+            async function submitForm(isDraft = false) {
+                const formData = new FormData(document.getElementById('postForm'));
+                formData.append('content', quill.root.innerHTML);
+                formData.append('isDraft', isDraft);
+                if (!document.getElementById('schedulePost').checked) {
+                    formData.delete('date');
+                    formData.delete('time');
+                }
+                mediaFiles.forEach(file => formData.append('postMedia', file));
+                try {
+                    const response = await axios.put(`/api/posts/${postId}`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    new bootstrap.Toast(document.getElementById('successToast')).show();
+                    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+                } catch (error) {
+                    if (error.response && error.response.status === 401) {
+                        window.location.href = '/login.html';
+                    } else {
+                        document.getElementById('errorToastBody').textContent = error.response?.data?.error || 'Error al actualizar la publicación';
+                        new bootstrap.Toast(document.getElementById('errorToast')).show();
+                    }
+                }
+            }
+
+            document.getElementById('postForm').addEventListener('submit', e => {
+                e.preventDefault();
+                submitForm(false);
+            });
+
+            document.getElementById('draftButton').addEventListener('click', () => submitForm(true));
+
+            document.getElementById('deleteButton').addEventListener('click', () => {
+                new bootstrap.Modal(document.getElementById('deleteModal')).show();
+            });
+
+            document.getElementById('confirmDelete').addEventListener('click', async () => {
+                try {
+                    const response = await axios.delete(`/api/posts/${postId}`);
+                    window.location.href = '/dashboard.html';
+                } catch (error) {
+                    document.getElementById('errorToastBody').textContent = error.response?.data?.error || 'Error al eliminar publicación';
+                    new bootstrap.Toast(document.getElementById('errorToast')).show();
+                }
+            });
+
+            loadPost();
+            updatePreview();
+            updateWordCount();
+
+            fetch('/get-session')
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = '/login.html';
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const userNameSpan = document.querySelector('.navbar .ms-auto span');
+                    if (userNameSpan) {
+                        userNameSpan.textContent = data.user?.name ? `Bienvenido, ${data.user.name}` : 'Bienvenido, Invitado';
+                    }
+                })
+                .catch(() => {
+                    window.location.href = '/login.html';
+                });
+        });
+    </script>
+</body>
+</html>

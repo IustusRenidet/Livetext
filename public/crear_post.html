@@ -1,23 +1,14 @@
-<?php
-require_once 'sesion.php';
-prevenir_cache();
-session_start();
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tabla'] !== 'profesores' || !isset($_SESSION['nombre'])) {
-    header("Location: /login.php");
-    exit();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVETEXT - Crear/Editar Publicación</title>
+    <title>LIVETEXT - Crear Publicación</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #000b24;
@@ -85,14 +76,14 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
         }
 
         .preview-section {
-            width: 350px;
+            width: 450px;
             position: sticky;
             top: 3rem;
             align-self: flex-start;
         }
 
         .form-section {
-            flex: 1;
+            flex: 1.5;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -126,7 +117,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             animation: zoomIn 0.7s ease;
         }
 
-        .form-card::before, .settings-card::before, .preview-card::before {
+        .form-card::before, .settings-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -135,6 +126,10 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             height: 4px;
             background: var(--border-gradient);
             z-index: 1;
+        }
+
+        .preview-card::before {
+            content: none;
         }
 
         .form-card:hover, .settings-card:hover {
@@ -181,10 +176,48 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             color: var(--primary-color);
         }
 
-        textarea.form-control {
-            height: 250px;
-            resize: none;
-            overflow-y: auto;
+        .ql-container {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--secondary-color);
+            border-radius: 12px;
+            color: var(--white);
+            min-height: 250px;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .ql-container.small-screen {
+            word-break: break-all;
+        }
+
+        .ql-toolbar {
+            background: var(--dark-bg);
+            border: 1px solid var(--secondary-color);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .ql-editor {
+            color: var(--white);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .ql-editor.small-screen {
+            word-break: break-all;
+        }
+
+        .ql-editor::before {
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            font-weight: 300;
         }
 
         .word-count {
@@ -284,6 +317,47 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
         }
 
+        .custom-file-upload {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--secondary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .custom-file-upload::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .custom-file-upload:hover::before {
+            left: 100%;
+        }
+
+        .custom-file-upload:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .custom-file-upload input[type="file"] {
+            display: none;
+        }
+
         .media-preview-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -363,27 +437,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             border-color: var(--secondary-color);
         }
 
-        .format-btn {
-            background: var(--secondary-color);
-            color: var(--white);
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            margin-right: 0.5rem;
-        }
-
-        .format-btn:hover {
-            background: var(--accent-color);
-            transform: scale(1.1);
-        }
-
-        .format-btn.active {
-            background: var(--accent-color);
-            transform: scale(1.1);
-        }
-
         .modal-content {
             background: var(--frosted-bg);
             backdrop-filter: blur(10px);
@@ -460,6 +513,25 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
             border-bottom: 2px dashed var(--light-bg);
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-content.expanded {
+            max-height: none;
+        }
+
+        .preview-content.small { font-size: 0.875rem; }
+        .preview-content.medium { font-size: 1rem; }
+        .preview-content.large { font-size: 1.125rem; }
+
+        .read-more {
+            color: var(--secondary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 0.5rem;
+            display: block;
         }
 
         .preview-media {
@@ -517,24 +589,26 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
         @media (max-width: 992px) {
             .main-container {
                 flex-direction: column;
-                padding: 2rem 1rem;
+                padding: 1rem;
             }
 
             .preview-section, .settings-section {
                 width: 100%;
                 position: static;
+                margin-bottom: 1rem;
             }
 
             .form-section {
                 max-width: 100%;
+                flex: auto;
             }
 
             .form-card, .settings-card, .preview-card {
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
-            .btn-primary, .btn-danger, .btn-secondary {
-                padding: 0.6rem 1.8rem;
+            .btn-primary, .btn-danger, .btn-secondary, .custom-file-upload {
+                padding: 0.6rem 1.5rem;
                 font-size: 0.9rem;
             }
 
@@ -542,24 +616,44 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             .media-preview-item video,
             .preview-media-grid img,
             .preview-media-grid video {
-                height: 160px;
+                height: 140px;
             }
 
             .logo-image {
-                width: 90px;
+                width: 80px;
             }
 
             .navbar-brand {
-                font-size: 1.9rem;
+                font-size: 1.7rem;
             }
 
             .preview-media .carousel-item img,
             .preview-media .carousel-item video {
-                max-height: 400px;
+                max-height: 300px;
             }
 
-            textarea.form-control {
-                height: 200px;
+            .ql-container {
+                min-height: 150px;
+                word-break: break-all;
+                overflow-x: auto;
+            }
+
+            .ql-editor {
+                word-break: break-all;
+                overflow-x: auto;
+            }
+
+            .preview-content {
+                max-height: none;
+            }
+
+            .read-more {
+                display: none;
+            }
+
+            .custom-file-upload {
+                width: 100%;
+                justify-content: center;
             }
         }
 
@@ -591,7 +685,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="d-flex align-items-center ms-auto">
-                    <a href="/logout.php" class="btn btn-danger animate__animated animate__bounceIn"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
+                    <a href="/logout" class="btn btn-danger animate__animated animate__bounceIn"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a>
                 </div>
             </div>
         </div>
@@ -606,50 +700,69 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
                 <div class="preview-title" id="previewTitle"></div>
                 <div class="preview-media" id="previewMedia"></div>
                 <div class="preview-content" id="previewContent"></div>
+                <span class="read-more" id="readMore">Leer más</span>
             </div>
         </div>
 
         <!-- Form Section -->
         <div class="form-section">
             <div class="form-card">
-                <h2 class="mb-4 animate__animated animate__fadeIn"><?php echo isset($_GET['id']) ? 'Editar Publicación' : 'Crear Publicación'; ?></h2>
+                <h2 class="mb-4 animate__animated animate__fadeIn">Crear Publicación</h2>
                 <form id="postForm" enctype="multipart/form-data">
                     <div class="mb-4">
                         <label for="postTitle" class="form-label">Título</label>
-                        <input type="text" class="form-control animate__animated animate__fadeInUp" id="postTitle" name="title" placeholder="Un título impactante..." required>
+                        <input type="text" class="form-control animate__animated animate__fadeInUp" id="postTitle" name="title" placeholder="Un título impactante..." required maxlength="100">
                     </div>
                     <div class="mb-4">
                         <label for="postMedia" class="form-label">Imágenes o Videos Verticales</label>
-                        <input type="file" class="form-control animate__animated animate__fadeInUp" id="postMedia" name="postMedia" accept="image/*,video/mp4,video/webm" multiple onchange="previewMedia(event)">
+                        <label class="custom-file-upload">
+                            <i class="fas fa-upload"></i> Seleccionar Archivos
+                            <input type="file" class="form-control animate__animated animate__fadeInUp" id="postMedia" name="postMedia" accept="image/*,video/mp4,video/webm" multiple onchange="validateFiles(this)">
+                        </label>
+                        <small class="text-muted">Máximo 50MB por archivo, hasta 5 archivos.</small>
                         <div class="media-preview-grid" id="mediaPreviewGrid"></div>
                     </div>
                     <div class="mb-4">
                         <label for="postCategory" class="form-label">Categoría</label>
                         <select class="form-select animate__animated animate__fadeInUp" id="postCategory" name="category" required>
                             <option value="" disabled selected>Selecciona una categoría</option>
-                            <option value="anuncios">Anuncios</option>
-                            <option value="eventos">Eventos</option>
-                            <option value="recursos">Recursos</option>
-                            <option value="ingles">Inglés</option>
-                            <option value="frances">Francés</option>
+                            <option value="Anuncios">Anuncios</option>
+                            <option value="Eventos">Eventos</option>
+                            <option value="Recursos">Recursos</option>
+                            <option value="Inglés">Inglés</option>
+                            <option value="Francés">Francés</option>
                         </select>
                     </div>
                     <div class="mb-4">
                         <label for="postContent" class="form-label">Contenido</label>
-                        <textarea class="form-control animate__animated animate__fadeInUp" id="postContent" name="content" placeholder="Escribe tu mensaje..."></textarea>
+                        <div id="editor" class="animate__animated animate__fadeInUp"></div>
+                        <input type="hidden" id="postContent" name="content">
                         <div class="word-count" id="wordCount">0/400 palabras</div>
-                        <div id="contentEditor" contenteditable="true" style="display: none;"></div>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="schedulePost" name="schedulePost">
+                        <label class="form-check-label" for="schedulePost">Programar publicación</label>
+                    </div>
+                    <div class="mb-4 schedule-fields" style="display: none;">
+                        <label for="postDate" class="form-label">Fecha</label>
+                        <input type="date" class="form-control animate__animated animate__fadeInUp" id="postDate" name="date" value="2025-06-23" min="2025-06-23">
+                    </div>
+                    <div class="mb-4 schedule-fields" style="display: none;">
+                        <label for="postTime" class="form-label">Hora</label>
+                        <input type="time" class="form-control animate__animated animate__fadeInUp" id="postTime" name="time" value="00:15">
+                    </div>
+                    <div class="mb-4">
+                        <label for="postTags" class="form-label">Etiquetas</label>
+                        <input type="text" class="form-control animate__animated animate__fadeInUp" id="postTags" name="tags" placeholder="tag1, tag2, tag3" title="Ingresa etiquetas separadas por comas">
                     </div>
                     <div class="d-flex gap-3 flex-wrap">
-                        <button type="submit" class="btn btn-primary animate__animated animate__bounceIn">
-                            <i class="fas fa-save me-2"></i> Guardar
+                        <button type="submit" class="btn btn-primary animate__animated animate__bounceIn" id="publishButton">
+                            <i class="fas fa-save me-2"></i> Crear Publicación
                         </button>
-                        <?php if (isset($_GET['id'])): ?>
-                            <button type="button" class="btn btn-danger animate__animated animate__bounceIn" data-bs-toggle="modal" data-bs-target="#deleteModal" data-type="post" data-id="<?php echo htmlspecialchars($_GET['id']); ?>">
-                                <i class="fas fa-trash me-2"></i> Eliminar
-                            </button>
-                        <?php endif; ?>
-                        <a href="/dashboard.php" class="btn btn-secondary animate__animated animate__bounceIn">
+                        <button type="button" class="btn btn-secondary animate__animated animate__bounceIn" id="draftButton">
+                            <i class="fas fa-save me-2"></i> Guardar Borrador
+                        </button>
+                        <a href="/dashboard.html" class="btn btn-secondary animate__animated animate__bounceIn">
                             <i class="fas fa-times me-2"></i> Cancelar
                         </a>
                     </div>
@@ -671,40 +784,17 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
                     <label for="mediaMode" class="form-label">Modo de visualización de medios</label>
                     <select class="form-select animate__animated animate__fadeInUp" id="mediaMode" name="mediaMode">
                         <option value="auto">Presentación automática</option>
-                        <option value="manual">Carrusel manual</option>
+                        <option value="carousel">Carrusel manual</option>
                         <option value="gallery">Galería (4+)</option>
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label">Formato de texto</label>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <button type="button" class="format-btn animate__animated animate__fadeInUp" id="boldBtn" title="Negrita"><i class="fas fa-bold"></i></button>
-                        <button type="button" class="format-btn animate__animated animate__fadeInUp" id="italicBtn" title="Cursiva"><i class="fas fa-italic"></i></button>
-                        <select class="form-select w-auto animate__animated animate__fadeInUp" id="fontSize" title="Tamaño de fuente">
-                            <option value="14px">Pequeño</option>
-                            <option value="16px" selected>Mediano</option>
-                            <option value="18px">Grande</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    ¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+                    <label for="textFormat" class="form-label">Formato de texto</label>
+                    <select class="form-select animate__animated animate__fadeInUp" id="textFormat" name="textFormat">
+                        <option value="small">Pequeño</option>
+                        <option value="medium" selected>Mediano</option>
+                        <option value="large">Grande</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -712,349 +802,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
 
     <!-- Toast Notification -->
     <div class="toast-container">
-        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body" id="errorToastBody">Error occurred.</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
         <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">Publicación guardada exitosamente.</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-        <div id="wordLimitToast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">Has alcanzado el límite de 400 palabras.</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer py-5">
-        <div class="container">
-            <div class="row mb-4 justify-content-center">
-                <div class="col-auto">
-                    <div class="social-icons d-flex gap-4 justify-content-center">
-                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4 animate__animated animate__swing">
-                            <i class="fab fa-facebook-square"></i>
-                        </a>
-                        <a href="https://www.instagram.com/comunidad.tesci" target="_blank" class="text-white fs-4 animate__animated animate__swing">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4 animate__animated animate__swing">
-                            <i class="fas fa-globe"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="row text-center">
-                <div class="col-12">
-                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
-                    <p class="mb-2">
-                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
-                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
-                    </p>
-                    <p class="mb-3">
-                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740, Cuautitlán Izcalli, Estado de México
-                    </p>
-                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Tag Handling (Hidden but Functional)
-            let tags = [];
-            const suggestedTags = ['Inglés', 'Francés', 'Recursos', 'Eventos', 'Anuncios', 'Aprendizaje', 'Idiomas', 'TESCI'];
-            // Note: Tag input is hidden, but tags array is maintained for backend
-            function addTag(tag) {
-                if (tag && !tags.includes(tag)) {
-                    tags.push(tag);
-                    updatePreview();
-                }
-            }
-
-            // Multiple Media Preview
-            let mediaFiles = [];
-            window.previewMedia = (event) => {
-                const files = Array.from(event.target.files);
-                const previewGrid = document.getElementById('mediaPreviewGrid');
-                mediaFiles = [...mediaFiles, ...files];
-                previewGrid.innerHTML = '';
-                updateMediaPreview();
-            };
-
-            function updateMediaPreview() {
-                const previewGrid = document.getElementById('mediaPreviewGrid');
-                previewGrid.innerHTML = '';
-
-                mediaFiles.forEach((file, index) => {
-                    const url = URL.createObjectURL(file);
-                    const fileType = file.type;
-
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'media-preview-item';
-                    const mediaElement = fileType.startsWith('image/') ? document.createElement('img') : document.createElement('video');
-                    mediaElement.src = url;
-                    if (fileType.startsWith('video/')) {
-                        mediaElement.controls = true;
-                        mediaElement.muted = true;
-                    }
-                    previewItem.appendChild(mediaElement);
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'media-remove';
-                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
-                    removeBtn.onclick = () => {
-                        mediaFiles.splice(index, 1);
-                        updateMediaPreview();
-                        updatePreview();
-                    };
-                    previewItem.appendChild(removeBtn);
-                    previewGrid.appendChild(previewItem);
-                });
-
-                // Enable Sorting
-                new Sortable(previewGrid, {
-                    animation: 150,
-                    onEnd: (evt) => {
-                        const [moved] = mediaFiles.splice(evt.oldIndex, 1);
-                        mediaFiles.splice(evt.newIndex, 0, moved);
-                        updateMediaPreview();
-                        updatePreview();
-                    }
-                });
-
-                updatePreview();
-            }
-
-            // Word Count and Limit
-            const contentArea = document.getElementById('postContent');
-            const wordCountDisplay = document.getElementById('wordCount');
-            const contentEditor = document.getElementById('contentEditor');
-            const wordLimitToast = new bootstrap.Toast(document.getElementById('wordLimitToast'));
-            const MAX_WORDS = 400;
-
-            function updateWordCount() {
-                let text = contentArea.value.trim();
-                const words = text === '' ? 0 : text.split(/\s+/).filter(word => word.length > 0).length;
-                wordCountDisplay.textContent = `${words}/${MAX_WORDS} palabras`;
-                if (words > MAX_WORDS) {
-                    wordCountDisplay.classList.add('exceeded');
-                    wordLimitToast.show();
-                    const wordArray = text.split(/\s+/).filter(word => word.length > 0).slice(0, MAX_WORDS);
-                    contentArea.value = wordArray.join(' ');
-                    updateWordCount();
-                } else {
-                    wordCountDisplay.classList.remove('exceeded');
-                }
-                contentEditor.innerHTML = text || 'Escribe algo para ver la vista previa...';
-                updatePreview();
-            }
-
-            contentArea.addEventListener('input', updateWordCount);
-
-            // Text Formatting
-            const boldBtn = document.getElementById('boldBtn');
-            const italicBtn = document.getElementById('italicBtn');
-            const fontSizeSelect = document.getElementById('fontSize');
-
-            boldBtn.addEventListener('click', () => {
-                contentEditor.focus();
-                document.execCommand('bold', false, null);
-                boldBtn.classList.toggle('active');
-                contentArea.value = contentEditor.innerText;
-                updateWordCount();
-            });
-
-            italicBtn.addEventListener('click', () => {
-                contentEditor.focus();
-                document.execCommand('italic', false, null);
-                italicBtn.classList.toggle('active');
-                contentArea.value = contentEditor.innerText;
-                updateWordCount();
-            });
-
-            fontSizeSelect.addEventListener('change', () => {
-                contentEditor.focus();
-                document.execCommand('fontSize', false, '3');
-                const fontElements = contentEditor.getElementsByTagName('font');
-                for (let el of fontElements) {
-                    el.style.fontSize = fontSizeSelect.value;
-                }
-                contentArea.value = contentEditor.innerText;
-                updateWordCount();
-            });
-
-            // Media Mode Handling
-            const mediaModeSelect = document.getElementById('mediaMode');
-            mediaModeSelect.addEventListener('change', updatePreview);
-
-            // Live Preview Update
-            function updatePreview() {
-                const title = document.getElementById('postTitle').value;
-                const content = contentEditor.innerHTML;
-                const previewTitle = document.getElementById('previewTitle');
-                const previewContent = document.getElementById('previewContent');
-                const previewMedia = document.getElementById('previewMedia');
-                const mediaMode = mediaModeSelect.value;
-
-                previewTitle.textContent = title || 'Título de la publicación';
-                previewContent.innerHTML = content || 'Escribe algo para ver la vista previa...';
-                // Tags are not displayed
-
-                previewMedia.innerHTML = '';
-                if (mediaFiles.length) {
-                    if (mediaMode === 'gallery') {
-                        const grid = document.createElement('div');
-                        grid.className = 'preview-media-grid';
-                        mediaFiles.forEach(file => {
-                            const url = URL.createObjectURL(file);
-                            const fileType = file.type;
-                            const mediaElement = fileType.startsWith('image/') ? document.createElement('img') : document.createElement('video');
-                            mediaElement.src = url;
-                            if (fileType.startsWith('video/')) {
-                                mediaElement.controls = true;
-                                mediaElement.muted = true;
-                            }
-                            grid.appendChild(mediaElement);
-                        });
-                        previewMedia.appendChild(grid);
-                    } else {
-                        const carousel = document.createElement('div');
-                        carousel.className = 'carousel slide';
-                        carousel.id = 'mediaCarousel';
-                        carousel.setAttribute('data-bs-ride', mediaMode === 'auto' ? 'carousel' : 'false');
-                        const inner = document.createElement('div');
-                        inner.className = 'carousel-inner';
-                        mediaFiles.forEach((file, index) => {
-                            const item = document.createElement('div');
-                            item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
-                            const url = URL.createObjectURL(file);
-                            const fileType = file.type;
-                            const mediaElement = fileType.startsWith('image/') ? document.createElement('img') : document.createElement('video');
-                            mediaElement.src = url;
-                            mediaElement.className = 'd-block w-100';
-                            if (fileType.startsWith('video/')) {
-                                mediaElement.controls = true;
-                                mediaElement.muted = true;
-                            }
-                            item.appendChild(mediaElement);
-                            inner.appendChild(item);
-                        });
-                        carousel.appendChild(inner);
-                        if (mediaFiles.length > 1) {
-                            const prev = document.createElement('button');
-                            prev.className = 'carousel-control-prev';
-                            prev.type = 'button';
-                            prev.setAttribute('data-bs-target', '#mediaCarousel');
-                            prev.setAttribute('data-bs-slide', 'prev');
-                            prev.innerHTML = '<span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>';
-                            const next = document.createElement('button');
-                            next.className = 'carousel-control-next';
-                            next.type = 'button';
-                            next.setAttribute('data-bs-target', '#mediaCarousel');
-                            next.setAttribute('data-bs-slide', 'next');
-                            next.innerHTML = '<span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>';
-                            carousel.appendChild(prev);
-                            carousel.appendChild(next);
-                        }
-                        previewMedia.appendChild(carousel);
-                    }
-                }
-            }
-
-            // Real-time Preview Updates
-            document.getElementById('postTitle').addEventListener('input', updatePreview);
-            document.getElementById('postCategory').addEventListener('change', updatePreview);
-
-            // Initialize Word Count
-            updateWordCount();
-
-            // Handle Paste to Prevent Formatting Issues
-            contentArea.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const text = e.clipboardData.getData('text/plain');
-                document.execCommand('insertText', false, text);
-                contentArea.value = contentEditor.innerText;
-                updateWordCount();
-            });
-
-            // Clear Placeholder on Focus
-            contentArea.addEventListener('focus', () => {
-                if (contentArea.value === 'Escribe tu mensaje...') {
-                    contentArea.value = '';
-                }
-                updateWordCount();
-            });
-
-            contentArea.addEventListener('blur', () => {
-                if (!contentArea.value.trim()) {
-                    contentArea.value = 'Escribe tu mensaje...';
-                }
-                updateWordCount();
-            });
-
-            // Form Submission
-            const form = document.getElementById('postForm');
-            const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
-            const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const formData = new FormData(form);
-                formData.append('tags', JSON.stringify(tags));
-                formData.append('allowComments', document.getElementById('allowComments').checked);
-                formData.append('mediaMode', document.getElementById('mediaMode').value);
-
-                try {
-                    const response = await fetch('http://localhost:3000/api/posts', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (response.ok) {
-                        successToast.show();
-                        setTimeout(() => window.location.href = '/index.html', 2000); // Redirigir después de 2 segundos
-                    } else {
-                        document.getElementById('errorToastBody').textContent = result.error || 'Error al guardar el post.';
-                        errorToast.show();
-                    }
-                } catch (error) {
-                    console.error('Error al enviar post:', error);
-                    document.getElementById('errorToastBody').textContent = 'Error de conexión al servidor.';
-                    errorToast.show();
-                }
-            });
-
-            // Delete Post Logic
-            document.getElementById('confirmDelete').addEventListener('click', async () => {
-                const postId = document.getElementById('confirmDelete').dataset.id;
-                try {
-                    const response = await fetch(`http://localhost:3000/api/posts/${postId}`, {
-                        method: 'DELETE'
-                    });
-                    if (response.ok) {
-                        window.location.href = '/dashboard.php';
-                    } else {
-                        document.getElementById('errorToastBody').textContent = 'Error al eliminar el post.';
-                        errorToast.show();
-                    }
-                } catch (error) {
-                    console.error('Error al eliminar post:', error);
-                    document.getElementById('errorToastBody').textContent = 'Error de conexión al eliminar.';
-                    errorToast.show();
-                }
-                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-            });
-        });
-    </script>
-</body>
-</html>
+                <div class="toast-body">Publicación creada exitosamente.</div>
+                <button type="button" class="btn-close btn-close-white me
