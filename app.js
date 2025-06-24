@@ -75,6 +75,36 @@ const upload = multer({
   }
 });
 
+const { body, validationResult } = require('express-validator');
+
+// Validation middleware for form creation
+const validateForm = [
+  body('name').trim().notEmpty().withMessage('El nombre del formulario es obligatorio').isLength({ max: 100 }).withMessage('El nombre no puede exceder los 100 caracteres'),
+  body('course').trim().notEmpty().withMessage('El curso es obligatorio').isIn(['ingles', 'frances', 'aleman', 'italiano']).withMessage('Curso inválido'),
+  body('description').trim().isLength({ max: 500 }).withMessage('La descripción no puede exceder los 500 caracteres'),
+  body('active').isBoolean().withMessage('El estado activo debe ser un booleano'),
+  body('fields').isArray().withMessage('Los campos deben ser un arreglo'),
+  body('fields.*.type').isIn(['text', 'email', 'tel', 'date', 'select', 'radio', 'checkbox', 'number', 'file', 'textarea']).withMessage('Tipo de campo inválido'),
+  body('fields.*.label').trim().notEmpty().withMessage('La etiqueta del campo es obligatoria').isLength({ max: 50 }).withMessage('La etiqueta no puede exceder los 50 caracteres'),
+  body('fields.*.required').isBoolean().withMessage('El campo requerido debe ser un booleano'),
+  body('fields.*.placeholder').optional().trim().isLength({ max: 100 }).withMessage('El placeholder no puede exceder los 100 caracteres'),
+  body('fields.*.options').if((value, { req }) => ['select', 'radio', 'checkbox'].includes(req.body.fields[req.path.split('/').pop()]?.type)).isArray({ min: 1 }).withMessage('Las opciones son obligatorias para select, radio o checkbox'),
+];
+
+// Validation middleware for form submissions
+const validateFormSubmission = [
+  body('formId').trim().notEmpty().withMessage('El ID del formulario es obligatorio').isMongoId().withMessage('ID de formulario inválido'),
+  body('responses').isArray().withMessage('Las respuestas deben ser un arreglo'),
+  body('responses.*.fieldId').trim().notEmpty().withMessage('El ID del campo es obligatorio'),
+  body('responses.*.value').trim().notEmpty().withMessage('El valor del campo es obligatorio'),
+  // Add specific validation for email fields
+  body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'email')).isEmail().withMessage('Correo electrónico inválido'),
+  // Add specific validation for tel fields
+  body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'tel')).matches(/^\+?\d{10,15}$/).withMessage('Número de teléfono inválido'),
+  // Add specific validation for number fields
+  body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'number')).isNumeric().withMessage('El valor debe ser numérico'),
+];
+
 let db;
 
 require('dotenv').config();
@@ -174,6 +204,10 @@ async function ensureIndexes(db) {
   await db.collection('calendar_events').createIndex({ userId: 1, start: -1 });
   await db.collection('forms').createIndex({ userId: 1, createdAt: -1 });
   await db.collection('resources').createIndex({ userId: 1, createdAt: -1 });
+  await db.collection('posts').createIndex({ userId: 1, createdAt: -1 });
+  await db.collection('forms').createIndex({ userId: 1, createdAt: -1 });
+  await db.collection('form_submissions').createIndex({ formId: 1, createdAt: -1 });
+  await db.collection('form_submissions').createIndex({ 'responses.fieldId': 1, 'responses.value': 1 }); // For email uniqueness
 }
 
 async function registerUser(db, userData) {
@@ -683,6 +717,34 @@ Equipo LIVETEXT
   return { message: 'Formulario actualizado exitosamente.' };
 }
 
+async function updateProfile(db, userId, profileData) {
+  const { name, surname, secondSurname, email, password, confirmPassword } = profileData;
+  if (!/^[a-zA-Z\s]+$/.test(name) || !/^[a-zA-Z\s]+$/.test(surname) || !/^[a-zA-Z\s]+$/.test(secondSurname)) {
+    throw new Error('El nombre y apellidos solo deben contener letras y espacios.');
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) throw new Error('El correo electrónico no tiene un formato válido.');
+  const existingUser = await db.collection('users').findOne({ email, _id: { $ne: new ObjectId(userId) } });
+  if (existingUser) throw new Error('El correo ya está en uso por otro usuario.');
+  let updateData = { name, surname, secondSurname, email };
+  if (password && confirmPassword) {
+    if (!/^(?=.[a-zA-Z])(?=.\d)[a-zA-Z\d]{8,}$/.test(password)) {
+      throw new Error('La contraseña debe tener al menos 8 caracteres con letras y números.');
+    }
+    if (password !== confirmPassword) throw new Error('Las contraseñas no coinciden.');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    updateData.password = hashedPassword;
+  }
+  const result = await db.collection('users').updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: updateData }
+  );
+  if (result.matchedCount === 0) throw new Error('Usuario no encontrado.');
+  const updatedUser = await db.collection('users').findOne({ _id: new ObjectId(userId) });
+  return updatedUser;
+}
+
 async function deleteForm(db, formId, userId) {
   const result = await db.collection('forms').deleteOne({ 
     _id: new ObjectId(formId),
@@ -863,6 +925,17 @@ app.put('/events/:id', requireAuth, async (req, res) => {
   }
 });
 
+app.post('/update-profile', requireAuth, async (req, res) => {
+  try {
+    const userId = req.session.user._id;
+    const updatedUser = await updateProfile(db, userId, req.body);
+    req.session.user = updatedUser; // Actualiza la sesión
+    res.status(200).json({ message: 'Perfil actualizado exitosamente.', user: updatedUser });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.delete('/events/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -930,12 +1003,59 @@ app.delete('/api/posts/:id', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/forms', requireAuth, async (req, res) => {
+app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
   try {
-    const result = await createForm(db, req.body, req.session.user._id);
-    res.status(201).json(result);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { name, course, description, active, fields } = req.body;
+    const userId = req.session.user._id;
+
+    // Sanitize inputs
+    const sanitizedForm = {
+      name: sanitizeHtml(name),
+      course: sanitizeHtml(course),
+      description: sanitizeHtml(description),
+      active,
+      fields: fields.map(field => ({
+        id: field.id,
+        type: field.type,
+        label: sanitizeHtml(field.label),
+        placeholder: field.placeholder ? sanitizeHtml(field.placeholder) : undefined,
+        required: field.required,
+        options: field.options ? field.options.map(opt => sanitizeHtml(opt)) : undefined,
+      })),
+      userId: new ObjectId(userId),
+      createdAt: new Date(),
+      isPublic: active,
+    };
+
+    const result = await db.collection('forms').insertOne(sanitizedForm);
+    await redis.del('forms:cache');
+
+    // Notify subscribers
+    const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
+    for (const subscriber of subscribers) {
+      emailQueue.add({
+        from: 'no-reply@livetextweb.com',
+        to: subscriber.email,
+        subject: `Nuevo formulario: ${sanitizedForm.name}`,
+        html: `Nuevo Formulario
+Hola, ${subscriber.name},
+Se ha publicado un nuevo formulario: ${sanitizedForm.name}
+<a href="http://localhost:3000/pagos.html#form-${result.insertedId}">Ver detalles</a>
+Saludos,
+Equipo LIVETEXT
+`
+      });
+    }
+
+    res.status(201).json({ message: 'Formulario creado exitosamente.', insertedId: result.insertedId });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error al crear formulario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
@@ -943,9 +1063,31 @@ app.get('/api/forms', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const forms = await getForms(db, page, limit);
-    res.json(forms);
+    const cacheKey = `forms:cache:${page}:${limit}`;
+    const cached = await redis.get(cacheKey);
+    if (cached) return res.json(JSON.parse(cached));
+
+    const forms = await db.collection('forms')
+      .find({ isPublic: true })
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+
+    const formattedForms = forms.map(form => ({
+      _id: form._id,
+      name: form.name,
+      course: form.course,
+      description: form.description,
+      createdAt: moment.tz(form.createdAt, 'America/Mexico_City').toDate(),
+      fields: form.fields,
+      active: form.active,
+    }));
+
+    await redis.setex(cacheKey, 300, JSON.stringify(formattedForms));
+    res.json(formattedForms);
   } catch (error) {
+    console.error('Error al obtener formularios:', error);
     res.status(500).json({ error: 'Error al obtener formularios' });
   }
 });
@@ -967,6 +1109,89 @@ app.delete('/api/forms/:id', requireAuth, async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/api/form-submissions', upload.fields([
+  { name: 'files', maxCount: 10 }, // Adjust based on max files allowed
+]), validateFormSubmission, async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { formId, responses } = req.body;
+    const files = req.files['files'] || [];
+
+    // Verify form exists
+    const form = await db.collection('forms').findOne({ _id: new ObjectId(formId), isPublic: true });
+    if (!form) {
+      return res.status(404).json({ error: 'Formulario no encontrado' });
+    }
+
+    // Check for email uniqueness
+    for (const response of responses) {
+      if (response.type === 'email') {
+        const existingSubmission = await db.collection('form_submissions').findOne({
+          formId: new ObjectId(formId),
+          'responses.fieldId': response.fieldId,
+          'responses.value': response.value,
+        });
+        if (existingSubmission) {
+          return res.status(400).json({ error: `El correo ${response.value} ya ha sido usado en este formulario` });
+        }
+      }
+    }
+
+    // Sanitize responses
+    const sanitizedResponses = responses.map(response => ({
+      fieldId: response.fieldId,
+      type: response.type,
+      value: ['text', 'email', 'tel', 'textarea'].includes(response.type) ? sanitizeHtml(response.value) : response.value,
+    }));
+
+    // Process files
+    const processedFiles = files.map(file => ({
+      filename: file.filename,
+      originalname: file.originalname,
+      path: `/uploads/${file.filename}`,
+      contentType: file.mimetype,
+      fieldId: file.fieldname, // Associate with fieldId if needed
+    }));
+
+    // Create submission
+    const submission = {
+      formId: new ObjectId(formId),
+      responses: sanitizedResponses,
+      files: processedFiles,
+      createdAt: new Date(),
+      status: 'pending', // For review process
+    };
+
+    const result = await db.collection('form_submissions').insertOne(submission);
+
+    // Notify admins (example)
+    const admins = await db.collection('users').find({ role: 'admin' }).toArray();
+    for (const admin of admins) {
+      emailQueue.add({
+        from: 'no-reply@livetextweb.com',
+        to: admin.email,
+        subject: `Nueva presentación de formulario: ${form.name}`,
+        html: `Nueva Presentación de Formulario
+Hola, ${admin.name},
+Se ha recibido una nueva presentación para el formulario: ${form.name}
+<a href="http://localhost:3000/dashboard_pagos#submission-${result.insertedId}">Ver detalles</a>
+Saludos,
+Equipo LIVETEXT
+`
+      });
+    }
+
+    res.status(201).json({ message: 'Formulario enviado exitosamente.', insertedId: result.insertedId });
+  } catch (error) {
+    console.error('Error al enviar formulario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 
