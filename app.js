@@ -97,12 +97,20 @@ const validateFormSubmission = [
   body('responses').isArray().withMessage('Las respuestas deben ser un arreglo'),
   body('responses.*.fieldId').trim().notEmpty().withMessage('El ID del campo es obligatorio'),
   body('responses.*.value').trim().notEmpty().withMessage('El valor del campo es obligatorio'),
-  // Add specific validation for email fields
   body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'email')).isEmail().withMessage('Correo electrónico inválido'),
-  // Add specific validation for tel fields
   body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'tel')).matches(/^\+?\d{10,15}$/).withMessage('Número de teléfono inválido'),
-  // Add specific validation for number fields
-  body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'number')).isNumeric().withMessage('El valor debe ser numérico'),
+  body('responses.*.value').if((value, { req }) => {
+    const response = req.body.responses.find(r => r.type === 'number' && r.label && r.label.toLowerCase().includes('línea de captura'));
+    return response && response.value === value;
+  }).matches(/^\d{27}$/).withMessage('La línea de captura debe tener exactamente 27 dígitos'),
+  body('responses.*.value').if((value, { req }) => {
+    const response = req.body.responses.find(r => r.type === 'number' && r.label && r.label.toLowerCase().includes('número de control'));
+    return response && response.value === value;
+  }).matches(/^\d{9}$/).withMessage('El número de control debe tener exactamente 9 dígitos'),
+  body('responses.*.value').if((value, { req }) => {
+    const response = req.body.responses.find(r => r.type === 'number' && (!r.label || (!r.label.toLowerCase().includes('línea de captura') && !r.label.toLowerCase().includes('número de control'))));
+    return response && response.value === value;
+  }).matches(/^\d{1,10}$/).withMessage('El valor numérico debe tener entre 1 y 10 dígitos'),
 ];
 
 let db;
@@ -1010,15 +1018,16 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, course, description, active, fields } = req.body;
+    const { name, formType, course, description, active, fields } = req.body;
     const userId = req.session.user._id;
 
-    // Sanitize inputs
     const sanitizedForm = {
       name: sanitizeHtml(name),
+      formType: sanitizeHtml(formType),
       course: sanitizeHtml(course),
       description: sanitizeHtml(description),
       active,
+      status: active ? 'published' : 'draft',
       fields: fields.map(field => ({
         id: field.id,
         type: field.type,
@@ -1026,6 +1035,21 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
         placeholder: field.placeholder ? sanitizeHtml(field.placeholder) : undefined,
         required: field.required,
         options: field.options ? field.options.map(opt => sanitizeHtml(opt)) : undefined,
+        maxDigits: field.maxDigits,
+        unique: field.unique,
+        conditionalFields: field.conditionalFields ? Object.fromEntries(
+          Object.entries(field.conditionalFields).map(([option, condFields]) => [
+            sanitizeHtml(option),
+            condFields.map(cf => ({
+              id: cf.id,
+              type: cf.type,
+              label: sanitizeHtml(cf.label),
+              placeholder: cf.placeholder ? sanitizeHtml(cf.placeholder) : undefined,
+              required: cf.required,
+              maxDigits: cf.maxDigits
+            }))
+          ])
+        ) : undefined,
       })),
       userId: new ObjectId(userId),
       createdAt: new Date(),
@@ -1035,21 +1059,16 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
     const result = await db.collection('forms').insertOne(sanitizedForm);
     await redis.del('forms:cache');
 
-    // Notify subscribers
-    const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
-    for (const subscriber of subscribers) {
-      emailQueue.add({
-        from: 'no-reply@livetextweb.com',
-        to: subscriber.email,
-        subject: `Nuevo formulario: ${sanitizedForm.name}`,
-        html: `Nuevo Formulario
-Hola, ${subscriber.name},
-Se ha publicado un nuevo formulario: ${sanitizedForm.name}
-<a href="http://localhost:3000/pagos.html#form-${result.insertedId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-      });
+    if (active) {
+      const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
+      for (const subscriber of subscribers) {
+        emailQueue.add({
+          from: 'no-reply@livetextweb.com',
+          to: subscriber.email,
+          subject: `Nuevo formulario: ${sanitizedForm.name}`,
+          html: `Nuevo Formulario\nHola, ${subscriber.name},\nSe ha publicado un nuevo formulario: ${sanitizedForm.name}\n<a href="http://localhost:3000/pagos.html#form-${result.insertedId}">Ver detalles</a>\nSaludos,\nEquipo LIVETEXT`
+        });
+      }
     }
 
     res.status(201).json({ message: 'Formulario creado exitosamente.', insertedId: result.insertedId });
@@ -1063,12 +1082,16 @@ app.get('/api/forms', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const cacheKey = `forms:cache:${page}:${limit}`;
+    const formType = req.query.formType || null;
+    const cacheKey = `forms:cache:${page}:${limit}:${formType || 'all'}`;
     const cached = await redis.get(cacheKey);
     if (cached) return res.json(JSON.parse(cached));
 
+    const query = req.session.user ? { userId: new ObjectId(req.session.user._id) } : { isPublic: true };
+    if (formType) query.formType = formType;
+
     const forms = await db.collection('forms')
-      .find({ isPublic: true })
+      .find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -1077,11 +1100,13 @@ app.get('/api/forms', async (req, res) => {
     const formattedForms = forms.map(form => ({
       _id: form._id,
       name: form.name,
+      formType: form.formType,
       course: form.course,
       description: form.description,
       createdAt: moment.tz(form.createdAt, 'America/Mexico_City').toDate(),
       fields: form.fields,
       active: form.active,
+      status: form.status,
     }));
 
     await redis.setex(cacheKey, 300, JSON.stringify(formattedForms));
@@ -1092,13 +1117,78 @@ app.get('/api/forms', async (req, res) => {
   }
 });
 
-app.put('/api/forms/:id', requireAuth, async (req, res) => {
+app.put('/api/forms/:id', requireAuth, validateForm, async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
-    const result = await updateForm(db, id, req.body, req.session.user._id);
-    res.status(200).json(result);
+    const { name, formType, course, description, active, fields } = req.body;
+    const userId = req.session.user._id;
+
+    const sanitizedForm = {
+      name: sanitizeHtml(name),
+      formType: sanitizeHtml(formType),
+      course: sanitizeHtml(course),
+      description: sanitizeHtml(description),
+      active,
+      status: active ? 'published' : 'draft',
+      fields: fields.map(field => ({
+        id: field.id,
+        type: field.type,
+        label: sanitizeHtml(field.label),
+        placeholder: field.placeholder ? sanitizeHtml(field.placeholder) : undefined,
+        required: field.required,
+        options: field.options ? field.options.map(opt => sanitizeHtml(opt)) : undefined,
+        maxDigits: field.maxDigits,
+        unique: field.unique,
+        conditionalFields: field.conditionalFields ? Object.fromEntries(
+          Object.entries(field.conditionalFields).map(([option, condFields]) => [
+            sanitizeHtml(option),
+            condFields.map(cf => ({
+              id: cf.id,
+              type: cf.type,
+              label: sanitizeHtml(cf.label),
+              placeholder: cf.placeholder ? sanitizeHtml(cf.placeholder) : undefined,
+              required: cf.required,
+              maxDigits: cf.maxDigits
+            }))
+          ])
+        ) : undefined,
+      })),
+      updatedAt: new Date(),
+      isPublic: active,
+    };
+
+    const result = await db.collection('forms').updateOne(
+      { _id: new ObjectId(id), userId: new ObjectId(userId) },
+      { $set: sanitizedForm }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Formulario no encontrado o no tienes permisos.' });
+    }
+
+    await redis.del('forms:cache');
+
+    if (active) {
+      const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
+      for (const subscriber of subscribers) {
+        emailQueue.add({
+          from: 'no-reply@livetextweb.com',
+          to: subscriber.email,
+          subject: `Formulario actualizado: ${sanitizedForm.name}`,
+          html: `Formulario Actualizado\nHola, ${subscriber.name},\nSe ha actualizado el formulario: ${sanitizedForm.name}\n<a href="http://localhost:3000/pagos.html#form-${id}">Ver detalles</a>\nSaludos,\nEquipo LIVETEXT`
+        });
+      }
+    }
+
+    res.status(200).json({ message: 'Formulario actualizado exitosamente.' });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error al actualizar formulario:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 });
 

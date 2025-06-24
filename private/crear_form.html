@@ -316,6 +316,11 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .form-select option {
+            color: #000 !important; /* Ensure select options are black */
+            background: #fff !important;
+        }
+
         .preview-form .form-control,
         .preview-form .form-select {
             background: var(--white);
@@ -721,7 +726,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="formActive" checked>
                         <label class="form-check-label" for="formActive">
-                            Activar formulario inmediatamente
+                            Publicar formulario inmediatamente
                         </label>
                     </div>
                 </div>
@@ -824,7 +829,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             initializeDragAndDrop();
             initializeSortable();
-            showTemplateModal(); // Show template modal on page load
+            showTemplateModal();
         });
 
         function initializeDragAndDrop() {
@@ -1012,7 +1017,7 @@
             }
 
             let fieldsHtml = formFields.map(field => `
-                <div class="mb-3">
+                <div class="mb-3" id="field_${field.id}">
                     <label class="form-label">
                         ${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}
                     </label>
@@ -1023,8 +1028,8 @@
             // Render conditional fields
             formFields.forEach(field => {
                 if (field.conditionalFields && (field.type === 'radio' || field.type === 'select')) {
-                    Object.keys(field.conditionalFields).forEach(option => {
-                        field.conditionalFields[option].forEach(condField => {
+                    Object.entries(field.conditionalFields).forEach(([option, condFields]) => {
+                        condFields.forEach(condField => {
                             fieldsHtml += `
                                 <div class="mb-3 conditional-field" style="display: none;" data-parent="${field.id}" data-option="${option}">
                                     <label class="form-label">
@@ -1041,7 +1046,7 @@
             formPreview.innerHTML = `
                 <div class="preview-form">
                     <h5 class="text-primary mb-4">${formName}</h5>
-                    <form>
+                    <form id="previewForm">
                         ${fieldsHtml}
                         <button type="submit" class="btn btn-primary mt-3">
                             <i class="fas fa-paper-plane me-2"></i> Enviar Formulario
@@ -1050,20 +1055,8 @@
                 </div>
             `;
 
-            // Add event listeners for conditional fields
-            formFields.forEach(field => {
-                if (field.conditionalFields && (field.type === 'radio' || field.type === 'select')) {
-                    const input = document.querySelector(`[name="${field.id}"], #${field.id}`);
-                    if (input) {
-                        input.addEventListener('change', (e) => {
-                            const value = field.type === 'radio' ? e.target.value : e.target.value;
-                            document.querySelectorAll(`.conditional-field[data-parent="${field.id}"]`).forEach(el => {
-                                el.style.display = el.dataset.option === value ? 'block' : 'none';
-                            });
-                        });
-                    }
-                }
-            });
+            // Attach event listeners for conditional fields
+            attachConditionalFieldListeners();
         }
 
         function renderPreviewField(field) {
@@ -1072,22 +1065,22 @@
                 case 'email':
                 case 'tel':
                 case 'number':
-                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} ${field.maxDigits ? `maxlength="${field.maxDigits}"` : ''}>`;
+                    return `<input type="${field.type}" class="form-control" id="${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} ${field.maxDigits ? `maxlength="${field.maxDigits}"` : ''} data-type="${field.type}">`;
 
                 case 'date':
-                    return `<input type="date" class="form-control" ${field.required ? 'required' : ''}>`;
+                    return `<input type="date" class="form-control" id="${field.id}" ${field.required ? 'required' : ''} data-type="${field.type}">`;
 
                 case 'textarea':
-                    return `<textarea class="form-control" rows="3" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}></textarea>`;
+                    return `<textarea class="form-control" id="${field.id}" rows="3" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} data-type="${field.type}"></textarea>`;
 
                 case 'select':
                     const selectOptions = field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-                    return `<select class="form-select" id="${field.id}" ${field.required ? 'required' : ''}><option value="">Selecciona una opción</option>${selectOptions}</select>`;
+                    return `<select class="form-select" id="${field.id}" ${field.required ? 'required' : ''} data-type="${field.type}"><option value="">Selecciona una opción</option>${selectOptions}</select>`;
 
                 case 'radio':
                     return field.options.map((opt, index) => `
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="${field.id}" value="${opt}" id="${field.id}_${index}" ${field.required ? 'required' : ''}>
+                            <input class="form-check-input" type="radio" name="${field.id}" id="${field.id}_${index}" value="${opt}" ${field.required ? 'required' : ''} data-type="${field.type}">
                             <label class="form-check-label" for="${field.id}_${index}">${opt}</label>
                         </div>
                     `).join('');
@@ -1095,17 +1088,50 @@
                 case 'checkbox':
                     return field.options.map((opt, index) => `
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="${opt}" id="${field.id}_${index}">
+                            <input class="form-check-input" type="checkbox" name="${field.id}" id="${field.id}_${index}" value="${opt}" data-type="${field.type}">
                             <label class="form-check-label" for="${field.id}_${index}">${opt}</label>
                         </div>
                     `).join('');
 
                 case 'file':
-                    return `<input type="file" class="form-control" ${field.required ? 'required' : ''}>`;
+                    return `<input type="file" class="form-control" id="${field.id}" ${field.required ? 'required' : ''} data-type="${field.type}">`;
 
                 default:
-                    return `<input type="text" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>`;
+                    return `<input type="text" class="form-control" id="${field.id}" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} data-type="${field.type}">`;
             }
+        }
+
+        function attachConditionalFieldListeners() {
+            formFields.forEach(field => {
+                if (field.conditionalFields && (field.type === 'radio' || field.type === 'select')) {
+                    console.log(`Attaching listeners for field: ${field.id}, type: ${field.type}`);
+                    if (field.type === 'radio') {
+                        const radios = document.querySelectorAll(`input[name="${field.id}"]`);
+                        radios.forEach(radio => {
+                            radio.addEventListener('change', (e) => {
+                                console.log(`Radio changed: ${e.target.value}`);
+                                toggleConditionalFields(field.id, e.target.value);
+                            });
+                        });
+                    } else if (field.type === 'select') {
+                        const select = document.getElementById(field.id);
+                        if (select) {
+                            select.addEventListener('change', (e) => {
+                                console.log(`Select changed: ${e.target.value}`);
+                                toggleConditionalFields(field.id, e.target.value);
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleConditionalFields(parentId, selectedValue) {
+            const conditionalFields = document.querySelectorAll(`.conditional-field[data-parent="${parentId}"]`);
+            conditionalFields.forEach(field => {
+                field.style.display = field.dataset.option === selectedValue ? 'block' : 'none';
+                console.log(`Toggling field for parent ${parentId}, option ${field.dataset.option}, display: ${field.style.display}`);
+            });
         }
 
         function selectField(fieldId) {
@@ -1235,7 +1261,12 @@
                     showToast('error', 'La opción no puede exceder los 50 caracteres');
                     return;
                 }
+                const oldOption = selectedField.options[index];
                 selectedField.options[index] = value;
+                if (selectedField.conditionalFields && selectedField.conditionalFields[oldOption]) {
+                    selectedField.conditionalFields[value] = selectedField.conditionalFields[oldOption];
+                    delete selectedField.conditionalFields[oldOption];
+                }
                 showFieldProperties(selectedField);
                 renderFormBuilder();
                 renderPreview();
@@ -1288,6 +1319,9 @@
                 if (property === 'label' && value.length > 50) {
                     showToast('error', 'La etiqueta no puede exceder los 50 caracteres');
                     return;
+                }
+                if (property === 'type' && value === 'number' && !selectedField.conditionalFields[option][index].maxDigits) {
+                    selectedField.conditionalFields[option][index].maxDigits = 10;
                 }
                 selectedField.conditionalFields[option][index][property] = value;
                 showFieldProperties(selectedField);
@@ -1360,8 +1394,11 @@
         }
 
         function loadTemplate(templateName) {
-            formFields = JSON.parse(JSON.stringify(templates[templateName])); // Deep copy
-            fieldCounter = formFields.length;
+            formFields = JSON.parse(JSON.stringify(templates[templateName]));
+            fieldCounter = formFields.reduce((max, field) => {
+                const idNum = parseInt(field.id.split('_')[1]) || 0;
+                return Math.max(max, idNum);
+            }, 0);
             document.getElementById('formName').value = templateName === 'blank' ? '' : `Formulario de ${templateName.charAt(0).toUpperCase() + templateName.slice(1)}`;
             document.getElementById('formType').value = templateName === 'blank' ? 'other' : templateName;
             renderFormBuilder();
@@ -1408,7 +1445,6 @@
                 return;
             }
 
-            // Validate payment forms
             const formType = document.getElementById('formType').value;
             if (formType === 'payment') {
                 const hasLineaCaptura = formFields.some(field => field.type === 'number' && field.label.toLowerCase().includes('línea de captura') && field.maxDigits === 27);
@@ -1429,7 +1465,6 @@
             const description = document.getElementById('formDescription').value.trim();
             const active = document.getElementById('formActive').checked;
 
-            // Client-side validation
             if (!course) {
                 showToast('error', 'Selecciona un curso para el formulario');
                 return;
@@ -1440,7 +1475,6 @@
                 return;
             }
 
-            // Validate fields
             for (const field of formFields) {
                 if (!field.label || field.label.length > 50) {
                     showToast('error', `La etiqueta del campo ${field.label} debe tener entre 1 y 50 caracteres`);
