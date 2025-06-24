@@ -16,7 +16,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 
 const app = express();
-const uri = 'mongodb://localhost:27017';
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
 const redis = new Redis({ host: 'localhost', port: 6379 });
 const emailQueue = new Queue('email-notifications', { redis: { host: 'localhost', port: 6379 } });
