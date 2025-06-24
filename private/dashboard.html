@@ -906,33 +906,25 @@
                 <div class="modal-body">
                     <div class="row row-cols-1 row-cols-md-2 g-4">
                         <div class="col">
-                            <a href="crear_form.html"
-                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
-                                style="animation-delay: 0.1s; text-decoration: none;">
+                            <a href="/crear_form" class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn" style="animation-delay: 0.1s; text-decoration: none;">
                                 <div class="card-body">
                                     <i class="fas fa-clipboard-list fa-3x mb-3"></i>
                                     <h5 class="card-title">Crear Formulario</h5>
-                                    <p class="card-text small">Crea formularios para recopilar información de tus
-                                        estudiantes.</p>
+                                    <p class="card-text small">Crea formularios para recopilar información de tus estudiantes.</p>
                                 </div>
                             </a>
                         </div>
                         <div class="col">
-                            <a href="crear_post.html"
-                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
-                                style="animation-delay: 0.2s; text-decoration: none;">
+                            <a href="/crear_post" class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn" style="animation-delay: 0.2s; text-decoration: none;">
                                 <div class="card-body">
                                     <i class="fas fa-bullhorn fa-3x mb-3"></i>
                                     <h5 class="card-title">Crear Publicación</h5>
-                                    <p class="card-text small">Comparte anuncios, noticias y eventos con toda la
-                                        comunidad.</p>
+                                    <p class="card-text small">Comparte anuncios, noticias y eventos con toda la comunidad.</p>
                                 </div>
                             </a>
                         </div>
                         <div class="col">
-                            <a href="crear_calendario.html"
-                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
-                                style="animation-delay: 0.3s; text-decoration: none;">
+                            <a href="/crear_calendario" class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn" style="animation-delay: 0.3s; text-decoration: none;">
                                 <div class="card-body">
                                     <i class="fas fa-calendar-alt fa-3x mb-3"></i>
                                     <h5 class="card-title">Gestionar Calendario</h5>
@@ -941,14 +933,11 @@
                             </a>
                         </div>
                         <div class="col">
-                            <a href="subir_recurso.html"
-                                class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn"
-                                style="animation-delay: 0.4s; text-decoration: none;">
+                            <a href="/subir_recurso" class="card bg-dark text-white text-center p-4 h-100 animate__animated animate__bounceIn" style="animation-delay: 0.4s; text-decoration: none;">
                                 <div class="card-body">
                                     <i class="fas fa-upload fa-3x mb-3"></i>
                                     <h5 class="card-title">Subir Recurso</h5>
-                                    <p class="card-text small">Agrega materiales educativos para compartir con los
-                                        estudiantes.</p>
+                                    <p class="card-text small">Agrega materiales educativos para compartir con los estudiantes.</p>
                                 </div>
                             </a>
                         </div>
@@ -1048,7 +1037,7 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="perfil.html" class="sidebar-menu-link">
+                    <a href="/perfil" class="sidebar-menu-link">
                         <i class="fas fa-user sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">Perfil</span>
                     </a>
@@ -1060,13 +1049,13 @@
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="dashboard_pagos.html" class="sidebar-menu-link">
+                    <a href="/dashboard_pagos" class="sidebar-menu-link">
                         <i class="fas fa-credit-card sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">Pagos</span>
                     </a>
                 </li>
                 <li class="sidebar-menu-item">
-                    <a href="dashboard_documentos.html" class="sidebar-menu-link">
+                    <a href="/dashboard_documentos" class="sidebar-menu-link">
                         <i class="fas fa-file-alt sidebar-menu-icon"></i>
                         <span class="sidebar-menu-text">Editor de Documentos</span>
                     </a>
@@ -1299,6 +1288,7 @@
                             userNameSpan.textContent = `Bienvenido, ${data.user.name}`;
                         } else {
                             userNameSpan.textContent = 'Bienvenido, Invitado';
+                            window.location.href = '/login.html'; // Redirige si no hay sesión
                         }
                     })
                     .catch(error => console.error('Error al cargar el nombre:', error));
@@ -1367,7 +1357,7 @@
                         button.addEventListener('click', () => {
                             const itemId = button.getAttribute('data-id');
                             const itemType = button.getAttribute('data-type');
-                            window.location.href = `editar_${itemType}.html?id=${itemId}`;
+                            window.location.href = `/editar_${itemType}?id=${itemId}`; // Cambiado a ruta dinámica
                         });
                     });
 
