@@ -18,9 +18,9 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
-const redis = new Redis({ host: 'localhost', port: 6379 });
-const emailQueue = new Queue('email-notifications', { redis: { host: 'localhost', port: 6379 } });
-const postQueue = new Queue('post-publishing', { redis: { host: 'localhost', port: 6379 } });
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const emailQueue = new Queue('email-notifications', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
+const postQueue = new Queue('post-publishing', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
 
 app.use(compression());
 app.use(morgan('combined'));
