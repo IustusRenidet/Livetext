@@ -345,8 +345,8 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center animate__animated animate__fadeIn" href="index.html">
-                <img src="img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image">
+            <a class="navbar-brand d-flex align-items-center animate__animated animate__fadeIn" href="/index.html">
+                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image">
                 LIVETEXT
             </a>
         </div>
@@ -505,7 +505,7 @@
                 const result = await response.json();
                 if (response.ok) {
                     showToast('success', result.message);
-                    setTimeout(() => window.location.href = '/dashboard.html', 1000);
+                    setTimeout(() => window.location.href = '/dashboard', 1000); // Cambiado a /dashboard
                 } else {
                     showToast('danger', result.error);
                 }
@@ -530,7 +530,7 @@
                 const result = await response.json();
                 if (response.ok) {
                     showToast('success', result.message);
-                    setTimeout(() => document.querySelector('.nav-link[href="#login"]').click(), 1000); // Cambia a pestaña de login
+                    setTimeout(() => window.location.href = '/dashboard', 1000); // Cambiado a /dashboard
                 } else {
                     showToast('danger', result.error);
                 }

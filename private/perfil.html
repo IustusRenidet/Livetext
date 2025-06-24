@@ -351,7 +351,7 @@
                             <button type="submit" class="btn btn-primary animate__animated animate__bounceIn">
                                 <i class="fas fa-save me-2"></i> Guardar Cambios
                             </button>
-                            <a href="/dashboard.html" class="btn btn-secondary animate__animated animate__bounceIn">
+                            <a href="/dashboard" class="btn btn-secondary animate__animated animate__bounceIn">
                                 <i class="fas fa-times me-2"></i> Cancelar
                             </a>
                         </div>
@@ -524,6 +524,17 @@
                         const result = await response.json();
                         if (response.ok) {
                             successToast.show();
+                            // Recargar datos de sesión
+                            fetch('/get-session')
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.user) {
+                                        nombreInput.value = data.user.name;
+                                        surnameInput.value = data.user.surname;
+                                        secondSurnameInput.value = data.user.secondSurname;
+                                        emailInput.value = data.user.email;
+                                    }
+                                });
                         } else {
                             document.getElementById('errorToastBody').textContent = result.error || 'Error al actualizar el perfil.';
                             errorToast.show();
