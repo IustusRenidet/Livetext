@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIVETEXT - Constructor de Formularios de Pago</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
@@ -118,55 +117,45 @@
         .preview-card {
             background: var(--white);
             color: #000 !important;
-            /* Color base negro */
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .preview-card * {
             color: #000 !important;
-            /* Forzar color negro en todos los elementos hijos */
         }
 
         .preview-card h5 {
             color: #000 !important;
-            /* Específico para h5 */
         }
 
         .preview-card h5.text-primary {
             color: #000 !important;
-            /* Específicamente para h5 con clase text-primary */
         }
 
         .preview-card h5 i {
             color: var(--secondary-color) !important;
-            /* Mantener íconos en color secundario */
         }
 
         .preview-card .text-muted {
             color: rgba(0, 0, 0, 0.6) !important;
-            /* Ajustar text-muted a negro con opacidad */
         }
 
         .preview-card .form-label {
             color: #000 !important;
-            /* Etiquetas de formulario */
         }
 
         .preview-card .form-control,
         .preview-card .form-select {
             color: #000 !important;
-            /* Campos de entrada y select */
             background: var(--white) !important;
         }
 
         .preview-card .form-control::placeholder {
             color: rgba(0, 0, 0, 0.5) !important;
-            /* Placeholder en tono negro claro */
         }
 
         .preview-card .form-check-label {
             color: #000 !important;
-            /* Etiquetas de casillas */
         }
 
         .preview-card::before {
@@ -465,7 +454,6 @@
             letter-spacing: 1px;
         }
 
-        /* Mejorar visibilidad en elementos específicos */
         .card h5 {
             color: var(--white) !important;
             font-weight: 600;
@@ -479,7 +467,6 @@
             color: rgba(255, 255, 255, 0.7) !important;
         }
 
-        /* Forzar color blanco SOLO en toolbox y form builder */
         .toolbox-section .card *,
         .builder-section .card * {
             color: var(--white) !important;
@@ -495,7 +482,6 @@
             color: rgba(255, 255, 255, 0.8) !important;
         }
 
-        /* Excepciones para elementos específicos en toolbox y builder */
         .toolbox-section .card .form-control,
         .toolbox-section .card .form-select,
         .builder-section .card .form-control,
@@ -503,12 +489,10 @@
             color: var(--white) !important;
         }
 
-        /* Placeholders en constructor deben ser oscuros pero visibles */
         .builder-section .card .form-control::placeholder {
             color: rgba(0, 0, 0, 0.6) !important;
         }
 
-        /* Los campos disabled en el constructor mantienen placeholder oscuro */
         .builder-section .form-field .form-control[disabled]::placeholder,
         .builder-section .form-field .form-select[disabled],
         .builder-section .form-field .form-control[disabled] {
@@ -657,6 +641,22 @@
                         placeholder="Ej: Formulario de Pago - Inglés Básico">
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Formulario</label>
+                    <select class="form-select" id="formType">
+                        <option value="payment">Pago (con Línea de Captura)</option>
+                        <option value="pre-registration">Pre-registro</option>
+                        <option value="inscription">Inscripción</option>
+                        <option value="other">Otro</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="showTemplateModal()">
+                        <i class="fas fa-folder-open me-2"></i> Seleccionar Plantilla
+                    </button>
+                </div>
+
                 <div class="form-builder" id="formBuilder">
                     <div class="form-builder-empty" id="builderEmpty">
                         <i class="fas fa-mouse-pointer"></i>
@@ -735,6 +735,29 @@
         </div>
     </div>
 
+    <!-- Template Selection Modal -->
+    <div class="modal fade" id="templateModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Seleccionar Plantilla</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <button class="btn btn-primary w-100 mb-2" onclick="loadTemplate('payment')">Plantilla de Pago</button>
+                        <button class="btn btn-primary w-100 mb-2" onclick="loadTemplate('pre-registration')">Plantilla de Pre-registro</button>
+                        <button class="btn btn-primary w-100 mb-2" onclick="loadTemplate('inscription')">Plantilla de Inscripción</button>
+                        <button class="btn btn-secondary w-100" onclick="loadTemplate('blank')">Formulario en Blanco</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="successToast" class="toast" role="alert">
@@ -763,15 +786,45 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/validator@13.7.0/validator.min.js"></script>
     <script>
         let formFields = [];
         let fieldCounter = 0;
         let selectedField = null;
 
+        // Predefined Templates
+        const templates = {
+            'payment': [
+                { id: 'field_1', type: 'text', label: 'Nombre Completo', placeholder: 'Ingresa tu nombre', required: true },
+                { id: 'field_2', type: 'email', label: 'Correo Electrónico', placeholder: 'ejemplo@correo.com', required: true, unique: true },
+                { id: 'field_3', type: 'number', label: 'Línea de Captura', placeholder: 'Ingresa 27 dígitos', required: true, maxDigits: 27 },
+                { id: 'field_4', type: 'file', label: 'Comprobante de Pago', required: true },
+                { id: 'field_5', type: 'radio', label: 'Tipo de Estudiante', options: ['Interno', 'Externo'], required: true, conditionalFields: {
+                    'Interno': [{ id: 'field_6', type: 'number', label: 'Número de Control', placeholder: 'Ingresa 9 dígitos', required: true, maxDigits: 9 }]
+                }}
+            ],
+            'pre-registration': [
+                { id: 'field_1', type: 'text', label: 'Nombre Completo', placeholder: 'Ingresa tu nombre', required: true },
+                { id: 'field_2', type: 'email', label: 'Correo Electrónico', placeholder: 'ejemplo@correo.com', required: true, unique: true },
+                { id: 'field_3', type: 'tel', label: 'Teléfono', placeholder: '55 1234 5678', required: true },
+                { id: 'field_4', type: 'select', label: 'Curso Deseado', options: ['Inglés', 'Francés', 'Alemán'], required: true }
+            ],
+            'inscription': [
+                { id: 'field_1', type: 'text', label: 'Nombre Completo', placeholder: 'Ingresa tu nombre', required: true },
+                { id: 'field_2', type: 'email', label: 'Correo Electrónico', placeholder: 'ejemplo@correo.com', required: true, unique: true },
+                { id: 'field_3', type: 'date', label: 'Fecha de Nacimiento', required: true },
+                { id: 'field_4', type: 'radio', label: 'Tipo de Estudiante', options: ['Interno', 'Externo'], required: true, conditionalFields: {
+                    'Interno': [{ id: 'field_5', type: 'number', label: 'Número de Control', placeholder: 'Ingresa 9 dígitos', required: true, maxDigits: 9 }]
+                }}
+            ],
+            'blank': []
+        };
+
         // Initialize drag and drop
         document.addEventListener('DOMContentLoaded', function () {
             initializeDragAndDrop();
             initializeSortable();
+            showTemplateModal(); // Show template modal on page load
         });
 
         function initializeDragAndDrop() {
@@ -833,7 +886,9 @@
                 label: getDefaultLabel(fieldType),
                 placeholder: getDefaultPlaceholder(fieldType),
                 required: false,
-                options: fieldType === 'select' || fieldType === 'radio' || fieldType === 'checkbox' ? ['Opción 1', 'Opción 2'] : []
+                options: fieldType === 'select' || fieldType === 'radio' || fieldType === 'checkbox' ? ['Opción 1', 'Opción 2'] : [],
+                maxDigits: fieldType === 'number' ? 10 : undefined,
+                conditionalFields: fieldType === 'radio' || fieldType === 'select' ? {} : undefined
             };
 
             formFields.push(field);
@@ -905,7 +960,7 @@
                 case 'email':
                 case 'tel':
                 case 'number':
-                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" disabled>`;
+                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" disabled ${field.maxDigits ? `maxlength="${field.maxDigits}"` : ''}>`;
 
                 case 'date':
                     return `<input type="date" class="form-control" disabled>`;
@@ -956,7 +1011,7 @@
                 return;
             }
 
-            const fieldsHtml = formFields.map(field => `
+            let fieldsHtml = formFields.map(field => `
                 <div class="mb-3">
                     <label class="form-label">
                         ${field.label} ${field.required ? '<span class="text-danger">*</span>' : ''}
@@ -964,6 +1019,24 @@
                     ${renderPreviewField(field)}
                 </div>
             `).join('');
+
+            // Render conditional fields
+            formFields.forEach(field => {
+                if (field.conditionalFields && (field.type === 'radio' || field.type === 'select')) {
+                    Object.keys(field.conditionalFields).forEach(option => {
+                        field.conditionalFields[option].forEach(condField => {
+                            fieldsHtml += `
+                                <div class="mb-3 conditional-field" style="display: none;" data-parent="${field.id}" data-option="${option}">
+                                    <label class="form-label">
+                                        ${condField.label} ${condField.required ? '<span class="text-danger">*</span>' : ''}
+                                    </label>
+                                    ${renderPreviewField(condField)}
+                                </div>
+                            `;
+                        });
+                    });
+                }
+            });
 
             formPreview.innerHTML = `
                 <div class="preview-form">
@@ -976,6 +1049,21 @@
                     </form>
                 </div>
             `;
+
+            // Add event listeners for conditional fields
+            formFields.forEach(field => {
+                if (field.conditionalFields && (field.type === 'radio' || field.type === 'select')) {
+                    const input = document.querySelector(`[name="${field.id}"], #${field.id}`);
+                    if (input) {
+                        input.addEventListener('change', (e) => {
+                            const value = field.type === 'radio' ? e.target.value : e.target.value;
+                            document.querySelectorAll(`.conditional-field[data-parent="${field.id}"]`).forEach(el => {
+                                el.style.display = el.dataset.option === value ? 'block' : 'none';
+                            });
+                        });
+                    }
+                }
+            });
         }
 
         function renderPreviewField(field) {
@@ -984,7 +1072,7 @@
                 case 'email':
                 case 'tel':
                 case 'number':
-                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''}>`;
+                    return `<input type="${field.type}" class="form-control" placeholder="${field.placeholder}" ${field.required ? 'required' : ''} ${field.maxDigits ? `maxlength="${field.maxDigits}"` : ''}>`;
 
                 case 'date':
                     return `<input type="date" class="form-control" ${field.required ? 'required' : ''}>`;
@@ -994,7 +1082,7 @@
 
                 case 'select':
                     const selectOptions = field.options.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-                    return `<select class="form-select" ${field.required ? 'required' : ''}><option value="">Selecciona una opción</option>${selectOptions}</select>`;
+                    return `<select class="form-select" id="${field.id}" ${field.required ? 'required' : ''}><option value="">Selecciona una opción</option>${selectOptions}</select>`;
 
                 case 'radio':
                     return field.options.map((opt, index) => `
@@ -1021,12 +1109,10 @@
         }
 
         function selectField(fieldId) {
-            // Remove previous selection
             document.querySelectorAll('.form-field').forEach(field => {
                 field.classList.remove('selected');
             });
 
-            // Add selection to current field
             const fieldElement = document.querySelector(`[data-field-id="${fieldId}"]`);
             fieldElement.classList.add('selected');
 
@@ -1060,6 +1146,44 @@
                 `;
             }
 
+            let conditionalFieldsHtml = '';
+            if (field.type === 'radio' || field.type === 'select') {
+                conditionalFieldsHtml = `
+                    <div class="mb-3">
+                        <label class="form-label">Campos Condicionales</label>
+                        ${field.options.map(option => `
+                            <div class="mb-2">
+                                <label class="form-label">Para "${option}"</label>
+                                <button class="btn btn-secondary btn-sm" onclick="addConditionalField('${option}')">
+                                    <i class="fas fa-plus"></i> Agregar Campo
+                                </button>
+                                <div id="conditionalFields_${option.replace(/\s/g, '_')}">
+                                    ${(field.conditionalFields && field.conditionalFields[option] || []).map((condField, index) => `
+                                        <div class="option-item">
+                                            <input type="text" class="form-control" value="${condField.label}" placeholder="Etiqueta" onchange="updateConditionalField('${option}', ${index}, 'label', this.value)">
+                                            <select class="form-select" onchange="updateConditionalField('${option}', ${index}, 'type', this.value)">
+                                                <option value="text" ${condField.type === 'text' ? 'selected' : ''}>Texto</option>
+                                                <option value="number" ${condField.type === 'number' ? 'selected' : ''}>Número</option>
+                                            </select>
+                                            <button class="remove-option" onclick="removeConditionalField('${option}', ${index})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            let maxDigitsHtml = field.type === 'number' ? `
+                <div class="mb-3">
+                    <label class="form-label">Máximo de Dígitos</label>
+                    <input type="number" class="form-control" value="${field.maxDigits || 10}" min="1" max="50" onchange="updateFieldProperty('maxDigits', parseInt(this.value))">
+                </div>
+            ` : '';
+
             propertiesContent.innerHTML = `
                 <div class="mb-3">
                     <label class="form-label">Etiqueta</label>
@@ -1077,7 +1201,9 @@
                         <label class="form-check-label">Campo obligatorio</label>
                     </div>
                 </div>
+                ${maxDigitsHtml}
                 ${optionsHtml}
+                ${conditionalFieldsHtml}
             `;
 
             propertiesPanel.style.display = 'block';
@@ -1085,6 +1211,18 @@
 
         function updateFieldProperty(property, value) {
             if (selectedField) {
+                if (property === 'label' && value.length > 50) {
+                    showToast('error', 'La etiqueta no puede exceder los 50 caracteres');
+                    return;
+                }
+                if (property === 'placeholder' && value.length > 100) {
+                    showToast('error', 'El placeholder no puede exceder los 100 caracteres');
+                    return;
+                }
+                if (property === 'maxDigits' && (value < 1 || value > 50)) {
+                    showToast('error', 'El máximo de dígitos debe estar entre 1 y 50');
+                    return;
+                }
                 selectedField[property] = value;
                 renderFormBuilder();
                 renderPreview();
@@ -1093,7 +1231,12 @@
 
         function updateOption(index, value) {
             if (selectedField && selectedField.options) {
+                if (value.length > 50) {
+                    showToast('error', 'La opción no puede exceder los 50 caracteres');
+                    return;
+                }
                 selectedField.options[index] = value;
+                showFieldProperties(selectedField);
                 renderFormBuilder();
                 renderPreview();
             }
@@ -1110,9 +1253,55 @@
 
         function removeOption(index) {
             if (selectedField && selectedField.options && selectedField.options.length > 1) {
+                const option = selectedField.options[index];
                 selectedField.options.splice(index, 1);
+                if (selectedField.conditionalFields && selectedField.conditionalFields[option]) {
+                    delete selectedField.conditionalFields[option];
+                }
                 showFieldProperties(selectedField);
                 renderFormBuilder();
+                renderPreview();
+            }
+        }
+
+        function addConditionalField(option) {
+            if (selectedField && selectedField.conditionalFields) {
+                fieldCounter++;
+                const condField = {
+                    id: `field_${fieldCounter}`,
+                    type: 'text',
+                    label: `Campo para ${option}`,
+                    required: false,
+                    maxDigits: selectedField.type === 'number' ? 10 : undefined
+                };
+                if (!selectedField.conditionalFields[option]) {
+                    selectedField.conditionalFields[option] = [];
+                }
+                selectedField.conditionalFields[option].push(condField);
+                showFieldProperties(selectedField);
+                renderPreview();
+            }
+        }
+
+        function updateConditionalField(option, index, property, value) {
+            if (selectedField && selectedField.conditionalFields && selectedField.conditionalFields[option]) {
+                if (property === 'label' && value.length > 50) {
+                    showToast('error', 'La etiqueta no puede exceder los 50 caracteres');
+                    return;
+                }
+                selectedField.conditionalFields[option][index][property] = value;
+                showFieldProperties(selectedField);
+                renderPreview();
+            }
+        }
+
+        function removeConditionalField(option, index) {
+            if (selectedField && selectedField.conditionalFields && selectedField.conditionalFields[option]) {
+                selectedField.conditionalFields[option].splice(index, 1);
+                if (selectedField.conditionalFields[option].length === 0) {
+                    delete selectedField.conditionalFields[option];
+                }
+                showFieldProperties(selectedField);
                 renderPreview();
             }
         }
@@ -1147,6 +1336,7 @@
                 formFields = [];
                 selectedField = null;
                 document.getElementById('formName').value = '';
+                document.getElementById('formType').value = 'payment';
                 document.getElementById('propertiesPanel').style.display = 'none';
                 renderFormBuilder();
                 renderPreview();
@@ -1162,6 +1352,24 @@
 
             const previewSection = document.querySelector('.preview-section');
             previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showTemplateModal() {
+            const modal = new bootstrap.Modal(document.getElementById('templateModal'));
+            modal.show();
+        }
+
+        function loadTemplate(templateName) {
+            formFields = JSON.parse(JSON.stringify(templates[templateName])); // Deep copy
+            fieldCounter = formFields.length;
+            document.getElementById('formName').value = templateName === 'blank' ? '' : `Formulario de ${templateName.charAt(0).toUpperCase() + templateName.slice(1)}`;
+            document.getElementById('formType').value = templateName === 'blank' ? 'other' : templateName;
+            renderFormBuilder();
+            renderPreview();
+            if (formFields.length > 0) {
+                hideEmptyMessage();
+            }
+            bootstrap.Modal.getInstance(document.getElementById('templateModal')).hide();
         }
 
         function hideEmptyMessage() {
@@ -1195,44 +1403,114 @@
                 return;
             }
 
+            if (formName.length > 100) {
+                showToast('error', 'El nombre del formulario no puede exceder los 100 caracteres');
+                return;
+            }
+
+            // Validate payment forms
+            const formType = document.getElementById('formType').value;
+            if (formType === 'payment') {
+                const hasLineaCaptura = formFields.some(field => field.type === 'number' && field.label.toLowerCase().includes('línea de captura') && field.maxDigits === 27);
+                if (!hasLineaCaptura) {
+                    showToast('error', 'Los formularios de pago deben incluir un campo de "Línea de Captura" con 27 dígitos');
+                    return;
+                }
+            }
+
             const modal = new bootstrap.Modal(document.getElementById('saveFormModal'));
             modal.show();
         }
 
-        function confirmSaveForm() {
+        async function confirmSaveForm() {
             const formName = document.getElementById('formName').value.trim();
+            const formType = document.getElementById('formType').value;
             const course = document.getElementById('formCourse').value;
             const description = document.getElementById('formDescription').value.trim();
             const active = document.getElementById('formActive').checked;
 
+            // Client-side validation
             if (!course) {
                 showToast('error', 'Selecciona un curso para el formulario');
                 return;
             }
 
+            if (description.length > 500) {
+                showToast('error', 'La descripción no puede exceder los 500 caracteres');
+                return;
+            }
+
+            // Validate fields
+            for (const field of formFields) {
+                if (!field.label || field.label.length > 50) {
+                    showToast('error', `La etiqueta del campo ${field.label} debe tener entre 1 y 50 caracteres`);
+                    return;
+                }
+                if (field.placeholder && field.placeholder.length > 100) {
+                    showToast('error', `El placeholder del campo ${field.label} no puede exceder los 100 caracteres`);
+                    return;
+                }
+                if (['select', 'radio', 'checkbox'].includes(field.type) && (!field.options || field.options.length < 1)) {
+                    showToast('error', `El campo ${field.label} debe tener al menos una opción`);
+                    return;
+                }
+                if (field.type === 'number' && (!field.maxDigits || field.maxDigits < 1 || field.maxDigits > 50)) {
+                    showToast('error', `El campo ${field.label} debe tener un máximo de dígitos entre 1 y 50`);
+                    return;
+                }
+                if (field.type === 'email' && field.required) {
+                    field.unique = true;
+                }
+                if (field.conditionalFields) {
+                    for (const option in field.conditionalFields) {
+                        field.conditionalFields[option].forEach(condField => {
+                            if (!condField.label || condField.label.length > 50) {
+                                showToast('error', `La etiqueta del campo condicional ${condField.label} debe tener entre 1 y 50 caracteres`);
+                                return;
+                            }
+                            if (condField.type === 'number' && (!condField.maxDigits || condField.maxDigits < 1 || condField.maxDigits > 50)) {
+                                showToast('error', `El campo condicional ${condField.label} debe tener un máximo de dígitos entre 1 y 50`);
+                                return;
+                            }
+                        });
+                    }
+                }
+            }
+
             const formData = {
                 name: formName,
-                course: course,
-                description: description,
-                active: active,
+                formType,
+                course,
+                description,
+                active,
                 fields: formFields,
-                created_at: new Date().toISOString()
+                created_at: new Date().toISOString(),
             };
 
-            // Simular guardado - aquí enviarías los datos al backend
-            console.log('Guardando formulario:', formData);
+            try {
+                const response = await fetch('/api/forms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
 
-            // Cerrar modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('saveFormModal'));
-            modal.hide();
-
-            // Mostrar mensaje de éxito
-            showToast('success', 'Formulario guardado exitosamente');
-
-            // Aquí podrías redirigir o limpiar el formulario
-            setTimeout(() => {
-                // window.location.href = '/forms-list.php';
-            }, 2000);
+                const result = await response.json();
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('saveFormModal'));
+                    modal.hide();
+                    showToast('success', result.message);
+                    setTimeout(() => {
+                        window.location.href = '/pagos.html';
+                    }, 2000);
+                } else {
+                    showToast('error', result.error || 'Error al guardar el formulario');
+                }
+            } catch (error) {
+                console.error('Error al guardar formulario:', error);
+                showToast('error', 'Error al conectar con el servidor');
+            }
         }
 
         function showToast(type, message) {
@@ -1244,10 +1522,9 @@
             toast.show();
         }
 
-        // Update preview when form name changes
         document.getElementById('formName').addEventListener('input', renderPreview);
+        document.getElementById('formType').addEventListener('change', renderPreview);
 
-        // Initialize preview
         renderPreview();
     </script>
 </body>
