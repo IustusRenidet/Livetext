@@ -88,6 +88,42 @@ document.addEventListener('DOMContentLoaded', () => {
             allowComments: false,
             likes: 18,
             comments: 1
+        },
+        {
+            id: 8,
+            title: "\u00a1Nuevo Curso Intensivo de Alem\u00e1n!",
+            category: "anuncios aleman",
+            content: "Aprende alem\u00e1n en tiempo r\u00e9cord con nuestro curso intensivo de verano. Inicio: 10 de julio. Cupos limitados.",
+            media: [{ type: "image", url: "https://images.unsplash.com/photo-1590608897129-79da63ec0201" }],
+            mediaMode: "manual",
+            allowComments: true,
+            likes: 15,
+            comments: 4
+        },
+        {
+            id: 9,
+            title: "Semana Cultural Japonesa",
+            category: "eventos japones",
+            content: "\u00danete a las actividades especiales para conocer la cultura japonesa: talleres, comida y charlas. 20 al 25 de julio.",
+            media: [
+                { type: "image", url: "https://images.unsplash.com/photo-1549693578-d683be217e58" },
+                { type: "image", url: "https://images.unsplash.com/photo-1557825835-74ef4e58c313" }
+            ],
+            mediaMode: "gallery",
+            allowComments: true,
+            likes: 22,
+            comments: 6
+        },
+        {
+            id: 10,
+            title: "Gu\u00eda de Pronunciaci\u00f3n en Ingl\u00e9s",
+            category: "recursos ingles",
+            content: "Descarga nuestra nueva gu\u00eda PDF con ejercicios de pronunciaci\u00f3n y ejemplos de audio.",
+            media: [{ type: "image", url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085" }],
+            mediaMode: "manual",
+            allowComments: false,
+            likes: 9,
+            comments: 0
         }
     ];
 
