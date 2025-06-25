@@ -67,7 +67,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif|mp4|webm/;
     const mimetype = filetypes.test(file.mimetype);
@@ -318,12 +318,17 @@ async function subscribeNewsletter(db, userData) {
   const existingSubscriber = await db.collection('newsletter_subscribers').findOne({ email });
   if (existingSubscriber) {
     await db.collection('newsletter_subscribers').updateOne({ email }, { $set: { name, notificationTypes, subscribed: true } });
-    return { message: 'Preferencias de notificación actualizadas.' };
   } else {
     const subscriber = { name, email, subscribed: true, notificationTypes, createdAt: new Date() };
     await db.collection('newsletter_subscribers').insertOne(subscriber);
-    return { message: 'Suscripción a notificaciones exitosa.' };
   }
+  emailQueue.add({
+    from: 'no-reply@livetextweb.com',
+    to: email,
+    subject: 'Bienvenido al boletín de LIVETEXT',
+    html: `Bienvenido ${name},<br>Comenzarás a recibir notificaciones de nuevas publicaciones y eventos.`
+  });
+  return { message: 'Suscripción a notificaciones exitosa.' };
 }
 
 async function unsubscribeNewsletter(db, email) {
@@ -553,7 +558,7 @@ Equipo LIVETEXT
   } catch (error) {
     console.error('Error in createPost:', error.stack);
     if (error instanceof multer.MulterError) {
-      throw new Error(`Error de archivo: ${error.message} (Límite: 20MB)`);
+      throw new Error(`Error de archivo: ${error.message} (Límite: 50MB)`);
     }
     throw error;
   }
@@ -631,7 +636,7 @@ Equipo LIVETEXT
   } catch (error) {
     console.error('Error in updatePost:', error.stack);
     if (error instanceof multer.MulterError) {
-      throw new Error(`Error de archivo: ${error.message} (Límite: 20MB)`);
+      throw new Error(`Error de archivo: ${error.message} (Límite: 50MB)`);
     }
     throw error;
   }
