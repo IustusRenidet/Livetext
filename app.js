@@ -1334,16 +1334,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
   }
 });
 
-app.post('/api/resources', requireAuth, upload.array('resourceFiles', 5), async (req, res) => {
-  try {
-    const result = await createResource(db, req.body, req.files, req.session.user._id);
-    res.status(201).json(result);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
-
-app.post('/upload-resource', requireAuth, resourceUpload.any(), async (req, res) => {
+app.post('/api/resources', requireAuth, resourceUpload.any(), async (req, res) => {
   try {
     const files = (req.files || []).filter(f => f.fieldname.startsWith('files'));
     const result = await createResource(db, req.body, files, req.session.user._id);
