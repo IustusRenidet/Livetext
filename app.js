@@ -150,6 +150,9 @@ app.get('/crear_calendario', requireAuth, (req, res) => {
 app.get('/editar_events', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_events.html'));
 });
+app.get('/editor.js', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editor.js'));
+});
 app.get('/dashboard', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
 });
@@ -197,7 +200,7 @@ async function ensureCollections(db) {
   const collectionNames = collections.map(c => c.name);
   const requiredCollections = [
     'users', 'codigos', 'resetTokens', 'notificationsQueue',
-    'calendar_events', 'posts', 'resources', 'newsletter_subscribers', 'forms', 'comments'
+    'calendar_events', 'posts', 'resources', 'newsletter_subscribers', 'forms', 'comments', 'documents', 'templates'
   ];
   for (const name of requiredCollections) {
     if (!collectionNames.includes(name)) await db.createCollection(name);
