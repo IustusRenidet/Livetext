@@ -687,7 +687,7 @@
                     files: selectedFiles.map(f => f.name)
                 });
 
-                fetch('http://localhost:3000/upload-resource', {
+                fetch('/api/resources', {
                     method: 'POST',
                     body: formData
                 })
