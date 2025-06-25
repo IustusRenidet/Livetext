@@ -19,6 +19,14 @@ const cookieParser = require('cookie-parser');
 const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
+const TRAINING_DATA_FILE = path.join(__dirname, 'training-data.json');
+let trainingData = [];
+try {
+  trainingData = JSON.parse(fs.readFileSync(TRAINING_DATA_FILE, 'utf8'));
+} catch {
+  trainingData = [];
+}
+
 const app = express();
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
@@ -1802,10 +1810,15 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
   }
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Servicio de chat no configurado' });
-  }
   try {
+    const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.content?.toLowerCase() || '';
+    const custom = trainingData.find(t => lastUserMsg.includes(t.question.toLowerCase()));
+    if (custom) {
+      return res.json({ reply: custom.answer });
+    }
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'Servicio de chat no configurado' });
+    }
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages,
@@ -1817,6 +1830,22 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     console.error('Error en chat IA:', error);
     const errMsg = error?.error?.message || error?.message;
     res.status(500).json({ error: errMsg || 'Error en servicio de chat' });
+  }
+});
+
+// Entrenamiento de la IA con pares pregunta/respuesta
+app.post('/api/train', requireAuth, async (req, res) => {
+  const { question, answer } = req.body;
+  if (!question || !answer) {
+    return res.status(400).json({ error: 'Datos incompletos' });
+  }
+  trainingData.push({ question, answer });
+  try {
+    fs.writeFileSync(TRAINING_DATA_FILE, JSON.stringify(trainingData, null, 2));
+    res.status(201).json({ success: true });
+  } catch (error) {
+    console.error('Error al guardar entrenamiento:', error);
+    res.status(500).json({ error: 'No se pudo guardar' });
   }
 });
 
