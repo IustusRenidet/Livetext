@@ -1,492 +1,90 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LIVETEXT - Editar Recurso</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #000b24;
-            --secondary-color: #e67e22;
-            --dark-bg: #232A40;
-            --light-bg: #D7D7D9;
-            --accent-color: #D94E41;
-            --white: #fff;
-            --gradient-bg: linear-gradient(135deg, var(--primary-color), #1a3c6b);
-            --frosted-bg: rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            --input-glow: 0 0 14px rgba(230, 126, 34, 0.7);
-            --border-gradient: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
-        }
-
-        body {
-            background: linear-gradient(180deg, var(--dark-bg), #1a1f2e);
-            color: var(--white);
-            min-height: 100vh;
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        .navbar {
-            background: var(--gradient-bg) !important;
-            padding: 1.3rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
-        }
-
-        .navbar-brand {
-            font-family: 'Franklin Gothic Medium', Arial, sans-serif;
-            font-size: 2.3rem;
-            color: var(--white) !important;
-            transition: color 0.3s ease, text-shadow 0.3s ease;
-        }
-
-        .navbar-brand:hover {
-            color: var(--secondary-color) !important;
-            text-shadow: 0 0 10px var(--secondary-color);
-        }
-
-        .logo-image {
-            width: 120px;
-            margin-right: 15px;
-            transition: transform 0.4s ease, filter 0.3s ease;
-        }
-
-        .logo-image:hover {
-            transform: scale(1.2) rotate(8deg);
-            filter: drop-shadow(0 0 10px var(--secondary-color));
-        }
-
-        .main-container {
-            flex: 1;
-            padding: 2rem 1rem;
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr minmax(0, 400px);
-            gap: 2rem;
-            align-items: flex-start;
-            overflow-x: auto;
-        }
-
-        .form-section {
-            width: 100%;
-        }
-
-        .preview-section {
-            position: sticky;
-            top: 2rem;
-            max-height: calc(100vh - 4rem);
-            overflow-y: auto;
-        }
-
-        .card {
-            background: var(--gradient-bg);
-            border-radius: 24px;
-            padding: 2rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: fadeInUp 0.7s ease;
-            position: relative;
-            overflow: hidden;
-            color: var(--white) !important;
-        }
-
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--border-gradient);
-            z-index: 1;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .card * {
-            color: var(--white) !important;
-        }
-
-        .card .text-muted {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .card small {
-            color: rgba(255, 255, 255, 0.8) !important;
-        }
-
-        .preview-card {
-            background: var(--white);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .preview-card * {
-            color: var(--primary-color) !important;
-        }
-
-        .preview-card .text-muted {
-            color: rgba(0, 0, 0, 0.6) !important;
-        }
-
-        .form-control, .form-select, textarea.form-control {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid var(--secondary-color);
-            color: var(--white);
-            border-radius: 12px;
-            padding: 0.7rem;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus, .form-select:focus, textarea.form-control:focus {
-            border-color: var(--white);
-            box-shadow: var(--input-glow);
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(1.02);
-        }
-
-        .form-control::placeholder, textarea.form-control::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-            font-style: italic;
-            font-weight: 300;
-        }
-
-        .form-select, .form-select option {
-            color: var(--primary-color) !important;
-            background: var(--white) !important;
-        }
-
-        .form-select:focus {
-            color: var(--primary-color) !important;
-            background: var(--white) !important;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: var(--white) !important;
-            margin-bottom: 0.5rem;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
-        }
-
-        .form-label:hover {
-            color: var(--secondary-color) !important;
-        }
-
-        .btn-primary {
-            background: var(--secondary-color);
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: 0.5s;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-color);
-            transform: scale(1.05);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-success {
-            background: #28a745;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: scale(1.05);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--light-bg);
-            color: var(--primary-color);
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background: #c0c0c2;
-            transform: scale(1.05);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        @media (max-width: 992px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .preview-section {
-                position: static;
-                max-height: none;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .form-control, .form-select {
-                font-size: 0.9rem;
-                padding: 0.5rem;
-            }
-        }
-    </style>
 </head>
-
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="/">
-                <img src="/img/logo_live.jpg" alt="LIVETEXT Logo" class="logo-image animate__animated animate__pulse">
-                LIVETEXT
-            </a>
-            <div class="d-flex align-items-center ms-auto gap-3">
-                <span class="me-3 d-none d-lg-block animate__animated animate__fadeIn" id="userName"></span>
-                <a href="/logout" class="btn btn-danger animate__animated animate__bounceIn" style="animation-delay: 0.5s;">
-                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
-                </a>
+<body class="bg-dark text-light">
+    <div class="container py-4">
+        <h1 class="mb-4">Editar Recurso</h1>
+        <form id="resourceForm" enctype="multipart/form-data" class="mb-3">
+            <div class="mb-3">
+                <label for="title" class="form-label">Título</label>
+                <input type="text" id="title" class="form-control" required>
             </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="main-container">
-        <!-- Form Section -->
-        <div class="form-section">
-            <div class="card">
-                <h5 class="mb-4 text-center">
-                    <i class="fas fa-edit me-2"></i> Editar Recurso
-                </h5>
-
-                <form id="resourceForm">
-                    <input type="hidden" id="resourceId" name="resourceId">
-
-                    <div class="mb-3">
-                        <label for="resourceTitle" class="form-label">Título del Recurso</label>
-                        <input type="text" class="form-control" id="resourceTitle" name="resourceTitle" placeholder="Ej: Guía de Estudio" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="resourceFile" class="form-label">Archivo</label>
-                        <input type="file" class="form-control" id="resourceFile" name="resourceFile">
-                        <small class="text-muted">Dejar en blanco para mantener el archivo actual.</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="resourceDescription" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="resourceDescription" name="resourceDescription" rows="3" placeholder="Describe el recurso..."></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="resourceDate" class="form-label">Fecha de Publicación</label>
-                        <input type="date" class="form-control" id="resourceDate" name="resourceDate" required min="2025-06-20">
-                    </div>
-
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="sendNotification" name="sendNotification">
-                        <label class="form-check-label" for="sendNotification">
-                            Enviar notificación a estudiantes
-                        </label>
-                    </div>
-
-                    <div class="d-flex gap-3 flex-wrap">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i> Guardar Cambios
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
-                            <i class="fas fa-broom me-2"></i> Limpiar
-                        </button>
-                    </div>
-                </form>
+            <div class="mb-3">
+                <label for="category" class="form-label">Categoría</label>
+                <select id="category" class="form-select">
+                    <option value="otros">Otros</option>
+                    <option value="documentos">Documentos</option>
+                    <option value="videos">Videos</option>
+                    <option value="imagenes">Imágenes</option>
+                </select>
             </div>
-        </div>
-
-        <!-- Preview Section -->
-        <div class="preview-section">
-            <div class="card preview-card">
-                <h5 class="mb-4 text-center">
-                    <i class="fas fa-eye me-2"></i> Vista Previa del Recurso
-                </h5>
-                <div id="resourcePreview">
-                    <div class="text-center text-muted">
-                        <i class="fas fa-file-alt" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
-                        <div>Completa los campos para ver la vista previa</div>
-                    </div>
-                </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Descripción</label>
+                <textarea id="description" rows="3" class="form-control"></textarea>
             </div>
-        </div>
+            <div class="mb-3">
+                <label for="files" class="form-label">Archivos (opcional)</label>
+                <input type="file" id="files" class="form-control" multiple>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="button" id="deleteBtn" class="btn btn-danger ms-2">Eliminar</button>
+        </form>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="successToast" class="toast" role="alert">
-            <div class="toast-header">
-                <i class="fas fa-check-circle text-success me-2"></i>
-                <strong class="me-auto">Éxito</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body" id="successMessage">
-                Recurso actualizado exitosamente
-            </div>
-        </div>
-        <div id="errorToast" class="toast" role="alert">
-            <div class="toast-header">
-                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                <strong class="me-auto">Error</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-            </div>
-            <div class="toast-body" id="errorMessage">
-                Error al actualizar el recurso
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cargar nombre del usuario
-            const userNameSpan = document.getElementById('userName');
-            if (userNameSpan) {
-                fetch('/get-session')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.user && data.user.name) {
-                            userNameSpan.textContent = `Bienvenido, ${data.user.name}`;
-                        } else {
-                            userNameSpan.textContent = 'Bienvenido, Invitado';
-                        }
-                    })
-                    .catch(error => console.error('Error al cargar el nombre:', error));
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const title = document.getElementById('title');
+    const category = document.getElementById('category');
+    const description = document.getElementById('description');
+    const files = document.getElementById('files');
+
+    async function loadResource() {
+        try {
+            const res = await axios.get(`/api/resources/${id}`);
+            title.value = res.data.title || '';
+            category.value = res.data.category || 'otros';
+            description.value = res.data.description || '';
+        } catch (err) {
+            console.error('Error al cargar recurso:', err);
+        }
+    }
+    if (id) loadResource();
+
+    document.getElementById('resourceForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('title', title.value);
+        formData.append('category', category.value);
+        formData.append('description', description.value);
+        Array.from(files.files).forEach((f, i) => formData.append(`files[${i}]`, f));
+        try {
+            await axios.put(`/api/resources/${id}`, formData);
+            alert('Recurso actualizado');
+            window.location.href = '/dashboard';
+        } catch (err) {
+            alert('Error al actualizar');
+            console.error(err);
+        }
+    });
+
+    document.getElementById('deleteBtn').addEventListener('click', async () => {
+        if (confirm('¿Eliminar este recurso?')) {
+            try {
+                await axios.delete(`/api/resources/${id}`);
+                window.location.href = '/dashboard';
+            } catch (err) {
+                alert('Error al eliminar');
+                console.error(err);
             }
-
-            // Obtener el ID del recurso desde la URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const resourceId = urlParams.get('id');
-            document.getElementById('resourceId').value = resourceId;
-
-            // Cargar datos del recurso para prellenar el formulario
-            async function loadResourceData() {
-                try {
-                    const response = await axios.get(`/api/resources/${resourceId}`);
-                    const resource = response.data;
-                    if (resource) {
-                        document.getElementById('resourceTitle').value = resource.title || '';
-                        document.getElementById('resourceDescription').value = resource.description || '';
-                        document.getElementById('resourceDate').value = resource.date ? moment(resource.date).format('YYYY-MM-DD') : '';
-                        document.getElementById('sendNotification').checked = resource.sendNotification || false;
-                        updatePreview();
-                    } else {
-                        showToast('error', 'Recurso no encontrado.');
-                    }
-                } catch (error) {
-                    console.error('Error al cargar el recurso:', error);
-                    if (error.response && error.response.status === 404) {
-                        showToast('error', 'Recurso no encontrado en el servidor.');
-                    } else {
-                        showToast('error', 'Error al conectar con el servidor. Intenta de nuevo.');
-                    }
-                }
-            }
-
-            loadResourceData();
-
-            // Actualizar vista previa
-            function updatePreview() {
-                const preview = document.getElementById('resourcePreview');
-                const title = document.getElementById('resourceTitle').value || 'Sin título';
-                const description = document.getElementById('resourceDescription').value || 'Sin descripción';
-                const date = document.getElementById('resourceDate').value ? moment(document.getElementById('resourceDate').value).format('DD/MM/YYYY') : 'Sin fecha';
-
-                preview.innerHTML = `
-                    <div class="preview-event" style="--event-color: #34495e;">
-                        <h6 class="mb-0">${title}</h6>
-                        <p class="mb-2"><small><i class="fas fa-calendar me-1"></i> ${date}</small></p>
-                        <p class="mb-2">${description}</p>
-                    </div>
-                `;
-            }
-
-            // Limpiar formulario
-            function clearForm() {
-                if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
-                    document.getElementById('resourceForm').reset();
-                    updatePreview();
-                }
-            }
-
-            // Guardar cambios
-            document.getElementById('resourceForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const formData = new FormData(document.getElementById('resourceForm'));
-
-                try {
-                    const response = await axios.put(`/api/resources/${resourceId}`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-                    if (response.status === 200) {
-                        showToast('success', 'Recurso actualizado exitosamente');
-                        setTimeout(() => window.location.href = 'dashboard.html', 2000);
-                    } else {
-                        showToast('error', 'Error al actualizar el recurso');
-                    }
-                } catch (error) {
-                    console.error('Error al guardar los cambios:', error);
-                    showToast('error', 'Error al actualizar el recurso');
-                }
-            });
-
-            function showToast(type, message) {
-                const toastElement = document.getElementById(type === 'success' ? 'successToast' : 'errorToast');
-                const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
-                messageElement.textContent = message;
-                const toast = new bootstrap.Toast(toastElement);
-                toast.show();
-            }
-        });
+        }
+    });
     </script>
 </body>
-
 </html>
