@@ -174,8 +174,11 @@ const restrictedPages = [
 
 app.use((req, res, next) => {
   const requestedPath = req.path;
-  if (restrictedPages.includes(requestedPath)) requireAuth(req, res, next);
-  else next();
+  if (restrictedPages.some(p => requestedPath.startsWith(p))) {
+    requireAuth(req, res, next);
+  } else {
+    next();
+  }
 });
 
 // Rutas dinámicas para páginas protegidas
@@ -221,7 +224,13 @@ app.get('/chat', requireAuth, (req, res) => {
 app.get('/editar_forms', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_forms.html'));
 });
+app.get('/editar_forms/:id', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editar_forms.html'));
+});
 app.get('/editar_resources', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editar_resources.html'));
+});
+app.get('/editar_resources/:id', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_resources.html'));
 });
 
