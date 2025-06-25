@@ -461,16 +461,9 @@
             document.getElementById('resourceForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(document.getElementById('resourceForm'));
-                const resourceData = {
-                    title: formData.get('resourceTitle'),
-                    description: formData.get('resourceDescription'),
-                    date: formData.get('resourceDate'),
-                    sendNotification: formData.get('sendNotification') === 'on',
-                    file: formData.get('resourceFile') // Solo si se carga un nuevo archivo
-                };
 
                 try {
-                    const response = await axios.put(`/api/resources/${resourceId}`, resourceData, {
+                    const response = await axios.put(`/api/resources/${resourceId}`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                     if (response.status === 200) {

@@ -569,29 +569,56 @@
                 documents.forEach(data => {
                     const clone = template.content.cloneNode(true);
                     clone.querySelector('.card-title').textContent = data.title;
-                    clone.querySelector('.card-text').textContent = `Última modificación: ${data.date}`;
+                    clone.querySelector('.card-text').textContent = `Última modificación: ${moment(data.updatedAt).format('DD/MM/YYYY')}`;
                     if (data.preview) {
                         clone.querySelector('.document-preview').src = data.preview;
                     }
                     const openBtn = clone.querySelector('.btn-custom');
-                    openBtn.setAttribute('href', '/editor');
+                    openBtn.setAttribute('href', `/editor?id=${data._id}`);
+                    const menu = document.createElement('div');
+                    menu.className = 'dropdown ms-2';
+                    menu.innerHTML = `
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">Acciones</button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item edit-doc" data-id="${data._id}" href="#">Editar</a></li>
+                            <li><a class="dropdown-item delete-doc" data-id="${data._id}" href="#">Eliminar</a></li>
+                        </ul>`;
+                    clone.querySelector('.template-card').appendChild(menu);
                     container.appendChild(clone);
+                });
+
+                container.querySelectorAll('.edit-doc').forEach(btn => {
+                    btn.addEventListener('click', e => {
+                        e.preventDefault();
+                        const id = btn.getAttribute('data-id');
+                        window.location.href = `/editor?id=${id}`;
+                    });
+                });
+                container.querySelectorAll('.delete-doc').forEach(btn => {
+                    btn.addEventListener('click', async e => {
+                        e.preventDefault();
+                        const id = btn.getAttribute('data-id');
+                        if (confirm('¿Eliminar documento?')) {
+                            await fetch(`/api/documents/${id}`, { method: 'DELETE' });
+                            btn.closest('.template-card').remove();
+                        }
+                    });
                 });
             }
 
-            // Example data
-            const exampleTemplates = [
-                { title: 'Presentación de Clase', date: '19/05/2025', dynamic: false },
-                { title: 'Ficha de Trabajo', date: '17/05/2025', dynamic: false },
-                { title: 'Certificado Dinámico', date: '22/05/2025', dynamic: true }
-            ];
-            const exampleDocuments = [
-                { title: 'Resumen de Curso', date: '21/05/2025', preview: '' },
-                { title: 'Guía de Estudio', date: '20/05/2025', preview: '' }
-            ];
+            async function loadDocuments() {
+                try {
+                    const response = await fetch('/api/documents');
+                    if (!response.ok) throw new Error('No se pudieron cargar los documentos');
+                    const docs = await response.json();
+                    loadRecentDocuments(docs);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
 
-            loadTemplates(exampleTemplates);
-            loadRecentDocuments(exampleDocuments);
+            loadTemplates([]);
+            loadDocuments();
         });
         
     </script>

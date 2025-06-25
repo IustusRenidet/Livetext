@@ -823,6 +823,98 @@ async function getComments(db, postId) {
   return comments;
 }
 
+// Resource helpers
+async function getResources(db, page = 1, limit = 10) {
+  return db.collection('resources')
+    .find()
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .toArray();
+}
+
+async function getResource(db, id) {
+  return db.collection('resources').findOne({ _id: new ObjectId(id) });
+}
+
+async function updateResource(db, id, data, files, userId) {
+  const update = {
+    title: data.title,
+    description: sanitizeHtml(data.description || ''),
+    updatedAt: new Date()
+  };
+  if (files && files.length > 0) {
+    update.files = files.map(f => ({
+      filename: f.filename,
+      originalname: f.originalname,
+      path: `/uploads/${f.filename}`,
+      contentType: f.mimetype
+    }));
+  }
+  const result = await db.collection('resources').updateOne(
+    { _id: new ObjectId(id), userId: new ObjectId(userId) },
+    { $set: update }
+  );
+  if (result.matchedCount === 0) throw new Error('Recurso no encontrado o no tienes permisos.');
+  await redis.del('resources:cache');
+  return { message: 'Recurso actualizado exitosamente.' };
+}
+
+async function deleteResource(db, id, userId) {
+  const result = await db.collection('resources').deleteOne({
+    _id: new ObjectId(id),
+    userId: new ObjectId(userId)
+  });
+  if (result.deletedCount === 0) throw new Error('Recurso no encontrado o no tienes permisos.');
+  await redis.del('resources:cache');
+  return { message: 'Recurso eliminado exitosamente.' };
+}
+
+// Document helpers
+async function createDocument(db, docData, userId) {
+  const document = {
+    ...docData,
+    userId: new ObjectId(userId),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  const result = await db.collection('documents').insertOne(document);
+  return { message: 'Documento guardado.', insertedId: result.insertedId };
+}
+
+async function updateDocument(db, id, docData, userId) {
+  const result = await db.collection('documents').updateOne(
+    { _id: new ObjectId(id), userId: new ObjectId(userId) },
+    { $set: { ...docData, updatedAt: new Date() } }
+  );
+  if (result.matchedCount === 0) throw new Error('Documento no encontrado o no tienes permisos.');
+  return { message: 'Documento actualizado.' };
+}
+
+async function getDocument(db, id) {
+  return db.collection('documents').findOne({ _id: new ObjectId(id) });
+}
+
+async function getDocuments(db, userId) {
+  return db.collection('documents')
+    .find({ userId: new ObjectId(userId) })
+    .sort({ updatedAt: -1 })
+    .toArray();
+}
+
+async function deleteDocument(db, id, userId) {
+  const result = await db.collection('documents').deleteOne({
+    _id: new ObjectId(id),
+    userId: new ObjectId(userId)
+  });
+  if (result.deletedCount === 0) throw new Error('Documento no encontrado o no tienes permisos.');
+  return { message: 'Documento eliminado.' };
+}
+
+async function getForm(db, id) {
+  return db.collection('forms').findOne({ _id: new ObjectId(id) });
+}
+
 // Routes
 app.get('/get-session', (req, res) => {
   if (req.session.user) {
@@ -1148,6 +1240,16 @@ app.get('/api/forms', async (req, res) => {
   }
 });
 
+app.get('/api/forms/:id', requireAuth, async (req, res) => {
+  try {
+    const form = await getForm(db, req.params.id);
+    if (!form) return res.status(404).json({ error: 'Formulario no encontrado' });
+    res.json(form);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener formulario' });
+  }
+});
+
 app.put('/api/forms/:id', requireAuth, validateForm, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -1326,6 +1428,32 @@ Equipo LIVETEXT
   }
 });
 
+app.get('/api/form-submissions', requireAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const submissions = await db.collection('form_submissions')
+      .find()
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .toArray();
+    res.json(submissions);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener envíos' });
+  }
+});
+
+app.get('/api/form-submissions/:id', requireAuth, async (req, res) => {
+  try {
+    const submission = await db.collection('form_submissions').findOne({ _id: new ObjectId(req.params.id) });
+    if (!submission) return res.status(404).json({ error: 'Envío no encontrado' });
+    res.json(submission);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener envío' });
+  }
+});
+
 app.post('/api/posts/:id/comments', async (req, res) => {
   try {
     const { id } = req.params;
@@ -1381,6 +1509,105 @@ app.post('/upload-resource', requireAuth, resourceUpload.any(), async (req, res)
     } else {
       res.status(400).json({ error: error.message });
     }
+  }
+});
+
+app.get('/api/resources', requireAuth, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const resources = await getResources(db, page, limit);
+    res.json(resources);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener recursos' });
+  }
+});
+
+app.get('/api/resources/:id', requireAuth, async (req, res) => {
+  try {
+    const resource = await getResource(db, req.params.id);
+    if (!resource) return res.status(404).json({ error: 'Recurso no encontrado' });
+    res.json(resource);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener recurso' });
+  }
+});
+
+app.put('/api/resources/:id', requireAuth, resourceUpload.any(), async (req, res) => {
+  try {
+    const files = (req.files || []).filter(f => f.fieldname.startsWith('files'));
+    const result = await updateResource(db, req.params.id, req.body, files, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/resources/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await deleteResource(db, req.params.id, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/api/documents', requireAuth, async (req, res) => {
+  try {
+    const result = await createDocument(db, req.body, req.session.user._id);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/documents', requireAuth, async (req, res) => {
+  try {
+    const docs = await getDocuments(db, req.session.user._id);
+    res.json(docs);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener documentos' });
+  }
+});
+
+app.get('/api/documents/:id', requireAuth, async (req, res) => {
+  try {
+    const doc = await getDocument(db, req.params.id);
+    if (!doc) return res.status(404).json({ error: 'Documento no encontrado' });
+    res.json(doc);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener documento' });
+  }
+});
+
+app.put('/api/documents/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await updateDocument(db, req.params.id, req.body, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/documents/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await deleteDocument(db, req.params.id, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/stats', requireAuth, async (req, res) => {
+  try {
+    const [pendingPayments, postCount, subscriberCount] = await Promise.all([
+      db.collection('form_submissions').countDocuments({ status: 'pending' }),
+      db.collection('posts').countDocuments(),
+      db.collection('newsletter_subscribers').countDocuments({ subscribed: true })
+    ]);
+    res.json({ pendingPayments, postCount, subscriberCount });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
   }
 });
 
