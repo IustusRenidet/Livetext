@@ -101,7 +101,7 @@ const validateForm = [
   body('name').trim().notEmpty().withMessage('El nombre del formulario es obligatorio').isLength({ max: 100 }).withMessage('El nombre no puede exceder los 100 caracteres'),
   body('course').trim().notEmpty().withMessage('El curso es obligatorio').isIn(['ingles', 'frances', 'aleman', 'italiano']).withMessage('Curso inválido'),
   body('description').trim().isLength({ max: 500 }).withMessage('La descripción no puede exceder los 500 caracteres'),
-  body('active').isBoolean().withMessage('El estado activo debe ser un booleano'),
+  body('active').toBoolean().isBoolean().withMessage('El estado activo debe ser un booleano'),
   body('fields').isArray().withMessage('Los campos deben ser un arreglo'),
   body('fields.*.type').isIn(['text', 'email', 'tel', 'date', 'select', 'radio', 'checkbox', 'number', 'file', 'textarea']).withMessage('Tipo de campo inválido'),
   body('fields.*.label').trim().notEmpty().withMessage('La etiqueta del campo es obligatoria').isLength({ max: 50 }).withMessage('La etiqueta no puede exceder los 50 caracteres'),
@@ -113,7 +113,7 @@ const validateForm = [
 // Validation middleware for form submissions
 const validateFormSubmission = [
   body('formId').trim().notEmpty().withMessage('El ID del formulario es obligatorio').isMongoId().withMessage('ID de formulario inválido'),
-  body('responses').isArray().withMessage('Las respuestas deben ser un arreglo'),
+  body('responses').custom(value => Array.isArray(value)).withMessage('Las respuestas deben ser un arreglo'),
   body('responses.*.fieldId').trim().notEmpty().withMessage('El ID del campo es obligatorio'),
   body('responses.*.value').trim().notEmpty().withMessage('El valor del campo es obligatorio'),
   body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'email')).isEmail().withMessage('Correo electrónico inválido'),
@@ -680,8 +680,16 @@ async function getPost(db, postId) {
 }
 
 async function createForm(db, formData, userId) {
-  const { title, description, createdAt = new Date() } = formData;
-  const form = { title, description, createdAt, isPublic: true, userId: new ObjectId(userId) };
+  const { title, description, active = true, createdAt = new Date() } = formData;
+  const activeBool = active === true || active === 'true';
+  const form = {
+    title,
+    description,
+    createdAt,
+    isPublic: activeBool,
+    status: activeBool ? 'published' : 'draft',
+    userId: new ObjectId(userId)
+  };
   const result = await db.collection('forms').insertOne(form);
   await redis.del('forms:cache');
   const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
@@ -1041,6 +1049,7 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
     }
 
     const { name, formType, course, description, active, fields } = req.body;
+    const activeBool = active === true || active === 'true';
     const userId = req.session.user._id;
 
     const sanitizedForm = {
@@ -1048,8 +1057,8 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
       formType: sanitizeHtml(formType),
       course: sanitizeHtml(course),
       description: sanitizeHtml(description),
-      active,
-      status: active ? 'published' : 'draft',
+      active: activeBool,
+      status: activeBool ? 'published' : 'draft',
       fields: fields.map(field => ({
         id: field.id,
         type: field.type,
@@ -1075,7 +1084,7 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
       })),
       userId: new ObjectId(userId),
       createdAt: new Date(),
-      isPublic: active,
+      isPublic: activeBool,
     };
 
     const result = await db.collection('forms').insertOne(sanitizedForm);
@@ -1148,6 +1157,7 @@ app.put('/api/forms/:id', requireAuth, validateForm, async (req, res) => {
 
     const { id } = req.params;
     const { name, formType, course, description, active, fields } = req.body;
+    const activeBool = active === true || active === 'true';
     const userId = req.session.user._id;
 
     const sanitizedForm = {
@@ -1155,8 +1165,8 @@ app.put('/api/forms/:id', requireAuth, validateForm, async (req, res) => {
       formType: sanitizeHtml(formType),
       course: sanitizeHtml(course),
       description: sanitizeHtml(description),
-      active,
-      status: active ? 'published' : 'draft',
+      active: activeBool,
+      status: activeBool ? 'published' : 'draft',
       fields: fields.map(field => ({
         id: field.id,
         type: field.type,
@@ -1181,7 +1191,7 @@ app.put('/api/forms/:id', requireAuth, validateForm, async (req, res) => {
         ) : undefined,
       })),
       updatedAt: new Date(),
-      isPublic: active,
+      isPublic: activeBool,
     };
 
     const result = await db.collection('forms').updateOne(
@@ -1226,7 +1236,16 @@ app.delete('/api/forms/:id', requireAuth, async (req, res) => {
 
 app.post('/api/form-submissions', upload.fields([
   { name: 'files', maxCount: 10 }, // Adjust based on max files allowed
-]), validateFormSubmission, async (req, res) => {
+]), (req, res, next) => {
+  if (typeof req.body.responses === 'string') {
+    try {
+      req.body.responses = JSON.parse(req.body.responses);
+    } catch (err) {
+      return res.status(400).json({ error: 'Formato de respuestas inválido' });
+    }
+  }
+  next();
+}, validateFormSubmission, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
