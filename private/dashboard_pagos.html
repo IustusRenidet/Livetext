@@ -598,80 +598,30 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Sample data for demonstration
-        let paymentsData = [
-            {
-                id: 1,
-                student: "María González",
-                form: "ingles-basico",
-                formName: "Inglés Básico",
-                captureNumber: "1234567890123456789",
-                govValidation: "valid",
-                date: "2024-05-20",
-                status: "verified",
-                files: [
-                    { name: "formato_pago.jpg", type: "image", url: "#" },
-                    { name: "ticket.pdf", type: "pdf", url: "#" }
-                ],
-                observations: [
-                    { author: "Prof. Juan", date: "2024-05-20", text: "Documentos correctos, pago verificado." }
-                ],
-                studentType: "interno",
-                controlNumber: "19120345"
-            },
-            {
-                id: 2,
-                student: "Carlos Rodríguez",
-                form: "frances-basico",
-                formName: "Francés Básico",
-                captureNumber: "9876543210987654321",
-                govValidation: "pending",
-                date: "2024-05-21",
-                status: "reviewing",
-                files: [
-                    { name: "formato_pago.png", type: "image", url: "#" },
-                    { name: "ticket.jpg", type: "image", url: "#" }
-                ],
-                observations: [],
-                studentType: "externo",
-                controlNumber: ""
-            },
-            {
-                id: 3,
-                student: "Ana Martínez",
-                form: "ingles-intermedio",
-                formName: "Inglés Intermedio",
-                captureNumber: "5555444433332222111",
-                govValidation: "invalid",
-                date: "2024-05-19",
-                status: "rejected",
-                files: [
-                    { name: "formato_pago.jpg", type: "image", url: "#" }
-                ],
-                observations: [
-                    { author: "Prof. María", date: "2024-05-19", text: "Línea de captura no válida, favor de verificar." }
-                ],
-                studentType: "interno",
-                controlNumber: "19120346"
-            },
-            {
-                id: 4,
-                student: "Luis Hernández",
-                form: "curso-verano",
-                formName: "Curso de Verano",
-                captureNumber: "1111222233334444555",
-                govValidation: "valid",
-                date: "2024-05-22",
-                status: "pending",
-                files: [
-                    { name: "formato_pago.pdf", type: "pdf", url: "#" },
-                    { name: "ticket.png", type: "image", url: "#" }
-                ],
-                observations: [],
-                studentType: "interno",
-                controlNumber: "19120347"
+        let paymentsData = [];
+        async function loadPayments() {
+            try {
+                const response = await fetch('/api/form-submissions');
+                if (!response.ok) throw new Error('No se pudieron obtener los registros');
+                const raw = await response.json();
+                paymentsData = raw.map(s => ({
+                    id: s._id,
+                    student: s.responses[0]?.value || 'N/A',
+                    formName: s.formId,
+                    captureNumber: s.responses[1]?.value || '',
+                    govValidation: 'pending',
+                    date: s.createdAt,
+                    status: s.status,
+                    files: s.files || [],
+                    observations: []
+                }));
+                filteredData = [...paymentsData];
+                updateStatistics();
+                renderTable();
+            } catch (err) {
+                console.error(err);
             }
-        ];
+        }
 
         let currentPage = 1;
         let itemsPerPage = 10;
@@ -679,10 +629,10 @@
         let selectedPaymentId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            updateStatistics();
-            renderTable();
-            setupFilters();
-            setupSearch();
+            loadPayments().then(() => {
+                setupFilters();
+                setupSearch();
+            });
         });
 
         function updateStatistics() {
