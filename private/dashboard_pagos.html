@@ -460,11 +460,6 @@
                     <label class="form-label">Formulario</label>
                     <select class="form-select" id="formFilter">
                         <option value="">Todos los formularios</option>
-                        <option value="ingles-basico">Inglés Básico</option>
-                        <option value="ingles-intermedio">Inglés Intermedio</option>
-                        <option value="frances-basico">Francés Básico</option>
-                        <option value="curso-verano">Curso de Verano</option>
-                        <option value="intensivo-sabatino">Intensivo Sabatino</option>
                     </select>
                 </div>
                 <div class="col-md-3 mb-3">
@@ -599,22 +594,63 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let paymentsData = [];
-        async function loadPayments() {
+        let formsMap = {};
+        async function loadData() {
             try {
-                const response = await fetch('/api/form-submissions');
-                if (!response.ok) throw new Error('No se pudieron obtener los registros');
-                const raw = await response.json();
-                paymentsData = raw.map(s => ({
-                    id: s._id,
-                    student: s.responses[0]?.value || 'N/A',
-                    formName: s.formId,
-                    captureNumber: s.responses[1]?.value || '',
-                    govValidation: 'pending',
-                    date: s.createdAt,
-                    status: s.status,
-                    files: s.files || [],
-                    observations: []
-                }));
+                const [formsRes, submissionsRes] = await Promise.all([
+                    fetch('/api/forms?formType=payment'),
+                    fetch('/api/form-submissions')
+                ]);
+                if (!formsRes.ok || !submissionsRes.ok) throw new Error('No se pudieron obtener los registros');
+
+                const forms = await formsRes.json();
+                const submissions = await submissionsRes.json();
+
+                forms.forEach(f => { formsMap[f._id] = f; });
+
+                const formFilter = document.getElementById('formFilter');
+                formFilter.innerHTML = '<option value="">Todos los formularios</option>';
+                forms.forEach(f => {
+                    const option = document.createElement('option');
+                    option.value = f._id;
+                    option.textContent = f.name;
+                    formFilter.appendChild(option);
+                });
+
+                paymentsData = submissions.map(s => {
+                    const form = formsMap[s.formId] || {};
+                    const fieldMap = {};
+                    if (form.fields) {
+                        form.fields.forEach(fl => { fieldMap[fl.id] = fl; });
+                    }
+                    let student = 'N/A';
+                    let studentType = '';
+                    let controlNumber = '';
+                    let captureNumber = '';
+                    s.responses.forEach(r => {
+                        const field = fieldMap[r.fieldId] || {};
+                        const label = (field.label || '').toLowerCase();
+                        if (label.includes('nombre')) student = r.value;
+                        else if (label.includes('línea de captura')) captureNumber = r.value;
+                        else if (label.includes('número de control')) controlNumber = r.value;
+                        else if (label.includes('tipo') && label.includes('estudiante')) studentType = r.value;
+                    });
+                    return {
+                        id: s._id,
+                        formId: s.formId,
+                        formName: form.name || s.formId,
+                        student,
+                        studentType,
+                        controlNumber,
+                        captureNumber,
+                        govValidation: 'pending',
+                        date: s.createdAt,
+                        status: s.status,
+                        files: s.files || [],
+                        observations: []
+                    };
+                });
+
                 filteredData = [...paymentsData];
                 updateStatistics();
                 renderTable();
@@ -625,11 +661,11 @@
 
         let currentPage = 1;
         let itemsPerPage = 10;
-        let filteredData = [...paymentsData];
+        let filteredData = [];
         let selectedPaymentId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadPayments().then(() => {
+            loadData().then(() => {
                 setupFilters();
                 setupSearch();
             });
@@ -775,7 +811,7 @@
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
             filteredData = paymentsData.filter(payment => {
-                const matchesForm = !formFilter || payment.form === formFilter;
+                const matchesForm = !formFilter || payment.formId === formFilter;
                 const matchesStatus = !statusFilter || payment.status === statusFilter;
                 const matchesValidation = !validationFilter || payment.govValidation === validationFilter;
                 const matchesSearch = !searchTerm || 
