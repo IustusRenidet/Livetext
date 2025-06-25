@@ -867,6 +867,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let mediaFiles = [];
+            const MAX_FILE_SIZE = 50 * 1024 * 1024;
             const MAX_WORDS = 400;
             moment.tz.setDefault('America/Mexico_City');
 
@@ -1022,7 +1023,18 @@
             }
 
             document.getElementById('postMedia').addEventListener('change', e => {
-                mediaFiles = [...mediaFiles, ...Array.from(e.target.files)];
+                const files = Array.from(e.target.files);
+                if (mediaFiles.length + files.length > 5) {
+                    alert('Máximo 5 archivos.');
+                    e.target.value = '';
+                    return;
+                }
+                if (files.some(f => f.size > MAX_FILE_SIZE)) {
+                    alert('Un archivo supera el límite de 50MB.');
+                    e.target.value = '';
+                    return;
+                }
+                mediaFiles = [...mediaFiles, ...files];
                 updateMediaPreview();
                 updatePreview();
             });
