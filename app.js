@@ -1272,7 +1272,9 @@ app.get('/api/forms', async (req, res) => {
     const cached = await redis.get(cacheKey);
     if (cached) return res.json(JSON.parse(cached));
 
-    const query = req.session.user ? { userId: new ObjectId(req.session.user._id) } : { isPublic: true };
+    const query = req.session.user
+      ? { userId: new ObjectId(req.session.user._id) }
+      : { $or: [{ isPublic: true }, { active: true }] };
     if (formType) query.formType = formType;
 
     const forms = await db.collection('forms')
