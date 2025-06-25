@@ -1,1 +1,402 @@
-[]
+[
+  {
+    "question": "¿Qué es el CLE del TESCI?",
+    "answer": "Es el Centro de Lenguas Extranjeras encargado de ofrecer cursos de idiomas a la comunidad estudiantil y externa."
+  },
+  {
+    "question": "¿Qué idiomas se imparten en el CLE del TESCI?",
+    "answer": "Inglés, francés, alemán y japonés, dependiendo de la demanda y disponibilidad."
+  },
+  {
+    "question": "¿Dónde se encuentra ubicado el CLE?",
+    "answer": "En el edificio C del TESCI, planta baja."
+  },
+  {
+    "question": "¿El CLE es solo para alumnos del TESCI?",
+    "answer": "No, también pueden inscribirse personas externas."
+  },
+  {
+    "question": "¿Qué niveles se imparten en inglés?",
+    "answer": "Desde nivel básico (A1) hasta avanzado (B2 o C1 dependiendo del curso)."
+  },
+  {
+    "question": "¿Hay exámenes de certificación?",
+    "answer": "Sí, el CLE aplica exámenes de certificación como el TOEFL ITP y exámenes internos de colocación."
+  },
+  {
+    "question": "¿Qué costo tiene inscribirse al CLE?",
+    "answer": "Depende del idioma y si eres alumno o externo. Los precios se publican semestralmente."
+  },
+  {
+    "question": "¿Cómo puedo contactar al CLE?",
+    "answer": "A través de su correo oficial, redes sociales o directamente en sus oficinas."
+  },
+  {
+    "question": "¿Puedo estudiar dos idiomas al mismo tiempo?",
+    "answer": "Sí, si hay disponibilidad de horarios y cupo."
+  },
+  {
+    "question": "¿Cuál es el objetivo del CLE?",
+    "answer": "Promover el aprendizaje de lenguas extranjeras como herramienta de desarrollo académico y profesional."
+  },
+  {
+    "question": "¿Cómo me inscribo al CLE?",
+    "answer": "Llenando un formulario en línea y realizando el pago correspondiente."
+  },
+  {
+    "question": "¿Dónde consigo el formulario de inscripción?",
+    "answer": "Se publica en las redes oficiales del CLE y en carteles del TESCI."
+  },
+  {
+    "question": "¿Cuándo son las fechas de inscripción?",
+    "answer": "Al inicio de cada semestre escolar, en enero y agosto."
+  },
+  {
+    "question": "¿Qué documentos debo entregar?",
+    "answer": "CURP, comprobante de pago y credencial escolar o INE si eres externo."
+  },
+  {
+    "question": "¿Puedo reinscribirme sin examen si aprobé el nivel anterior?",
+    "answer": "Sí, siempre que hayas pasado con calificación mínima aprobatoria."
+  },
+  {
+    "question": "¿Qué pasa si repruebo el nivel?",
+    "answer": "Puedes repetir el curso pagando nuevamente."
+  },
+  {
+    "question": "¿Hay cupo limitado?",
+    "answer": "Sí, los grupos son limitados. Se asignan por orden de inscripción."
+  },
+  {
+    "question": "¿Puedo inscribirme fuera de tiempo?",
+    "answer": "Solo si quedan lugares disponibles y con autorización del CLE."
+  },
+  {
+    "question": "¿Dónde pago el curso?",
+    "answer": "En el banco o plataforma indicada en la convocatoria."
+  },
+  {
+    "question": "¿Cómo sé si quedé inscrito?",
+    "answer": "Se publica una lista oficial con los grupos asignados y horarios."
+  },
+  {
+    "question": "¿Cuánto duran los cursos?",
+    "answer": "Un semestre (aproximadamente 5 meses)."
+  },
+  {
+    "question": "¿Cuántas horas a la semana son las clases?",
+    "answer": "Generalmente 3 horas por semana."
+  },
+  {
+    "question": "¿Qué modalidad tienen las clases?",
+    "answer": "Presenciales, en línea o mixtas, según el periodo."
+  },
+  {
+    "question": "¿Qué materiales se usan?",
+    "answer": "Libros oficiales, plataformas en línea, ejercicios impresos."
+  },
+  {
+    "question": "¿Qué metodología se emplea?",
+    "answer": "Comunicativa, enfocada en desarrollar habilidades de habla, escucha, lectura y escritura."
+  },
+  {
+    "question": "¿Quiénes son los profesores?",
+    "answer": "Docentes certificados con experiencia en enseñanza de idiomas."
+  },
+  {
+    "question": "¿Qué pasa si falto a clase?",
+    "answer": "Se deben justificar las faltas. Muchas pueden afectar la acreditación."
+  },
+  {
+    "question": "¿Qué porcentaje de asistencia necesito para acreditar?",
+    "answer": "Al menos el 80%."
+  },
+  {
+    "question": "¿Hay tareas y exámenes?",
+    "answer": "Sí, se evalúa de manera continua y con un examen final."
+  },
+  {
+    "question": "¿Puedo cambiarme de grupo?",
+    "answer": "Solo durante la primera semana y si hay disponibilidad."
+  },
+  {
+    "question": "¿El CLE otorga certificados?",
+    "answer": "Sí, al concluir satisfactoriamente un curso se entrega constancia."
+  },
+  {
+    "question": "¿Qué es el examen TOEFL ITP?",
+    "answer": "Es una prueba oficial para certificar el nivel de inglés con validez internacional."
+  },
+  {
+    "question": "¿El CLE aplica TOEFL ITP?",
+    "answer": "Sí, en fechas específicas durante el semestre."
+  },
+  {
+    "question": "¿Cuánto cuesta el TOEFL ITP en el CLE?",
+    "answer": "El precio varía, pero ronda entre los $600 y $900 pesos."
+  },
+  {
+    "question": "¿Cómo me inscribo al TOEFL ITP?",
+    "answer": "Acudiendo al CLE con tu comprobante de pago."
+  },
+  {
+    "question": "¿Hay exámenes de colocación?",
+    "answer": "Sí, para alumnos con conocimientos previos."
+  },
+  {
+    "question": "¿Cuándo son los exámenes finales?",
+    "answer": "Al terminar el semestre, en la última semana de clases."
+  },
+  {
+    "question": "¿El certificado del CLE tiene validez oficial?",
+    "answer": "Sí, dentro del TESCI y en algunos trámites institucionales."
+  },
+  {
+    "question": "¿Qué pasa si no paso el TOEFL?",
+    "answer": "Puedes volver a presentarlo cuando haya próxima fecha."
+  },
+  {
+    "question": "¿Puedo obtener puntos extra por cursos del CLE?",
+    "answer": "Sí, algunos programas de becas consideran la participación en cursos."
+  },
+  {
+    "question": "¿El CLE emite constancias?",
+    "answer": "Sí, se pueden solicitar después de acreditar un curso."
+  },
+  {
+    "question": "¿Cómo solicito una constancia?",
+    "answer": "Por correo o en la oficina con tu CURP y comprobante de inscripción."
+  },
+  {
+    "question": "¿Cuánto tarda una constancia?",
+    "answer": "Entre 3 y 5 días hábiles."
+  },
+  {
+    "question": "¿Puedo usar la constancia para servicio social o titulación?",
+    "answer": "Sí, depende del programa de cada carrera."
+  },
+  {
+    "question": "¿El CLE ofrece talleres?",
+    "answer": "Sí, ocasionalmente ofrece talleres de conversación y cultura."
+  },
+  {
+    "question": "¿Hay cursos intensivos en verano o invierno?",
+    "answer": "Sí, si hay suficiente demanda."
+  },
+  {
+    "question": "¿Puedo cancelar mi curso?",
+    "answer": "Solo en la primera semana. No hay reembolsos después."
+  },
+  {
+    "question": "¿Puedo cambiar de idioma una vez inscrito?",
+    "answer": "Solo antes de que inicien clases y si hay cupo disponible."
+  },
+  {
+    "question": "¿Puedo repetir un nivel aunque lo haya pasado?",
+    "answer": "Sí, pero se debe pagar como curso nuevo."
+  },
+  {
+    "question": "¿El CLE tiene redes sociales?",
+    "answer": "Sí, usualmente en Facebook como “CLE TESCI” o similar."
+  },
+  {
+    "question": "¿Cuántos niveles hay de inglés?",
+    "answer": "Generalmente de A1 a B2."
+  },
+  {
+    "question": "¿Se requiere experiencia previa para inscribirse?",
+    "answer": "No, puedes comenzar desde cero."
+  },
+  {
+    "question": "¿Qué libro se usa para inglés?",
+    "answer": "Depende del semestre; se indica al inicio del curso."
+  },
+  {
+    "question": "¿Hay práctica de conversación?",
+    "answer": "Sí, en clase y a veces en talleres adicionales."
+  },
+  {
+    "question": "¿Hay cursos especiales para TOEFL?",
+    "answer": "Sí, cuando hay demanda."
+  },
+  {
+    "question": "¿Hay práctica de listening en clase?",
+    "answer": "Sí, es parte de la metodología."
+  },
+  {
+    "question": "¿Se hace writing en clase?",
+    "answer": "Sí, hay redacción de correos, textos y ensayos."
+  },
+  {
+    "question": "¿Cómo sé qué nivel me corresponde?",
+    "answer": "Puedes hacer el examen de colocación."
+  },
+  {
+    "question": "¿Hay cursos sabatinos de inglés?",
+    "answer": "Sí, si hay cupo suficiente."
+  },
+  {
+    "question": "¿Los niveles son semestrales o modulares?",
+    "answer": "Son semestrales."
+  },
+  {
+    "question": "¿Hay cursos de francés disponibles?",
+    "answer": "Sí, cuando hay suficientes inscritos."
+  },
+  {
+    "question": "¿Cuánto dura un nivel de francés?",
+    "answer": "Un semestre."
+  },
+  {
+    "question": "¿Qué libro se usa para francés?",
+    "answer": "Se informa al inicio del curso."
+  },
+  {
+    "question": "¿Puedo aprender alemán desde cero?",
+    "answer": "Sí, se ofrece nivel básico."
+  },
+  {
+    "question": "¿El CLE ofrece certificación de alemán?",
+    "answer": "No, solo constancia interna."
+  },
+  {
+    "question": "¿Se puede practicar kanjis en japonés?",
+    "answer": "Sí, es parte del curso."
+  },
+  {
+    "question": "¿Cuántos niveles de japonés hay?",
+    "answer": "Generalmente básico e intermedio."
+  },
+  {
+    "question": "¿Hay profesores nativos?",
+    "answer": "A veces hay docentes extranjeros invitados."
+  },
+  {
+    "question": "¿Los cursos de idiomas tienen validez en movilidad internacional?",
+    "answer": "Las constancias pueden ayudar como complemento."
+  },
+  {
+    "question": "¿Los cursos de idiomas tienen cupo limitado?",
+    "answer": "Sí, se llenan rápidamente."
+  },
+  {
+    "question": "¿Qué pasa si no puedo asistir por trabajo o clases?",
+    "answer": "Puedes justificar y pedir apoyo al docente."
+  },
+  {
+    "question": "¿Puedo recuperar clases perdidas?",
+    "answer": "Se recomienda hablar con el profesor para tareas y seguimiento."
+  },
+  {
+    "question": "¿Puedo inscribirme en línea?",
+    "answer": "Sí, el proceso es virtual."
+  },
+  {
+    "question": "¿Dónde veo los horarios disponibles?",
+    "answer": "En la convocatoria oficial o redes sociales."
+  },
+  {
+    "question": "¿Puedo elegir a mi profesor?",
+    "answer": "No, los grupos son asignados."
+  },
+  {
+    "question": "¿Puedo entrar después de iniciar clases?",
+    "answer": "Solo durante la primera semana."
+  },
+  {
+    "question": "¿El CLE entrega constancia aunque no asista?",
+    "answer": "No, se requiere cumplir con el curso."
+  },
+  {
+    "question": "¿Hay exámenes orales?",
+    "answer": "Sí, como parte de la evaluación integral."
+  },
+  {
+    "question": "¿Qué pasa si repruebo?",
+    "answer": "Puedes volver a tomar el curso el próximo semestre."
+  },
+  {
+    "question": "¿El CLE tiene actividades culturales?",
+    "answer": "Sí, como ferias de idiomas, cineclub o intercambio cultural."
+  },
+  {
+    "question": "¿Quién coordina el CLE?",
+    "answer": "Un(a) coordinador(a) designado por la dirección académica del TESCI."
+  },
+  {
+    "question": "¿Puedo hablar con el coordinador?",
+    "answer": "Sí, en horarios de atención publicados."
+  },
+  {
+    "question": "¿Dónde reporto problemas con el curso?",
+    "answer": "En las oficinas del CLE o por correo electrónico."
+  },
+  {
+    "question": "¿Qué hago si no aparece mi nombre en la lista?",
+    "answer": "Debes acudir con tu comprobante al CLE."
+  },
+  {
+    "question": "¿Cómo reporto un error en mi constancia?",
+    "answer": "Llenando una solicitud de corrección."
+  },
+  {
+    "question": "¿Dónde se publican los avisos importantes del CLE?",
+    "answer": "En redes sociales y en vitrinas del edificio C."
+  },
+  {
+    "question": "¿Qué pasa si pierdo mi comprobante de pago?",
+    "answer": "Solicita una reimpresión en el banco o genera otro."
+  },
+  {
+    "question": "¿Puedo hacer servicio social en el CLE?",
+    "answer": "Sí, dependiendo del programa y vacantes disponibles."
+  },
+  {
+    "question": "¿El CLE colabora con otras instituciones?",
+    "answer": "A veces organiza actividades conjuntas con otros centros."
+  },
+  {
+    "question": "¿Dónde puedo ver los resultados del examen de colocación?",
+    "answer": "En listas oficiales publicadas por el CLE."
+  },
+  {
+    "question": "¿Qué necesito para aprovechar el curso?",
+    "answer": "Compromiso, asistencia y práctica constante."
+  },
+  {
+    "question": "¿Qué plataforma se usa para clases en línea?",
+    "answer": "Generalmente Google Meet, Zoom o Moodle."
+  },
+  {
+    "question": "¿Qué hago si tengo problemas técnicos en línea?",
+    "answer": "Informa al docente o a soporte del CLE."
+  },
+  {
+    "question": "¿Qué nivel se necesita para movilidad internacional?",
+    "answer": "Al menos B1 o B2 dependiendo del destino."
+  },
+  {
+    "question": "¿Qué requisitos hay para ser docente del CLE?",
+    "answer": "Certificación en el idioma y experiencia en docencia."
+  },
+  {
+    "question": "¿Hay becas para estudiar en el CLE?",
+    "answer": "No directamente, pero hay descuentos a estudiantes."
+  },
+  {
+    "question": "¿Puedo cambiar de turno una vez iniciado?",
+    "answer": "Solo en casos justificados."
+  },
+  {
+    "question": "¿Qué pasa si mi grupo se cancela?",
+    "answer": "Se ofrece reubicación o devolución del pago."
+  },
+  {
+    "question": "¿Cuánto tiempo se tarda en aprender un idioma?",
+    "answer": "Depende del nivel y constancia, mínimo 3 semestres por nivel básico a intermedio."
+  },
+  {
+    "question": "¿Puedo acreditar inglés con el CLE para titulación?",
+    "answer": "Sí, si cumples con los niveles requeridos por tu carrera."
+  }
+]
