@@ -495,6 +495,10 @@ Equipo LIVETEXT
   return { message: 'Recurso creado exitosamente.', insertedId: result.insertedId };
 }
 
+function parseBool(value) {
+  return value === true || value === 'true' || value === 'on' || value === 1 || value === '1';
+}
+
 async function createPost(db, postData, files, userId, isDraft = false) {
   console.log('Creating post:', postData, files);
   const { title, content, category, allowComments, mediaMode, tags, date, time, schedulePost } = postData;
@@ -506,19 +510,20 @@ async function createPost(db, postData, files, userId, isDraft = false) {
     allowedAttributes: {}
   });
   const now = moment.tz('America/Mexico_City').toDate();
+  const schedule = parseBool(schedulePost);
   let postDateTime = now;
-  if (schedulePost === 'true' && date && time) {
+  if (schedule && date && time) {
     postDateTime = moment.tz(`${date} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Mexico_City').toDate();
     if (!moment(postDateTime).isValid()) throw new Error('Formato de fecha u hora inválido.');
     if (!isDraft && postDateTime < now) throw new Error('No puedes programar una publicación en el pasado.');
-  } else if (schedulePost === 'true') {
+  } else if (schedule) {
     throw new Error('Fecha y hora son obligatorios cuando se programa la publicación.');
   }
   const post = {
     title: title.trim(),
     content: sanitizedContent,
     category,
-    allowComments: allowComments === 'true',
+    allowComments: parseBool(allowComments),
     mediaMode: mediaMode || 'auto',
     tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
     date: postDateTime,
@@ -581,19 +586,20 @@ async function updatePost(db, postId, postData, files, userId, isDraft = false) 
     allowedAttributes: {}
   });
   const now = moment.tz('America/Mexico_City').toDate();
+  const schedule = parseBool(schedulePost);
   let postDateTime = now;
-  if (schedulePost === 'true' && date && time) {
+  if (schedule && date && time) {
     postDateTime = moment.tz(`${date} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Mexico_City').toDate();
     if (!moment(postDateTime).isValid()) throw new Error('Formato de fecha u hora inválido.');
     if (!isDraft && postDateTime < now) throw new Error('No puedes programar una publicación en el pasado.');
-  } else if (schedulePost === 'true') {
+  } else if (schedule) {
     throw new Error('Fecha y hora son obligatorios cuando se programa la publicación.');
   }
   const updateData = {
     title: title.trim(),
     content: sanitizedContent,
     category,
-    allowComments: allowComments === 'true',
+    allowComments: parseBool(allowComments),
     mediaMode: mediaMode || 'auto',
     tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
     date: postDateTime,
@@ -1155,7 +1161,7 @@ app.delete('/events/:id', requireAuth, async (req, res) => {
 app.post('/api/posts', requireAuth, upload.array('postMedia', 5), async (req, res) => {
   try {
     console.log('Received post request:', req.body, req.files);
-    const isDraft = req.body.isDraft === 'true';
+    const isDraft = parseBool(req.body.isDraft);
     const result = await createPost(db, req.body, req.files, req.session.user._id, isDraft);
     res.status(201).json(result);
   } catch (error) {
@@ -1190,7 +1196,7 @@ app.put('/api/posts/:id', requireAuth, upload.array('postMedia', 5), async (req,
   try {
     console.log('Received put request for post:', req.params.id, req.body, req.files);
     const { id } = req.params;
-    const isDraft = req.body.isDraft === 'true';
+    const isDraft = parseBool(req.body.isDraft);
     const result = await updatePost(db, id, req.body, req.files, req.session.user._id, isDraft);
     res.status(200).json(result);
   } catch (error) {

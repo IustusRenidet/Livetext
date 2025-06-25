@@ -930,7 +930,7 @@
                     const response = await axios.put(`/events/${eventId}`, eventData);
                     if (response.status === 200) {
                         showToast('success', 'Evento actualizado exitosamente');
-                        setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                        setTimeout(() => window.location.href = '/dashboard', 2000);
                     } else {
                         showToast('error', 'Error al actualizar el evento');
                     }

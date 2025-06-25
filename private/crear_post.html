@@ -762,7 +762,7 @@
                         <button type="button" class="btn btn-secondary animate__animated animate__bounceIn" id="draftButton">
                             <i class="fas fa-save me-2"></i> Guardar Borrador
                         </button>
-                        <a href="/dashboard.html" class="btn btn-secondary animate__animated animate__bounceIn">
+                        <a href="/dashboard" class="btn btn-secondary animate__animated animate__bounceIn">
                             <i class="fas fa-times me-2"></i> Cancelar
                         </a>
                     </div>
@@ -1061,6 +1061,8 @@
 
             async function submitForm(isDraft = false) {
                 const formData = new FormData(document.getElementById('postForm'));
+                formData.set('allowComments', document.getElementById('allowComments').checked);
+                formData.set('schedulePost', document.getElementById('schedulePost').checked);
                 formData.append('content', quill.root.innerHTML);
                 formData.append('isDraft', isDraft);
                 if (!document.getElementById('schedulePost').checked) {
@@ -1071,7 +1073,7 @@
                 try {
                     await axios.post('/api/posts', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
                     new bootstrap.Toast(document.getElementById('successToast')).show();
-                    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+                    setTimeout(() => window.location.href = '/dashboard', 1500);
                 } catch (error) {
                     if (error.response && error.response.status === 401) {
                         window.location.href = '/login.html';
