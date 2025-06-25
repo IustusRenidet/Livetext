@@ -58,6 +58,7 @@ window.initializeEditor = function(pageIndex) {
     }
   });
   editors[pageIndex] = editor;
+  setupDroppable($(`#editor-page-${pageIndex}`));
 };
 
 // Add a new page
@@ -167,21 +168,25 @@ $('.element-icon').draggable({
   }
 });
 
-$('.editor-content').droppable({
-  accept: '.element-icon',
-  tolerance: 'pointer', // Improve drop accuracy
-  drop: function (event, ui) {
-    const type = ui.draggable.data('type');
-    const editorIndex = $(this).attr('id').split('-')[2];
-    addElement(type, event, editorIndex);
-  },
-  over: function (event, ui) {
-    $(this).addClass('dropzone-active'); // Visual feedback
-  },
-  out: function (event, ui) {
-    $(this).removeClass('dropzone-active');
-  }
-});
+window.setupDroppable = function($el) {
+  $el.droppable({
+    accept: '.element-icon',
+    tolerance: 'pointer', // Improve drop accuracy
+    drop: function (event, ui) {
+      const type = ui.draggable.data('type');
+      const editorIndex = $(this).attr('id').split('-')[2];
+      addElement(type, event, editorIndex);
+    },
+    over: function () {
+      $(this).addClass('dropzone-active'); // Visual feedback
+    },
+    out: function () {
+      $(this).removeClass('dropzone-active');
+    }
+  });
+};
+
+setupDroppable($('.editor-content'));
 
 // Add elements to the editor
 window.addElement = function(type, event, editorIndex) {

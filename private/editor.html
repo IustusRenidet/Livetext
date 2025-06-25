@@ -1,4 +1,5 @@
 
+<!-- Editor version: 1.0.1 -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -209,6 +210,7 @@
             min-height: 279.4mm;
             margin: 20px auto;
             background: var(--white);
+            color: #000;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
             position: relative;
             animation: fadeInUp 0.5s ease;
@@ -216,6 +218,16 @@
             page-break-inside: avoid;
             padding: var(--default-margin);
             overflow: hidden;
+        }
+
+        .ce-blocks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ce-block {
+            flex: 1 1 200px;
         }
 
         .page.landscape {
@@ -649,6 +661,17 @@
                 width: 100%;
                 padding: var(--default-margin);
                 margin: 10px;
+                color: #000;
+            }
+
+            .ce-blocks {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .ce-block {
+                flex: 1 1 100%;
             }
 
             .page.landscape {
