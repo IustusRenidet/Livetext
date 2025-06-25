@@ -1407,7 +1407,7 @@
                             document.getElementById('deleteConfirmationModalLabel').textContent = `Confirmar Eliminación de ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`;
                             document.getElementById('confirmDelete').onclick = async () => {
                                 try {
-                                    await axios.delete(`/${itemType}/${itemId}`); // Ajustado a rutas específicas
+                                    await axios.delete(`/api/${itemType}/${itemId}`);
                                     deleteModal.hide();
                                     loadContent(itemType); // Recargar lista
                                     showToast('Éxito', 'Eliminación realizada con éxito');
