@@ -27,10 +27,15 @@ const emailQueue = new Queue('email-notifications', { redis: { url: process.env.
 const postQueue = new Queue('post-publishing', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
 
 let openai;
-try {
-  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-} catch (err) {
-  console.error('Error initializing OpenAI:', err);
+if (process.env.OPENAI_API_KEY) {
+  try {
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  } catch (err) {
+    console.error('Error initializing OpenAI:', err);
+    openai = null;
+  }
+} else {
+  console.warn('OPENAI_API_KEY not provided');
   openai = null;
 }
 
@@ -1821,17 +1826,25 @@ app.post('/api/chat', async (req, res) => {
   if (!openai) {
     return res.status(500).json({ error: 'Servicio de chat no configurado' });
   }
-  const { messages } = req.body;
-  if (!Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Formato de mensajes inválido' });
+  let history = req.session.chatHistory || [];
+  const { message, messages } = req.body;
+  if (Array.isArray(messages)) {
+    history = messages;
+  } else if (typeof message === 'string') {
+    history.push({ role: 'user', content: message });
+    if (history.length > 20) history = history.slice(-20);
+  } else {
+    return res.status(400).json({ error: 'Formato de mensaje inválido' });
   }
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages,
+      messages: history,
       temperature: 0.7
     });
     const reply = completion.choices?.[0]?.message?.content || '';
+    history.push({ role: 'assistant', content: reply });
+    req.session.chatHistory = history;
     res.json({ reply });
   } catch (error) {
     console.error('Error en chat IA:', error);
@@ -1840,6 +1853,15 @@ app.post('/api/chat', async (req, res) => {
     }
     res.status(500).json({ error: 'Error en servicio de chat' });
   }
+});
+
+app.get('/api/chat/history', (req, res) => {
+  res.json({ history: req.session.chatHistory || [] });
+});
+
+app.post('/api/chat/reset', (req, res) => {
+  req.session.chatHistory = [];
+  res.json({ ok: true });
 });
 
 app.post('/upload-resource', requireAuth, resourceUpload.any(), async (req, res) => {
