@@ -17,6 +17,8 @@ const cookieParser = require('cookie-parser');
 const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
+require('dotenv').config();
+
 const app = express();
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
@@ -136,7 +138,6 @@ const validateFormSubmission = [
 
 let db;
 
-require('dotenv').config();
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
   port: process.env.MAIL_PORT,
