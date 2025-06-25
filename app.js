@@ -14,6 +14,7 @@ const Queue = require('bull');
 const sanitizeHtml = require('sanitize-html');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const app = express();
@@ -22,6 +23,7 @@ const client = new MongoClient(uri);
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const emailQueue = new Queue('email-notifications', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
 const postQueue = new Queue('post-publishing', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.use(compression());
 app.use(morgan('combined'));
@@ -65,7 +67,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif|mp4|webm/;
     const mimetype = filetypes.test(file.mimetype);
@@ -153,7 +155,7 @@ function requireAuth(req, res, next) {
 const restrictedPages = [
   '/crear_calendario', '/editar_events', '/dashboard', '/crear_form',
   '/editor', '/crear_post', '/editar_posts', '/dashboard_documentos',
-  '/dashboard_pagos', '/perfil', '/subir_recurso'
+  '/dashboard_pagos', '/perfil', '/subir_recurso', '/chat'
 ];
 
 app.use((req, res, next) => {
@@ -199,6 +201,9 @@ app.get('/perfil', requireAuth, (req, res) => {
 app.get('/subir_recurso', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'subir_recurso.html'));
 });
+app.get('/chat', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'chat.html'));
+});
 
 async function connect() {
   try {
@@ -238,6 +243,7 @@ async function ensureIndexes(db) {
   await db.collection('forms').createIndex({ userId: 1, createdAt: -1 });
   await db.collection('form_submissions').createIndex({ formId: 1, createdAt: -1 });
   await db.collection('form_submissions').createIndex({ 'responses.fieldId': 1, 'responses.value': 1 }); // For email uniqueness
+  await db.collection('templates').createIndex({ userId: 1, createdAt: -1 });
 }
 
 async function registerUser(db, userData) {
@@ -312,12 +318,17 @@ async function subscribeNewsletter(db, userData) {
   const existingSubscriber = await db.collection('newsletter_subscribers').findOne({ email });
   if (existingSubscriber) {
     await db.collection('newsletter_subscribers').updateOne({ email }, { $set: { name, notificationTypes, subscribed: true } });
-    return { message: 'Preferencias de notificación actualizadas.' };
   } else {
     const subscriber = { name, email, subscribed: true, notificationTypes, createdAt: new Date() };
     await db.collection('newsletter_subscribers').insertOne(subscriber);
-    return { message: 'Suscripción a notificaciones exitosa.' };
   }
+  emailQueue.add({
+    from: 'no-reply@livetextweb.com',
+    to: email,
+    subject: 'Bienvenido al boletín de LIVETEXT',
+    html: `Bienvenido ${name},<br>Comenzarás a recibir notificaciones de nuevas publicaciones y eventos.`
+  });
+  return { message: 'Suscripción a notificaciones exitosa.' };
 }
 
 async function unsubscribeNewsletter(db, email) {
@@ -547,7 +558,7 @@ Equipo LIVETEXT
   } catch (error) {
     console.error('Error in createPost:', error.stack);
     if (error instanceof multer.MulterError) {
-      throw new Error(`Error de archivo: ${error.message} (Límite: 20MB)`);
+      throw new Error(`Error de archivo: ${error.message} (Límite: 50MB)`);
     }
     throw error;
   }
@@ -625,7 +636,7 @@ Equipo LIVETEXT
   } catch (error) {
     console.error('Error in updatePost:', error.stack);
     if (error instanceof multer.MulterError) {
-      throw new Error(`Error de archivo: ${error.message} (Límite: 20MB)`);
+      throw new Error(`Error de archivo: ${error.message} (Límite: 50MB)`);
     }
     throw error;
   }
@@ -909,6 +920,47 @@ async function deleteDocument(db, id, userId) {
   });
   if (result.deletedCount === 0) throw new Error('Documento no encontrado o no tienes permisos.');
   return { message: 'Documento eliminado.' };
+}
+
+// Template helpers
+async function createTemplate(db, templateData, userId) {
+  const template = {
+    ...templateData,
+    userId: new ObjectId(userId),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  const result = await db.collection('templates').insertOne(template);
+  return { message: 'Plantilla guardada.', insertedId: result.insertedId };
+}
+
+async function updateTemplate(db, id, templateData, userId) {
+  const result = await db.collection('templates').updateOne(
+    { _id: new ObjectId(id), userId: new ObjectId(userId) },
+    { $set: { ...templateData, updatedAt: new Date() } }
+  );
+  if (result.matchedCount === 0) throw new Error('Plantilla no encontrada o no tienes permisos.');
+  return { message: 'Plantilla actualizada.' };
+}
+
+async function getTemplate(db, id) {
+  return db.collection('templates').findOne({ _id: new ObjectId(id) });
+}
+
+async function getTemplates(db, userId) {
+  return db.collection('templates')
+    .find({ userId: new ObjectId(userId) })
+    .sort({ updatedAt: -1 })
+    .toArray();
+}
+
+async function deleteTemplate(db, id, userId) {
+  const result = await db.collection('templates').deleteOne({
+    _id: new ObjectId(id),
+    userId: new ObjectId(userId)
+  });
+  if (result.deletedCount === 0) throw new Error('Plantilla no encontrada o no tienes permisos.');
+  return { message: 'Plantilla eliminada.' };
 }
 
 async function getForm(db, id) {
@@ -1598,16 +1650,139 @@ app.delete('/api/documents/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Template routes
+app.post('/api/templates', requireAuth, async (req, res) => {
+  try {
+    const result = await createTemplate(db, req.body, req.session.user._id);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/templates', requireAuth, async (req, res) => {
+  try {
+    const templates = await getTemplates(db, req.session.user._id);
+    res.json(templates);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener plantillas' });
+  }
+});
+
+app.get('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const template = await getTemplate(db, req.params.id);
+    if (!template) return res.status(404).json({ error: 'Plantilla no encontrada' });
+    res.json(template);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener plantilla' });
+  }
+});
+
+app.put('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await updateTemplate(db, req.params.id, req.body, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await deleteTemplate(db, req.params.id, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.get('/api/stats', requireAuth, async (req, res) => {
   try {
-    const [pendingPayments, postCount, subscriberCount] = await Promise.all([
+    const start = new Date();
+    start.setDate(start.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+
+    const [pendingPayments, postCount, subscriberCount, paymentsDailyAgg, postsDailyAgg, subscribersDailyAgg] = await Promise.all([
       db.collection('form_submissions').countDocuments({ status: 'pending' }),
       db.collection('posts').countDocuments(),
-      db.collection('newsletter_subscribers').countDocuments({ subscribed: true })
+      db.collection('newsletter_subscribers').countDocuments({ subscribed: true }),
+      db.collection('form_submissions').aggregate([
+        { $match: { status: 'pending', createdAt: { $gte: start } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
+      ]).toArray(),
+      db.collection('posts').aggregate([
+        { $match: { createdAt: { $gte: start } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
+      ]).toArray(),
+      db.collection('newsletter_subscribers').aggregate([
+        { $match: { createdAt: { $gte: start }, subscribed: true } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
+      ]).toArray()
     ]);
-    res.json({ pendingPayments, postCount, subscriberCount });
+
+    const formatDaily = (arr) => arr.reduce((acc, cur) => {
+      acc[cur._id] = cur.count;
+      return acc;
+    }, {});
+
+    res.json({
+      pendingPayments,
+      postCount,
+      subscriberCount,
+      paymentsDaily: formatDaily(paymentsDailyAgg),
+      postsDaily: formatDaily(postsDailyAgg),
+      subscribersDaily: formatDaily(subscribersDailyAgg)
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
+// Validación de línea de captura con servicio gubernamental
+app.post('/api/validate-capture', requireAuth, async (req, res) => {
+  const { capture } = req.body;
+  if (!capture) return res.status(400).json({ error: 'Falta línea de captura' });
+
+  try {
+    const params = new URLSearchParams({ lineaCaptura: capture });
+    const response = await fetch('https://sfpya.edomexico.gob.mx/controlv/consultas/ConsultaDatos.jsp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    });
+
+    const html = await response.text();
+    const valid = !/no\s+se\s+encontr/i.test(html);
+    res.json({ valid });
+  } catch (error) {
+    console.error('Error al validar captura:', error);
+    res.status(500).json({ error: 'Error al validar captura' });
+  }
+});
+
+// Servicio de chat IA utilizando OpenAI
+app.post('/api/chat', requireAuth, async (req, res) => {
+  const { messages } = req.body;
+  if (!Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Formato de mensajes inválido' });
+  }
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages,
+      temperature: 0.7
+    });
+    const reply = completion.choices?.[0]?.message?.content || '';
+    res.json({ reply });
+  } catch (error) {
+    console.error('Error en chat IA:', error);
+    res.status(500).json({ error: 'Error en servicio de chat' });
   }
 });
 

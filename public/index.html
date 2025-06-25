@@ -671,6 +671,26 @@
         </div>
     </footer>
 
+    <!-- Modal Comentarios -->
+    <div class="modal fade" id="commentsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Comentarios</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="commentsList" class="mb-3"></div>
+                    <textarea id="commentInput" class="form-control" placeholder="Escribe un comentario..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="sendComment">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
@@ -873,10 +893,19 @@
                                 <small>Categoría: ${post.category} | ${moment(post.date).format('DD/MM/YYYY HH:mm')}</small>
                             </div>
                             <div class="post-actions">
-                                <button class="btn btn-sm btn-secondary">Comentarios ${post.allowComments ? '✅' : '❌'}</button>
+                                <button class="btn btn-sm btn-secondary comment-btn" data-id="${post._id}" ${post.allowComments ? '' : 'disabled'}>Comentarios</button>
                             </div>
                         `;
                         container.appendChild(item);
+                        const btn = item.querySelector('.comment-btn');
+                        if (btn) {
+                            btn.addEventListener('click', () => {
+                                activePost = btn.getAttribute('data-id');
+                                loadComments(activePost);
+                                const modal = new bootstrap.Modal(document.getElementById('commentsModal'));
+                                modal.show();
+                            });
+                        }
                     });
 
                     masonry.reloadItems();
@@ -895,6 +924,32 @@
                     button.classList.add('active');
                     loadPosts(button.dataset.filter);
                 });
+            });
+
+            async function loadComments(postId) {
+                try {
+                    const res = await fetch(`/api/posts/${postId}/comments`);
+                    const comments = await res.json();
+                    const list = document.getElementById('commentsList');
+                    list.innerHTML = comments.map(c => `<div class="border-bottom pb-2 mb-2">${c.content}</div>`).join('') || '<p>No hay comentarios</p>';
+                } catch (err) {
+                    console.error('Error al cargar comentarios:', err);
+                }
+            }
+
+            let activePost = null;
+            document.getElementById('sendComment').addEventListener('click', async () => {
+                const content = document.getElementById('commentInput').value.trim();
+                if (!content || !activePost) return;
+                const res = await fetch(`/api/posts/${activePost}/comments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                if (res.ok) {
+                    document.getElementById('commentInput').value = '';
+                    await loadComments(activePost);
+                }
             });
 
             // Cargar posts iniciales
