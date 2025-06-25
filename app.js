@@ -63,7 +63,7 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
   fileFilter: (req, file, cb) => {
@@ -72,6 +72,25 @@ const upload = multer({
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     if (mimetype && extname) return cb(null, true);
     cb(new Error('Solo se permiten imágenes y videos (JPEG, PNG, GIF, MP4, WebM)'));
+  }
+});
+
+const resourceUpload = multer({
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/jpeg',
+      'image/png',
+      'video/mp4'
+    ];
+    if (allowed.includes(file.mimetype)) return cb(null, true);
+    cb(new Error('Formato de archivo no permitido'));
   }
 });
 
@@ -419,11 +438,11 @@ async function deleteEvent(db, eventId, userId) {
 }
 
 async function createResource(db, resourceData, files, userId) {
-  const { title, description, category } = resourceData;
-  if (!title || !description) throw new Error('Título y descripción son obligatorios.');
+  const { title, description = '', category } = resourceData;
+  if (!title) throw new Error('El título es obligatorio.');
   const resource = {
     title: title.trim(),
-    description: sanitizeHtml(description),
+    description: sanitizeHtml(description || ''),
     category,
     userId: new ObjectId(userId),
     createdAt: new Date(),
@@ -1321,6 +1340,21 @@ app.post('/api/resources', requireAuth, upload.array('resourceFiles', 5), async 
     res.status(201).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/upload-resource', requireAuth, resourceUpload.any(), async (req, res) => {
+  try {
+    const files = (req.files || []).filter(f => f.fieldname.startsWith('files'));
+    const result = await createResource(db, req.body, files, req.session.user._id);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error al subir recurso:', error);
+    if (error instanceof multer.MulterError) {
+      res.status(400).json({ error: `Error de archivo: ${error.message}` });
+    } else {
+      res.status(400).json({ error: error.message });
+    }
   }
 });
 
