@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat IA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #232A40; color: #fff; }
+        #chatBox { background: #fff; color: #000; height: 400px; overflow-y: auto; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">LIVETEXT</a>
+        </div>
+    </nav>
+    <div class="container my-4 flex-grow-1">
+        <h1 class="mb-4">Chat de Entrenamiento IA</h1>
+        <div id="chatBox" class="mb-3"></div>
+        <div class="input-group">
+            <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje...">
+            <button id="sendBtn" class="btn btn-primary">Enviar</button>
+        </div>
+    </div>
+    <script>
+        const messages = [];
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+
+        function addMessage(sender, text) {
+            const div = document.createElement('div');
+            div.className = 'mb-2';
+            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            const box = document.getElementById('chatBox');
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            messages.push({ role: 'user', content: text });
+            addMessage('Tú', text);
+            input.value = '';
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    messages.push({ role: 'assistant', content: data.reply });
+                    addMessage('IA', data.reply);
+                } else {
+                    addMessage('Error', data.error || 'Error');
+                }
+            } catch (err) {
+                addMessage('Error', 'No se pudo conectar');
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
