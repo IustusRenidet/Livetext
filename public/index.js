@@ -52,6 +52,42 @@ document.addEventListener('DOMContentLoaded', () => {
             allowComments: true,
             likes: 8,
             comments: 2
+        },
+        {
+            id: 5,
+            title: "\u00a1Ap\u00fantate al Club de Conversaci\u00f3n en Ingl\u00e9s!",
+            category: "eventos ingles",
+            content: "Practica tu ingl\u00e9s todos los viernes con nuestros moderadores nativos. \u00a1Sesiones gratuitas para estudiantes registrados!",
+            media: [{ type: "image", url: "https://images.unsplash.com/photo-1515162305281-9de0c5540b98" }],
+            mediaMode: "manual",
+            allowComments: true,
+            likes: 12,
+            comments: 3
+        },
+        {
+            id: 6,
+            title: "Concurso de Traducci\u00f3n 2025",
+            category: "anuncios",
+            content: "Demuestra tus habilidades de traducci\u00f3n y gana becas para nuestros cursos avanzados. Inscripciones abiertas hasta el 30 de junio.",
+            media: [{ type: "image", url: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b" }],
+            mediaMode: "manual",
+            allowComments: true,
+            likes: 5,
+            comments: 0
+        },
+        {
+            id: 7,
+            title: "Top 5 Pel\u00edculas para Practicar Franc\u00e9s",
+            category: "recursos frances",
+            content: "Descubre nuestra selecci\u00f3n de pel\u00edculas francesas con subt\u00edtulos para mejorar tu comprensi\u00f3n auditiva.",
+            media: [
+                { type: "image", url: "https://images.unsplash.com/photo-1524985069026-dd778a71c7b4" },
+                { type: "image", url: "https://images.unsplash.com/photo-1542206395-9feb3edaa68f" }
+            ],
+            mediaMode: "gallery",
+            allowComments: false,
+            likes: 18,
+            comments: 1
         }
     ];
 
