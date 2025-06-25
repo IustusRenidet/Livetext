@@ -1,19 +1,7 @@
 // editor.js
-import EditorJS from '@editorjs/editorjs';
-import Header from '@editorjs/header';
-import List from '@editorjs/list';
-import ImageTool from '@editorjs/image';
-import Table from '@editorjs/table';
-import ChartJS from 'chart.js/auto';
-import html2pdf from 'html2pdf.js';
-import $ from 'jquery';
-import 'jquery-ui/ui/widgets/draggable';
-import 'jquery-ui/ui/widgets/resizable';
-import sanitizeHtml from 'sanitize-html';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'animate.css';
-import * as XLSX from 'xlsx';
-import JSZip from 'jszip';
+// All required libraries are included via CDN in editor.html, so we rely on
+// the global variables they expose instead of using ES module imports. This
+// keeps the script simple and avoids the need for a build step.
 
 // Initialize global variables
 window.editors = [];
