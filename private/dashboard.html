@@ -1098,6 +1098,18 @@
                         <h4>Actividad Reciente</h4>
                         <canvas id="activityChart" height="200"></canvas>
                     </div>
+
+                    <!-- Gráfico de pagos pendientes -->
+                    <div class="chart-container bounce-in" style="animation-delay: 0.5s;">
+                        <h4>Pagos Pendientes</h4>
+                        <canvas id="paymentsChart" height="200"></canvas>
+                    </div>
+
+                    <!-- Gráfico de usuarios boletín -->
+                    <div class="chart-container bounce-in" style="animation-delay: 0.6s;">
+                        <h4>Usuarios Boletín</h4>
+                        <canvas id="subscribersChart" height="200"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1210,70 +1222,64 @@
                     cards[0].textContent = stats.pendingPayments;
                     cards[1].textContent = stats.postCount;
                     cards[2].textContent = stats.subscriberCount;
+                    updateChart(activityChart, stats.postsDaily || {});
+                    updateChart(paymentsChart, stats.paymentsDaily || {});
+                    updateChart(subscribersChart, stats.subscribersDaily || {});
                 } catch(e) { console.error(e); }
             }
 
-            // Inicializar gráfico de actividad
-            try {
-                const activityChart = new Chart(document.getElementById('activityChart'), {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'Publicaciones',
-                            data: [],
-                            backgroundColor: 'rgba(230, 126, 34, 0.2)',
+            // Gráficos
+            const chartOptions = {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [],
+                    backgroundColor: 'rgba(230, 126, 34, 0.2)',
+                    borderColor: '#e67e22',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    pointBackgroundColor: '#e67e22',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#e67e22',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#232A40',
+                            titleColor: '#e67e22',
+                            bodyColor: '#fff',
                             borderColor: '#e67e22',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            pointBackgroundColor: '#e67e22',
-                            pointBorderColor: '#fff',
-                            pointHoverBackgroundColor: '#fff',
-                            pointHoverBorderColor: '#e67e22',
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                backgroundColor: '#232A40',
-                                titleColor: '#e67e22',
-                                bodyColor: '#fff',
-                                borderColor: '#e67e22',
-                                borderWidth: 1,
-                                cornerRadius: 8,
-                                displayColors: false,
-                                callbacks: {
-                                    title: function (tooltipItem) { return 'Día: ' + tooltipItem[0].label; },
-                                    label: function (context) { return 'Actividad: ' + context.raw; }
-                                }
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            callbacks: {
+                                title: (items) => 'Día: ' + items[0].label,
+                                label: (ctx) => 'Cantidad: ' + ctx.raw
                             }
-                        },
-                        scales: {
-                            x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } },
-                            y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } }
                         }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: 'rgba(255, 255, 255, 0.7)' } }
                     }
-                });
-                try {
-                    const res = await fetch('/api/posts');
-                    const posts = await res.json();
-                    const counts = {};
-                    posts.forEach(p => {
-                        const d = new Date(p.createdAt).toLocaleDateString('es-ES');
-                        counts[d] = (counts[d] || 0) + 1;
-                    });
-                    activityChart.data.labels = Object.keys(counts);
-                    activityChart.data.datasets[0].data = Object.values(counts);
-                    activityChart.update();
-                } catch(e) { console.error(e); }
-            } catch (error) {
-                console.error('Error al inicializar el gráfico:', error);
+                }
+            };
+
+            const activityChart = new Chart(document.getElementById('activityChart'), JSON.parse(JSON.stringify(chartOptions)));
+            activityChart.data.datasets[0].label = 'Publicaciones';
+            const paymentsChart = new Chart(document.getElementById('paymentsChart'), JSON.parse(JSON.stringify(chartOptions)));
+            paymentsChart.data.datasets[0].label = 'Pagos';
+            const subscribersChart = new Chart(document.getElementById('subscribersChart'), JSON.parse(JSON.stringify(chartOptions)));
+            subscribersChart.data.datasets[0].label = 'Suscriptores';
+
+            function updateChart(chart, data) {
+                chart.data.labels = Object.keys(data);
+                chart.data.datasets[0].data = Object.values(data);
+                chart.update();
             }
 
             // Toggle sidebar

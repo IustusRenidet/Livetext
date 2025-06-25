@@ -1689,12 +1689,44 @@ app.delete('/api/templates/:id', requireAuth, async (req, res) => {
 
 app.get('/api/stats', requireAuth, async (req, res) => {
   try {
-    const [pendingPayments, postCount, subscriberCount] = await Promise.all([
+    const start = new Date();
+    start.setDate(start.getDate() - 6);
+    start.setHours(0, 0, 0, 0);
+
+    const [pendingPayments, postCount, subscriberCount, paymentsDailyAgg, postsDailyAgg, subscribersDailyAgg] = await Promise.all([
       db.collection('form_submissions').countDocuments({ status: 'pending' }),
       db.collection('posts').countDocuments(),
-      db.collection('newsletter_subscribers').countDocuments({ subscribed: true })
+      db.collection('newsletter_subscribers').countDocuments({ subscribed: true }),
+      db.collection('form_submissions').aggregate([
+        { $match: { status: 'pending', createdAt: { $gte: start } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
+      ]).toArray(),
+      db.collection('posts').aggregate([
+        { $match: { createdAt: { $gte: start } } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
+      ]).toArray(),
+      db.collection('newsletter_subscribers').aggregate([
+        { $match: { createdAt: { $gte: start }, subscribed: true } },
+        { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { _id: 1 } }
+      ]).toArray()
     ]);
-    res.json({ pendingPayments, postCount, subscriberCount });
+
+    const formatDaily = (arr) => arr.reduce((acc, cur) => {
+      acc[cur._id] = cur.count;
+      return acc;
+    }, {});
+
+    res.json({
+      pendingPayments,
+      postCount,
+      subscriberCount,
+      paymentsDaily: formatDaily(paymentsDailyAgg),
+      postsDaily: formatDaily(postsDailyAgg),
+      subscribersDaily: formatDaily(subscribersDailyAgg)
+    });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener estadísticas' });
   }
