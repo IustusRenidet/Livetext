@@ -717,7 +717,7 @@
                         <label for="postMedia" class="form-label">Imágenes o Videos Verticales</label>
                         <label class="custom-file-upload">
                             <i class="fas fa-upload"></i> Seleccionar Archivos
-                            <input type="file" class="form-control animate__animated animate__fadeInUp" id="postMedia" name="postMedia" accept="image/*,video/mp4,video/webm" multiple onchange="validateFiles(this)">
+                            <input type="file" class="form-control animate__animated animate__fadeInUp" id="postMedia" name="postMedia" accept="image/*,video/mp4,video/webm" multiple>
                         </label>
                         <small class="text-muted">Máximo 50MB por archivo, hasta 5 archivos.</small>
                         <div class="media-preview-grid" id="mediaPreviewGrid"></div>
@@ -867,6 +867,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             let mediaFiles = [];
+            const MAX_FILE_SIZE = 50 * 1024 * 1024;
             const MAX_WORDS = 400;
             moment.tz.setDefault('America/Mexico_City');
 
@@ -1022,7 +1023,18 @@
             }
 
             document.getElementById('postMedia').addEventListener('change', e => {
-                mediaFiles = [...mediaFiles, ...Array.from(e.target.files)];
+                const files = Array.from(e.target.files);
+                if (mediaFiles.length + files.length > 5) {
+                    alert('Máximo 5 archivos.');
+                    e.target.value = '';
+                    return;
+                }
+                if (files.some(f => f.size > MAX_FILE_SIZE)) {
+                    alert('Un archivo supera el límite de 50MB.');
+                    e.target.value = '';
+                    return;
+                }
+                mediaFiles = [...mediaFiles, ...files];
                 updateMediaPreview();
                 updatePreview();
             });
