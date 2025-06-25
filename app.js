@@ -173,7 +173,7 @@ app.get('/editar_events', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_events.html'));
 });
 app.get('/editor.js', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'private', 'editor.js'));
+  res.sendFile(path.join(__dirname, 'public', 'editor.js'));
 });
 app.get('/dashboard', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
@@ -875,6 +875,23 @@ async function updateResource(db, id, data, files, userId) {
   );
   if (result.matchedCount === 0) throw new Error('Recurso no encontrado o no tienes permisos.');
   await redis.del('resources:cache');
+  const subscribers = await db
+    .collection('newsletter_subscribers')
+    .find({ subscribed: true, notificationTypes: { $in: ['resources'] } })
+    .toArray();
+  for (const subscriber of subscribers) {
+    emailQueue.add({
+      from: 'no-reply@livetextweb.com',
+      to: subscriber.email,
+      subject: `Recurso actualizado: ${update.title}`,
+      html: `Recurso Actualizado
+Hola, ${subscriber.name},
+Se ha actualizado el recurso: ${update.title}
+<a href="http://localhost:3000/index.html#resource-${id}">Ver detalles</a>
+Saludos,
+Equipo LIVETEXT`
+    });
+  }
   return { message: 'Recurso actualizado exitosamente.' };
 }
 
