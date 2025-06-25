@@ -1,14 +1,3 @@
-<?php
-require_once 'sesion.php';
-prevenir_cache();
-session_start();
-
-// Verificar que el usuario es un maestro (admin)
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tabla'] !== 'profesores' || !isset($_SESSION['nombre'])) {
-    header("Location: /login.php");
-    exit();
-}
-?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -132,7 +121,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
 
         .search-input:focus {
             background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 10px rgba(230, 126, 34, 0.3);
+            box-shadow: 0 0 10px rgba(230, 34, 126, 0.3);
             color: var(--white);
             outline: none;
         }
@@ -370,7 +359,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             </a>
             <div class="ms-auto d-flex align-items-center gap-3">
                 <input type="text" class="form-control search-input animate__animated animate__fadeIn" placeholder="Buscar documentos...">
-                <a href="/editor.html" class="btn btn-custom animate__animated animate__bounceIn">
+                <a href="/editor" class="btn btn-custom animate__animated animate__bounceIn">
                     <i class="fas fa-plus me-2"></i>Nuevo Documento
                 </a>
             </div>
@@ -402,7 +391,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             <div class="template-card card">
                 <div class="template-preview preview-placeholder">
                     <div class="template-overlay">
-                        <a href="/editor.html" class="btn btn-custom">Editar</a>
+                        <a href="/editor" class="btn btn-custom">Editar</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -413,7 +402,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             <div class="template-card card">
                 <div class="template-preview preview-placeholder">
                     <div class="template-overlay">
-                        <a href="/editor.html" class="btn btn-custom">Editar</a>
+                        <a href="/editor" class="btn btn-custom">Editar</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -424,12 +413,23 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             <div class="template-card card">
                 <div class="template-preview preview-placeholder">
                     <div class="template-overlay">
-                        <a href="/editor.html" class="btn btn-custom">Editar</a>
+                        <a href="/editor" class="btn btn-custom">Editar</a>
                     </div>
                 </div>
                 <div class="card-body">
                     <h5 class="card-title">Informe Académico</h5>
                     <p class="card-text">Formato para reportes escolares</p>
+                </div>
+            </div>
+            <div class="template-card card">
+                <div class="template-preview preview-placeholder">
+                    <div class="template-overlay">
+                        <a href="/editor?template=dynamic" class="btn btn-custom">Editar</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Documento Dinámico</h5>
+                    <p class="card-text">Plantilla con campos dinámicos para Excel</p>
                 </div>
             </div>
         </div>
@@ -457,7 +457,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             <div class="template-card card">
                 <div class="template-preview preview-placeholder">
                     <div class="template-overlay">
-                        <a href="/editor.html" class="btn btn-custom">Abrir</a>
+                        <a href="/editor" class="btn btn-custom">Abrir</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -468,7 +468,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
             <div class="template-card card">
                 <div class="template-preview preview-placeholder">
                     <div class="template-overlay">
-                        <a href="/editor.html" class="btn btn-custom">Abrir</a>
+                        <a href="/editor" class="btn btn-custom">Abrir</a>
                     </div>
                 </div>
                 <div class="card-body">
@@ -479,19 +479,17 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
         </div>
     </div>
 
- <!-- Footer -->
+    <!-- Footer -->
     <footer class="footer mt-5 py-4">
         <div class="container">
             <!-- Logos y redes sociales -->
             <div class="row mb-4 justify-content-center">
                 <div class="col-auto">
                     <div class="social-icons d-flex gap-4 justify-content-center">
-                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank"
-                            class="text-white fs-4">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4">
                             <i class="fab fa-facebook-square"></i>
                         </a>
-                        <a href="https://www.instagram.com/comunidad.tesci?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                            target="_blank" class="text-white fs-4">
+                        <a href="https://www.instagram.com/comunidad.tesci?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="text-white fs-4">
                             <i class="fab fa-instagram"></i>
                         </a>
                         <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4">
@@ -507,13 +505,13 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
                     <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
                     <p class="mb-2">
                         <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
-                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                        <i class="fas fa-envelope me-2"></i> <a href="mailto:clem@tesci.edomex.gob.mx">clem@tesci.edomex.gob.mx</a>
                     </p>
                     <p class="mb-3">
                         <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740,
                         Cuautitlán Izcalli, Estado de México
                     </p>
-                    <p class="mb-0 text-muted">&copy; 2025 Livetext - Todos los derechos reservados</p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
                 </div>
             </div>
         </div>
@@ -551,14 +549,16 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
                 });
             });
 
-            // Dynamic loading placeholder (to be replaced with backend integration)
+            // Dynamic loading placeholder
             function loadTemplates(templates) {
                 const container = document.querySelector('.document-grid:first-of-type');
                 const template = document.getElementById('template-card');
                 templates.forEach(data => {
                     const clone = template.content.cloneNode(true);
                     clone.querySelector('.card-title').textContent = data.title;
-                    clone.querySelector('.card-text').textContent = `Última modificación: ${data.date}`;
+                    clone.querySelector('.card-text').textContent = `Última modificación: ${data.date}${data.dynamic ? ' (Dinámico)' : ''}`;
+                    const editBtn = clone.querySelector('.btn-custom');
+                    editBtn.setAttribute('href', `/editor${data.dynamic ? '?template=dynamic' : ''}`);
                     container.appendChild(clone);
                 });
             }
@@ -573,14 +573,17 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['tabla']) || $_SESSION['tab
                     if (data.preview) {
                         clone.querySelector('.document-preview').src = data.preview;
                     }
+                    const openBtn = clone.querySelector('.btn-custom');
+                    openBtn.setAttribute('href', '/editor');
                     container.appendChild(clone);
                 });
             }
 
-            // Example data (replace with API call)
+            // Example data
             const exampleTemplates = [
-                { title: 'Presentación de Clase', date: '19/05/2025' },
-                { title: 'Ficha de Trabajo', date: '17/05/2025' }
+                { title: 'Presentación de Clase', date: '19/05/2025', dynamic: false },
+                { title: 'Ficha de Trabajo', date: '17/05/2025', dynamic: false },
+                { title: 'Certificado Dinámico', date: '22/05/2025', dynamic: true }
             ];
             const exampleDocuments = [
                 { title: 'Resumen de Curso', date: '21/05/2025', preview: '' },

@@ -1,15 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://cdn.sheetjs.com https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' https://code.jquery.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font; connect-src 'self';">
     <title>LIVETEXT - Editor de Documentos</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery UI CSS -->
     <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <!-- Poppins Font -->
@@ -566,7 +568,7 @@
         body.preview-mode .toggle-sidebar,
         body.preview-mode .page-controls,
         body.preview-mode .header-controls {
-            display: none;
+            display: none !important;
         }
 
         body.preview-mode .document-container {
@@ -764,10 +766,10 @@
             </div>
             <div class="navbar-actions">
                 <button class="btn btn-light" id="addPage">
-                    <i class="fas fa-plus"></i> Nueva Página
+                    <i class="bi bi-file-earmark-plus"></i> Nueva Página
                 </button>
                 <button class="btn btn-success" id="saveDocument">
-                    <i class="fas fa-save"></i> Guardar
+                    <i class="bi bi-save"></i> Guardar
                 </button>
             </div>
         </div>
@@ -793,37 +795,37 @@
                 <option value="7">36pt</option>
             </select>
             <div class="btn-group animate__animated animate__fadeIn">
-                <button class="btn btn-light" data-command="bold"><i class="fas fa-bold"></i></button>
-                <button class="btn btn-light" data-command="italic"><i class="fas fa-italic"></i></button>
-                <button class="btn btn-light" data-command="underline"><i class="fas fa-underline"></i></button>
-                <button class="btn btn-light" data-command="justifyLeft"><i class="fas fa-align-left"></i></button>
-                <button class="btn btn-light" data-command="justifyCenter"><i class="fas fa-align-center"></i></button>
-                <button class="btn btn-light" data-command="justifyRight"><i class="fas fa-align-right"></i></button>
-                <button class="btn btn-light" data-command="justifyFull"><i class="fas fa-align-justify"></i></button>
-                <button class="btn btn-light" data-command="insertOrderedList"><i class="fas fa-list-ol"></i></button>
-                <button class="btn btn-light" data-command="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
-                <button class="btn btn-light" data-command="createLink"><i class="fas fa-link"></i></button>
-                <button class="btn btn-light" id="headerEditBtn"><i class="fas fa-edit"></i> Editar Encabezado</button>
-                <button class="btn btn-light" id="footerEditBtn"><i class="fas fa-edit"></i> Editar Pie</button>
-                <button class="btn btn-light" id="pageSetupBtn"><i class="fas fa-cog"></i> Configurar Página</button>
+                <button class="btn btn-light" data-command="bold"><i class="bi bi-type-bold"></i></button>
+                <button class="btn btn-light" data-command="italic"><i class="bi bi-type-italic"></i></button>
+                <button class="btn btn-light" data-command="underline"><i class="bi bi-type-underline"></i></button>
+                <button class="btn btn-light" data-command="justifyLeft"><i class="bi bi-text-left"></i></button>
+                <button class="btn btn-light" data-command="justifyCenter"><i class="bi bi-text-center"></i></button>
+                <button class="btn btn-light" data-command="justifyRight"><i class="bi bi-text-right"></i></button>
+                <button class="btn btn-light" data-command="justifyFull"><i class="bi bi-text-indent-left"></i></button>
+                <button class="btn btn-light" data-command="insertOrderedList"><i class="bi bi-list-ol"></i></button>
+                <button class="btn btn-light" data-command="insertUnorderedList"><i class="bi bi-list-ul"></i></button>
+                <button class="btn btn-light" data-command="createLink"><i class="bi bi-link-45deg"></i></button>
+                <button class="btn btn-light" id="headerEditBtn"><i class="bi bi-pencil"></i> Editar Encabezado</button>
+                <button class="btn btn-light" id="footerEditBtn"><i class="bi bi-pencil"></i> Editar Pie</button>
+                <button class="btn btn-light" id="pageSetupBtn"><i class="bi bi-gear"></i> Configurar Página</button>
             </div>
         </div>
     </div>
 
     <!-- Sidebar Toggle Button -->
     <button class="toggle-sidebar d-md-none animate__animated animate__fadeIn" aria-label="Toggle sidebar">
-        <i class="fas fa-bars"></i>
+        <i class="bi bi-list"></i>
     </button>
 
     <!-- Sidebar -->
     <div class="sidebar">
         <h5>Elementos</h5>
-        <div class="draggable-element" data-type="text"><i class="fas fa-paragraph"></i> Texto</div>
-        <div class="draggable-element" data-type="heading"><i class="fas fa-heading"></i> Título</div>
-        <div class="draggable-element" data-type="image"><i class="fas fa-image"></i> Imagen</div>
-        <div class="draggable-element" data-type="table"><i class="fas fa-table"></i> Tabla</div>
-        <div class="draggable-element" data-type="chart"><i class="fas fa-chart-bar"></i> Gráfica</div>
-        <div class="draggable-element" data-type="list"><i class="fas fa-list"></i> Lista</div>
+        <div class="draggable-element" data-type="text"><i class="bi bi-type"></i> Texto</div>
+        <div class="draggable-element" data-type="heading"><i class="bi bi-type-h1"></i> Título</div>
+        <div class="draggable-element" data-type="image"><i class="bi bi-image"></i> Imagen</div>
+        <div class="draggable-element" data-type="table"><i class="bi bi-table"></i> Tabla</div>
+        <div class="draggable-element" data-type="chart"><i class="bi bi-bar-chart"></i> Gráfica</div>
+        <div class="draggable-element" data-type="list"><i class="bi bi-list-ul"></i> Lista</div>
     </div>
 
     <!-- Document Container -->
@@ -831,7 +833,7 @@
         <div class="document-page" data-orientation="portrait" data-size="carta">
             <div class="page-controls">
                 <button class="btn btn-sm btn-light toggle-orientation" title="Cambiar orientación" aria-label="Toggle page orientation">
-                    <i class="fas fa-retweet"></i>
+                    <i class="bi bi-arrow-repeat"></i>
                 </button>
             </div>
             
@@ -839,13 +841,13 @@
             <div class="page-header" contenteditable="true">
                 <div class="header-controls">
                     <button class="btn btn-sm btn-light add-header-image" title="Insertar imagen">
-                        <i class="fas fa-image"></i>
+                        <i class="bi bi-image"></i>
                     </button>
                     <button class="btn btn-sm btn-light add-header-text" title="Insertar texto">
-                        <i class="fas fa-font"></i>
+                        <i class="bi bi-type"></i>
                     </button>
                     <button class="btn btn-sm btn-light header-alignment" title="Alinear elementos">
-                        <i class="fas fa-align-center"></i>
+                        <i class="bi bi-align-center"></i>
                     </button>
                 </div>
                 <div class="header-content">
@@ -863,13 +865,13 @@
             <div class="page-footer" contenteditable="true">
                 <div class="header-controls">
                     <button class="btn btn-sm btn-light add-footer-image" title="Insertar imagen">
-                        <i class="fas fa-image"></i>
+                        <i class="bi bi-image"></i>
                     </button>
                     <button class="btn btn-sm btn-light add-footer-text" title="Insertar texto">
-                        <i class="fas fa-font"></i>
+                        <i class="bi bi-type"></i>
                     </button>
                     <button class="btn btn-sm btn-light footer-alignment" title="Alinear elementos">
-                        <i class="fas fa-align-center"></i>
+                        <i class="bi bi-align-center"></i>
                     </button>
                 </div>
                 <div class="footer-content">
@@ -886,7 +888,7 @@
 
     <!-- Mode Toggle Button -->
     <button class="mode-toggle" id="modeToggle" aria-label="Toggle preview mode">
-        <i class="fas fa-eye me-2"></i>Modo Vista Previa
+        <i class="bi bi-eye me-2"></i>Modo Vista Previa
     </button>
 
     <!-- Table Modal -->
@@ -945,10 +947,10 @@
                             <div class="input-group mb-2">
                                 <input type="text" class="form-control" placeholder="Etiqueta">
                                 <input type="number" class="form-control" placeholder="Valor">
-                                <button class="btn btn-outline-danger remove-data">×</button>
+                                <button class="btn btn-outline-danger remove-data"><i class="bi bi-x"></i></button>
                             </div>
                         </div>
-                        <button class="btn btn-outline-primary btn-sm" id="addChartData">Añadir Dato</button>
+                        <button class="btn btn-outline-primary btn-sm" id="addChartData"><i class="bi bi-plus"></i> Añadir Dato</button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1034,7 +1036,7 @@
         $(document).ready(function () {
             let charts = {};
             let pageSettings = {
-                numberFormat: 'numeric',
+                numberFormat: 'none',
                 startNumber: 1,
                 customFormat: '',
                 margins: { top: 25.4, bottom: 25.4, left: 25.4, right: 25.4 },
@@ -1071,7 +1073,6 @@
 
             // Sistema de edición de encabezado y pie estilo Word 365
             function setupHeaderFooterEditing() {
-                // Activar/desactivar modo de edición de encabezado
                 $('#headerEditBtn').click(function() {
                     toggleHeaderFooterEditMode('.page-header');
                 });
@@ -1080,12 +1081,10 @@
                     toggleHeaderFooterEditMode('.page-footer');
                 });
 
-                // Función para alternar modo de edición
                 function toggleHeaderFooterEditMode(selector) {
                     const element = $(selector);
                     const isEditing = element.hasClass('editing');
                     
-                    // Limpiar otros modos de edición
                     $('.page-header, .page-footer').removeClass('editing');
                     $('.header-element, .footer-element').removeClass('selected');
                     
@@ -1095,7 +1094,6 @@
                     }
                 }
 
-                // Configurar interacciones en modo de edición
                 function setupHeaderFooterInteractions(container) {
                     const elements = container.find('.header-element, .footer-element');
                     
@@ -1106,50 +1104,20 @@
                     });
                 }
 
-                // Hacer elemento arrastrable
                 function makeElementDraggable(element) {
-                    element.off('mousedown.drag').on('mousedown.drag', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        if ($(e.target).hasClass('resize-handle')) return;
-                        
-                        selectedElement = element;
-                        isDragging = true;
-                        
-                        element.addClass('selected').siblings().removeClass('selected');
-                        
-                        const offset = element.offset();
-                        const containerOffset = element.parent().offset();
-                        
-                        dragStart.x = e.pageX;
-                        dragStart.y = e.pageY;
-                        elementStart.x = offset.left - containerOffset.left;
-                        elementStart.y = offset.top - containerOffset.top;
-                        
-                        $(document).on('mousemove.drag', function(e) {
-                            if (!isDragging) return;
-                            
-                            const deltaX = e.pageX - dragStart.x;
-                            const deltaY = e.pageY - dragStart.y;
-                            
-                            const newX = Math.max(0, elementStart.x + deltaX);
-                            const newY = Math.max(0, elementStart.y + deltaY);
-                            
-                            element.css({
-                                left: newX + 'px',
-                                top: newY + 'px'
-                            });
-                        });
-                        
-                        $(document).on('mouseup.drag', function() {
+                    element.draggable({
+                        containment: element.parent(),
+                        cursor: 'move',
+                        start: function(e, ui) {
+                            selectedElement = element;
+                            element.addClass('selected').siblings().removeClass('selected');
+                        },
+                        stop: function() {
                             isDragging = false;
-                            $(document).off('mousemove.drag mouseup.drag');
-                        });
+                        }
                     });
                 }
 
-                // Hacer elemento redimensionable
                 function makeElementResizable(element) {
                     if (!element.find('.resize-handle').length) {
                         const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
@@ -1158,59 +1126,26 @@
                         });
                     }
                     
-                    element.find('.resize-handle').off('mousedown.resize').on('mousedown.resize', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        isResizing = true;
-                        const handle = $(this);
-                        const direction = handle.attr('class').split(' ')[1];
-                        
-                        const startWidth = element.width();
-                        const startHeight = element.height();
-                        const startX = e.pageX;
-                        const startY = e.pageY;
-                        const startLeft = parseInt(element.css('left'));
-                        const startTop = parseInt(element.css('top'));
-                        
-                        $(document).on('mousemove.resize', function(e) {
-                            const deltaX = e.pageX - startX;
-                            const deltaY = e.pageY - startY;
-                            
-                            let newWidth = startWidth;
-                            let newHeight = startHeight;
-                            let newLeft = startLeft;
-                            let newTop = startTop;
-                            
-                            if (direction.includes('e')) newWidth = Math.max(20, startWidth + deltaX);
-                            if (direction.includes('w')) {
-                                newWidth = Math.max(20, startWidth - deltaX);
-                                newLeft = startLeft + deltaX;
-                            }
-                            if (direction.includes('s')) newHeight = Math.max(20, startHeight + deltaY);
-                            if (direction.includes('n')) {
-                                newHeight = Math.max(20, startHeight - deltaY);
-                                newTop = startTop + deltaY;
-                            }
-                            
+                    element.resizable({
+                        handles: 'nw, n, ne, e, se, s, sw, w',
+                        containment: 'parent',
+                        start: function() {
+                            selectedElement = element;
+                            element.addClass('selected').siblings().removeClass('selected');
+                        },
+                        stop: function(event, ui) {
+                            const width = ui.size.width;
+                            const height = ui.size.height;
                             element.css({
-                                width: newWidth + 'px',
-                                height: newHeight + 'px',
-                                left: newLeft + 'px',
-                                top: newTop + 'px'
+                                width: width + 'px',
+                                height: height + 'px'
                             });
-                        });
-                        
-                        $(document).on('mouseup.resize', function() {
-                            isResizing = false;
-                            $(document).off('mousemove.resize mouseup.resize');
-                        });
+                        }
                     });
                 }
 
-                // Hacer elemento seleccionable
                 function makeElementSelectable(element) {
-                    element.off('click.select').on('click.select', function(e) {
+                    element.click(function(e) {
                         e.stopPropagation();
                         $('.header-element, .footer-element').removeClass('selected');
                         element.addClass('selected');
@@ -1218,7 +1153,6 @@
                     });
                 }
 
-                // Agregar imagen al encabezado
                 $('.add-header-image').click(function() {
                     const input = $('<input type="file" accept="image/*">');
                     input.change(function(e) {
@@ -1232,7 +1166,6 @@
                                         <img src="${e.target.result}" class="header-image" style="width: 100%; height: 100%; object-fit: contain;">
                                     </div>
                                 `);
-                                
                                 headerContent.append(imageElement);
                                 setupHeaderFooterInteractions($('.page-header'));
                             };
@@ -1242,7 +1175,6 @@
                     input.click();
                 });
 
-                // Agregar texto al encabezado
                 $('.add-header-text').click(function() {
                     const headerContent = $('.page-header .header-content');
                     const textElement = $(`
@@ -1250,12 +1182,10 @@
                             <textarea class="header-text" style="width: 100%; height: 100%; resize: none; border: none; background: transparent;">Nuevo texto</textarea>
                         </div>
                     `);
-                    
                     headerContent.append(textElement);
                     setupHeaderFooterInteractions($('.page-header'));
                 });
 
-                // Agregar imagen al pie
                 $('.add-footer-image').click(function() {
                     const input = $('<input type="file" accept="image/*">');
                     input.change(function(e) {
@@ -1269,7 +1199,6 @@
                                         <img src="${e.target.result}" class="footer-image" style="width: 100%; height: 100%; object-fit: contain;">
                                     </div>
                                 `);
-                                
                                 footerContent.append(imageElement);
                                 setupHeaderFooterInteractions($('.page-footer'));
                             };
@@ -1279,7 +1208,6 @@
                     input.click();
                 });
 
-                // Agregar texto al pie
                 $('.add-footer-text').click(function() {
                     const footerContent = $('.page-footer .footer-content');
                     const textElement = $(`
@@ -1287,24 +1215,20 @@
                             <textarea class="footer-text" style="width: 100%; height: 100%; resize: none; border: none; background: transparent;">Nuevo texto</textarea>
                         </div>
                     `);
-                    
                     footerContent.append(textElement);
                     setupHeaderFooterInteractions($('.page-footer'));
                 });
 
-                // Alineación de elementos
                 $('.header-alignment, .footer-alignment').click(function() {
                     if (selectedElement) {
                         const container = selectedElement.closest('.page-header, .page-footer');
                         const containerWidth = container.width();
                         const elementWidth = selectedElement.width();
                         const centerX = (containerWidth - elementWidth) / 2;
-                        
                         selectedElement.css('left', centerX + 'px');
                     }
                 });
 
-                // Desactivar edición al hacer clic fuera
                 $(document).click(function(e) {
                     if (!$(e.target).closest('.page-header, .page-footer, .header-controls').length) {
                         $('.page-header, .page-footer').removeClass('editing');
@@ -1313,7 +1237,6 @@
                     }
                 });
 
-                // Tecla Delete para eliminar elemento seleccionado
                 $(document).keydown(function(e) {
                     if (e.key === 'Delete' && selectedElement) {
                         selectedElement.remove();
@@ -1323,7 +1246,7 @@
             }
 
             // Editor Commands
-            $('.toolbar-group button[data-command]').click(function () {
+            $('.toolbar-group button[data-command]').click(function() {
                 const command = $(this).data('command');
                 if (command === 'createLink') {
                     const url = prompt('Ingrese la URL:', 'http://');
@@ -1333,7 +1256,7 @@
                 }
             });
 
-            $('.font-family, .font-size').change(function () {
+            $('.font-family, .font-size').change(function() {
                 const command = $(this).hasClass('font-family') ? 'fontName' : 'fontSize';
                 document.execCommand(command, false, $(this).val());
             });
@@ -1346,10 +1269,10 @@
                     cursor: 'move',
                     opacity: 0.7,
                     zIndex: 1000,
-                    start: function (event, ui) {
+                    start: function(event, ui) {
                         ui.helper.addClass('animate__animated animate__pulse');
                     },
-                    stop: function (event, ui) {
+                    stop: function(event, ui) {
                         ui.helper.removeClass('animate__animated animate__pulse');
                     }
                 });
@@ -1357,35 +1280,40 @@
 
             // Setup Dropzones
             function setupDropzones() {
-                $('.dropzone').each(function () {
-                    $(this).droppable({
-                        accept: '.draggable-element, .element-wrapper',
-                        classes: {
-                            'ui-droppable-active': 'active'
-                        },
-                        drop: function (event, ui) {
+                $('.dropzone').droppable({
+                    accept: '.draggable-element, .element-wrapper',
+                    classes: {
+                        'ui-droppable-active': 'active'
+                    },
+                    drop: function(event, ui) {
+                        if (ui.helper.hasClass('draggable-element')) {
                             const type = ui.helper.data('type');
-                            if (ui.helper.hasClass('draggable-element')) {
-                                createNewElement(type, this);
-                            }
+                            createNewElement(type, this);
+                        } else if (ui.draggable.hasClass('element-wrapper')) {
+                            const wrapper = ui.draggable.clone();
+                            wrapper.find('.element-controls').show();
+                            $(this).append(wrapper);
+                            initializeElementFunctionality(wrapper, wrapper.data('type'));
+                            makeResizable(wrapper);
                         }
-                    }).sortable({
-                        items: '.element-wrapper',
-                        handle: '.element-controls',
-                        placeholder: 'sort-placeholder',
-                        connectWith: '.dropzone',
-                        update: function () {
-                            $(this).find('.element-wrapper').each(function () {
-                                $(this).css('grid-column', `span ${$(this).data('columns') || 12}`);
-                            });
-                        }
-                    });
+                    }
+                }).sortable({
+                    items: '.element-wrapper',
+                    handle: '.element-controls',
+                    placeholder: 'sort-placeholder',
+                    connectWith: '.dropzone',
+                    update: function(event, ui) {
+                        $(this).find('.element-wrapper').each(function() {
+                            const columns = $(this).data('columns') || 12;
+                            $(this).css('grid-column', `span ${columns}`);
+                        });
+                    }
                 });
             }
 
             // Page Controls
             function setupPageControls() {
-                $('.toggle-orientation').click(function () {
+                $('.toggle-orientation').click(function() {
                     const page = $(this).closest('.document-page');
                     const isLandscape = page.hasClass('landscape');
                     page.toggleClass('landscape');
@@ -1398,7 +1326,7 @@
 
             // Update Page Dimensions
             function updatePageDimensions(page) {
-                const size = pageSettings.pageSize;
+                const size = page.data('size') || 'carta';
                 const isLandscape = page.hasClass('landscape');
                 let width, height;
                 switch (size) {
@@ -1458,9 +1386,9 @@
             function createElementControls() {
                 return $(`
                     <div class="element-controls">
-                        <button class="btn btn-sm btn-light edit-btn" title="Editar"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-light column-btn" title="Ajustar columnas"><i class="fas fa-columns"></i></button>
-                        <button class="btn btn-sm btn-light delete-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-light edit-btn" title="Editar"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-light column-btn" title="Ajustar columnas"><i class="bi bi-layout-three-columns"></i></button>
+                        <button class="btn btn-sm btn-light delete-btn" title="Eliminar"><i class="bi bi-trash"></i></button>
                     </div>
                 `);
             }
@@ -1472,7 +1400,7 @@
                 const img = $('<img style="max-width: 100%; height: auto; display: none;">');
                 const placeholder = $(`
                     <div class="image-placeholder" style="padding: 20px; border: 2px dashed #ccc; text-align: center; cursor: pointer;">
-                        <i class="fas fa-image fa-2x"></i>
+                        <i class="bi bi-image"></i>
                         <p>Haga clic para agregar imagen</p>
                     </div>
                 `);
@@ -1480,11 +1408,11 @@
                 container.append(input).append(img).append(placeholder);
                 placeholder.on('click', () => input.trigger('click'));
                 img.on('click', () => input.trigger('click'));
-                input.on('change', function (e) {
+                input.on('change', function(e) {
                     const file = this.files[0];
                     if (file && file.type.match('image.*')) {
                         const reader = new FileReader();
-                        reader.onload = function (e) {
+                        reader.onload = function(e) {
                             img.attr('src', e.target.result).css('display', 'block');
                             placeholder.hide();
                         };
@@ -1501,15 +1429,15 @@
                 const tableContainer = $('<div class="table-container"></div>');
                 const tableControls = $(`
                     <div class="table-controls mb-2">
-                        <button class="btn btn-sm btn-primary add-row">Añadir Fila</button>
-                        <button class="btn btn-sm btn-primary add-col">Añadir Columna</button>
-                        <button class="btn btn-sm btn-danger del-row">Eliminar Fila</button>
-                        <button class="btn btn-sm btn-danger del-col">Eliminar Columna</button>
+                        <button class="btn btn-sm btn-primary add-row"><i class="bi bi-plus"></i> Añadir Fila</button>
+                        <button class="btn btn-sm btn-primary add-col"><i class="bi bi-plus"></i> Añadir Columna</button>
+                        <button class="btn btn-sm btn-danger del-row"><i class="bi bi-dash"></i> Eliminar Fila</button>
+                        <button class="btn btn-sm btn-danger del-col"><i class="bi bi-dash"></i> Eliminar Columna</button>
                     </div>
                 `);
                 let table;
 
-                $('#createTable').off('click').on('click', function () {
+                $('#createTable').off('click').on('click', function() {
                     const rows = parseInt($('#tableRows').val()) || 3;
                     const cols = parseInt($('#tableCols').val()) || 3;
                     const header = $('#tableHeader').is(':checked');
@@ -1535,8 +1463,7 @@
                     $('#tableModal').modal('hide');
                 });
 
-                // Table controls event handlers
-                tableControls.find('.add-row').click(function () {
+                tableControls.find('.add-row').click(function() {
                     const cols = table.find('tr:first td, tr:first th').length;
                     const newRow = $('<tr>');
                     for (let i = 0; i < cols; i++) {
@@ -1545,23 +1472,23 @@
                     table.find('tbody').append(newRow);
                 });
 
-                tableControls.find('.add-col').click(function () {
+                tableControls.find('.add-col').click(function() {
                     table.find('thead tr').append($('<th contenteditable="true">Nueva columna</th>'));
-                    table.find('tbody tr').each(function () {
+                    table.find('tbody tr').each(function() {
                         $(this).append($('<td contenteditable="true">Nueva celda</td>'));
                     });
                 });
 
-                tableControls.find('.del-row').click(function () {
+                tableControls.find('.del-row').click(function() {
                     if (table.find('tbody tr').length > 1) {
                         table.find('tbody tr:last').remove();
                     }
                 });
 
-                tableControls.find('.del-col').click(function () {
+                tableControls.find('.del-col').click(function() {
                     if (table.find('tr:first td, tr:first th').length > 1) {
                         table.find('thead tr th:last').remove();
-                        table.find('tbody tr').each(function () {
+                        table.find('tbody tr').each(function() {
                             $(this).find('td:last').remove();
                         });
                     }
@@ -1583,7 +1510,7 @@
                                 <option value="pie">Gráfica Circular</option>
                                 <option value="doughnut">Gráfica de Dona</option>
                             </select>
-                            <button class="btn btn-sm btn-primary edit-data-btn">Editar Datos</button>
+                            <button class="btn btn-sm btn-primary edit-data-btn"><i class="bi bi-pencil"></i> Editar Datos</button>
                         </div>
                         <canvas id="${chartId}"></canvas>
                     </div>
@@ -1594,24 +1521,24 @@
                     data: [12, 19, 3, 5]
                 };
 
-                $('#addChartData').off('click').on('click', function () {
+                $('#addChartData').off('click').on('click', function() {
                     $('#chartData').append(`
                         <div class="input-group mb-2">
                             <input type="text" class="form-control" placeholder="Etiqueta">
                             <input type="number" class="form-control" placeholder="Valor">
-                            <button class="btn btn-outline-danger remove-data">×</button>
+                            <button class="btn btn-outline-danger remove-data"><i class="bi bi-x"></i></button>
                         </div>
                     `);
                 });
 
-                $('#chartData').on('click', '.remove-data', function () {
+                $('#chartData').on('click', '.remove-data', function() {
                     $(this).closest('.input-group').remove();
                 });
 
-                $('#createChart').off('click').on('click', function () {
+                $('#createChart').off('click').on('click', function() {
                     chartData.labels = [];
                     chartData.data = [];
-                    $('#chartData .input-group').each(function () {
+                    $('#chartData .input-group').each(function() {
                         const label = $(this).find('input[type="text"]').val();
                         const value = parseFloat($(this).find('input[type="number"]').val()) || 0;
                         if (label) {
@@ -1650,12 +1577,12 @@
                     });
 
                     charts[chartId] = chart;
-                    container.find('.chart-type').change(function () {
+                    container.find('.chart-type').change(function() {
                         chart.config.type = $(this).val();
                         chart.update();
                     });
 
-                    container.find('.edit-data-btn').click(function () {
+                    container.find('.edit-data-btn').click(function() {
                         $('#chartModal').modal('show');
                     });
 
@@ -1667,18 +1594,18 @@
 
             // Initialize Element Functionality
             function initializeElementFunctionality(wrapper, type) {
-                wrapper.find('.edit-btn').click(function () {
+                wrapper.find('.edit-btn').click(function() {
                     if (type === 'image') {
                         wrapper.find('input[type="file"]').click();
                     }
                 });
 
-                wrapper.find('.delete-btn').click(function () {
+                wrapper.find('.delete-btn').click(function() {
                     wrapper.addClass('animate__animated animate__fadeOut');
                     setTimeout(() => wrapper.remove(), 500);
                 });
 
-                wrapper.find('.column-btn').click(function () {
+                wrapper.find('.column-btn').click(function() {
                     const currentColumns = wrapper.data('columns') || 12;
                     const newColumns = currentColumns > 6 ? 6 : currentColumns > 4 ? 4 : 12;
                     wrapper.data('columns', newColumns).css('grid-column', `span ${newColumns}`);
@@ -1692,7 +1619,11 @@
                 wrapper.resizable({
                     handles: 'e, se, s',
                     grid: [100 / 12, 10],
-                    stop: function (event, ui) {
+                    start: function(event, ui) {
+                        selectedElement = wrapper;
+                        wrapper.addClass('selected').siblings().removeClass('selected');
+                    },
+                    stop: function(event, ui) {
                         const parentWidth = ui.element.parent().width();
                         const elementWidth = ui.element.width();
                         const columns = Math.round((elementWidth / parentWidth) * 12);
@@ -1708,13 +1639,13 @@
             }
 
             // Add Page
-            $('#addPage').click(function () {
+            $('#addPage').click(function() {
                 const totalPages = $('.document-page').length + 1;
                 const newPage = $(`
-                    <div class="document-page animate__animated animate__fadeInUp" data-orientation="portrait" data-size="${pageSettings.pageSize}">
+                    <div class="document-page animate__animated animate__fadeInUp" data-orientation="portrait" data-size="carta">
                         <div class="page-controls">
                             <button class="btn btn-sm btn-light toggle-orientation" title="Cambiar orientación" aria-label="Toggle page orientation">
-                                <i class="fas fa-retweet"></i>
+                                <i class="bi bi-arrow-repeat"></i>
                             </button>
                         </div>
                         
@@ -1722,13 +1653,13 @@
                         <div class="page-header" contenteditable="true">
                             <div class="header-controls">
                                 <button class="btn btn-sm btn-light add-header-image" title="Insertar imagen">
-                                    <i class="fas fa-image"></i>
+                                    <i class="bi bi-image"></i>
                                 </button>
                                 <button class="btn btn-sm btn-light add-header-text" title="Insertar texto">
-                                    <i class="fas fa-font"></i>
+                                    <i class="bi bi-type"></i>
                                 </button>
                                 <button class="btn btn-sm btn-light header-alignment" title="Alinear elementos">
-                                    <i class="fas fa-align-center"></i>
+                                    <i class="bi bi-align-center"></i>
                                 </button>
                             </div>
                             <div class="header-content">
@@ -1746,13 +1677,13 @@
                         <div class="page-footer" contenteditable="true">
                             <div class="header-controls">
                                 <button class="btn btn-sm btn-light add-footer-image" title="Insertar imagen">
-                                    <i class="fas fa-image"></i>
+                                    <i class="bi bi-image"></i>
                                 </button>
                                 <button class="btn btn-sm btn-light add-footer-text" title="Insertar texto">
-                                    <i class="fas fa-font"></i>
+                                    <i class="bi bi-type"></i>
                                 </button>
                                 <button class="btn btn-sm btn-light footer-alignment" title="Alinear elementos">
-                                    <i class="fas fa-align-center"></i>
+                                    <i class="bi bi-align-center"></i>
                                 </button>
                             </div>
                             <div class="footer-content">
@@ -1786,7 +1717,7 @@
             // Update Page Numbers
             function updatePageNumbers() {
                 const totalPages = $('.document-page').length;
-                $('.document-page').each(function (index) {
+                $('.document-page').each(function(index) {
                     const pageNum = index + pageSettings.startNumber;
                     let text = '';
                     if (pageSettings.numberFormat !== 'none') {
@@ -1816,18 +1747,18 @@
 
             // Page Setup
             function setupPageSettings() {
-                $('#pageSetupBtn').click(function () {
+                $('#pageSetupBtn').click(function() {
                     $('#pageSetupModal').modal('show');
                 });
 
-                $('#pageNumberFormat').change(function () {
+                $('#pageNumberFormat').change(function() {
                     $('#customNumberFormat').toggle($(this).val() === 'custom');
                 });
 
-                $('#applyPageSetup').click(function () {
+                $('#applyPageSetup').click(function() {
                     pageSettings.numberFormat = $('#pageNumberFormat').val();
                     pageSettings.startNumber = parseInt($('#startNumber').val()) || 1;
-                    pageSettings.customFormat = $('#customFormat').val();
+                    pageSettings.customFormat = $('#customFormat').val() || '';
                     pageSettings.margins = {
                         top: parseFloat($('#marginTop').val()) || 25.4,
                         bottom: parseFloat($('#marginBottom').val()) || 25.4,
@@ -1839,7 +1770,7 @@
                     $(':root').css({
                         '--default-margin': `${pageSettings.margins.top}mm`
                     });
-                    $('.document-page').each(function () {
+                    $('.document-page').each(function() {
                         $(this).css({
                             'padding': `${pageSettings.margins.top}mm ${pageSettings.margins.right}mm ${pageSettings.margins.bottom}mm ${pageSettings.margins.left}mm`
                         });
@@ -1852,7 +1783,7 @@
             }
 
             // Save Document
-            $('#saveDocument').click(function () {
+            $('#saveDocument').click(function() {
                 const element = document.createElement('div');
                 const style = document.createElement('style');
                 style.textContent = `
@@ -1877,7 +1808,7 @@
                 `;
                 element.appendChild(style);
 
-                $('.document-page').each(function () {
+                $('.document-page').each(function() {
                     const isLandscape = $(this).hasClass('landscape');
                     const size = $(this).data('size');
                     const pageClone = $(this).clone();
@@ -1912,15 +1843,16 @@
             // Mode Toggle
             function setupModeToggle() {
                 const modeToggle = $('#modeToggle');
-                modeToggle.click(function () {
+                modeToggle.click(function() {
                     $('body').toggleClass('preview-mode');
                     if ($('body').hasClass('preview-mode')) {
-                        modeToggle.html('<i class="fas fa-edit me-2"></i>Modo Edición');
+                        modeToggle.html('<i class="bi bi-pencil me-2"></i>Modo Edición');
                         $('.document-container').addClass('animate__animated animate__fadeIn');
                         $('.page-header, .page-footer').removeClass('editing');
                         $('.header-element, .footer-element').removeClass('selected');
+                        selectedElement = null;
                     } else {
-                        modeToggle.html('<i class="fas fa-eye me-2"></i>Modo Vista Previa');
+                        modeToggle.html('<i class="bi bi-eye me-2"></i>Modo Vista Previa');
                         $('.sidebar, .toolbar, .navbar').addClass('animate__animated animate__fadeIn');
                     }
                     setTimeout(() => {
@@ -1930,7 +1862,7 @@
             }
 
             // Sidebar Toggle
-            $('.toggle-sidebar').click(function () {
+            $('.toggle-sidebar').click(function() {
                 $('.sidebar').toggleClass('show');
                 $('.sidebar').addClass('animate__animated animate__slideInLeft');
                 setTimeout(() => $('.sidebar').removeClass('animate__animated animate__slideInLeft'), 500);
@@ -1938,44 +1870,16 @@
 
             // Helper functions for dragging and resizing (referenced in setupHeaderFooterEditing)
             function makeElementDraggable(element) {
-                element.off('mousedown.drag').on('mousedown.drag', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    if ($(e.target).hasClass('resize-handle')) return;
-                    
-                    selectedElement = element;
-                    isDragging = true;
-                    
-                    element.addClass('selected').siblings().removeClass('selected');
-                    
-                    const offset = element.offset();
-                    const containerOffset = element.parent().offset();
-                    
-                    dragStart.x = e.pageX;
-                    dragStart.y = e.pageY;
-                    elementStart.x = offset.left - containerOffset.left;
-                    elementStart.y = offset.top - containerOffset.top;
-                    
-                    $(document).on('mousemove.drag', function(e) {
-                        if (!isDragging) return;
-                        
-                        const deltaX = e.pageX - dragStart.x;
-                        const deltaY = e.pageY - dragStart.y;
-                        
-                        const newX = Math.max(0, elementStart.x + deltaX);
-                        const newY = Math.max(0, elementStart.y + deltaY);
-                        
-                        element.css({
-                            left: newX + 'px',
-                            top: newY + 'px'
-                        });
-                    });
-                    
-                    $(document).on('mouseup.drag', function() {
+                element.draggable({
+                    containment: element.parent(),
+                    cursor: 'move',
+                    start: function(e, ui) {
+                        selectedElement = element;
+                        element.addClass('selected').siblings().removeClass('selected');
+                    },
+                    stop: function() {
                         isDragging = false;
-                        $(document).off('mousemove.drag mouseup.drag');
-                    });
+                    }
                 });
             }
 
@@ -1987,58 +1891,26 @@
                     });
                 }
                 
-                element.find('.resize-handle').off('mousedown.resize').on('mousedown.resize', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    isResizing = true;
-                    const handle = $(this);
-                    const direction = handle.attr('class').split(' ')[1];
-                    
-                    const startWidth = element.width();
-                    const startHeight = element.height();
-                    const startX = e.pageX;
-                    const startY = e.pageY;
-                    const startLeft = parseInt(element.css('left'));
-                    const startTop = parseInt(element.css('top'));
-                    
-                    $(document).on('mousemove.resize', function(e) {
-                        const deltaX = e.pageX - startX;
-                        const deltaY = e.pageY - startY;
-                        
-                        let newWidth = startWidth;
-                        let newHeight = startHeight;
-                        let newLeft = startLeft;
-                        let newTop = startTop;
-                        
-                        if (direction.includes('e')) newWidth = Math.max(20, startWidth + deltaX);
-                        if (direction.includes('w')) {
-                            newWidth = Math.max(20, startWidth - deltaX);
-                            newLeft = startLeft + deltaX;
-                        }
-                        if (direction.includes('s')) newHeight = Math.max(20, startHeight + deltaY);
-                        if (direction.includes('n')) {
-                            newHeight = Math.max(20, startHeight - deltaY);
-                            newTop = startTop + deltaY;
-                        }
-                        
+                element.resizable({
+                    handles: 'nw, n, ne, e, se, s, sw, w',
+                    containment: 'parent',
+                    start: function() {
+                        selectedElement = element;
+                        element.addClass('selected').siblings().removeClass('selected');
+                    },
+                    stop: function(event, ui) {
+                        const width = ui.size.width;
+                        const height = ui.size.height;
                         element.css({
-                            width: newWidth + 'px',
-                            height: newHeight + 'px',
-                            left: newLeft + 'px',
-                            top: newTop + 'px'
+                            width: width + 'px',
+                            height: height + 'px'
                         });
-                    });
-                    
-                    $(document).on('mouseup.resize', function() {
-                        isResizing = false;
-                        $(document).off('mousemove.resize mouseup.resize');
-                    });
+                    }
                 });
             }
 
             function makeElementSelectable(element) {
-                element.off('click.select').on('click.select', function(e) {
+                element.click(function(e) {
                     e.stopPropagation();
                     $('.header-element, .footer-element').removeClass('selected');
                     element.addClass('selected');
@@ -2046,6 +1918,286 @@
                 });
             }
         });
+
+        // Add Page
+        $('#addPage').click(function() {
+            const totalPages = $('.document-page').length + 1;
+            const newPage = $(`
+                <div class="document-page animate__animated animate__fadeInUp" data-orientation="portrait" data-size="carta">
+                    <div class="page-controls">
+                        <button class="btn btn-sm btn-light toggle-orientation" title="Cambiar orientación" aria-label="Toggle page orientation">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Encabezado estilo Word 365 -->
+                    <div class="page-header" contenteditable="true">
+                        <div class="header-controls">
+                            <button class="btn btn-sm btn-light add-header-image" title="Insertar imagen">
+                                <i class="bi bi-image"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light add-header-text" title="Insertar texto">
+                                <i class="bi bi-type"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light header-alignment" title="Alinear elementos">
+                                <i class="bi bi-align-center"></i>
+                            </button>
+                        </div>
+                        <div class="header-content">
+                            <div class="header-element header-text" style="position: absolute; top: 10px; left: 10px;">
+                                <textarea class="header-text" placeholder="Escriba aquí el encabezado...">Encabezado del documento</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-area">
+                        <div class="dropzone"></div>
+                    </div>
+
+                    <!-- Pie de página estilo Word 365 -->
+                    <div class="page-footer" contenteditable="true">
+                        <div class="header-controls">
+                            <button class="btn btn-sm btn-light add-footer-image" title="Insertar imagen">
+                                <i class="bi bi-image"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light add-footer-text" title="Insertar texto">
+                                <i class="bi bi-type"></i>
+                            </button>
+                            <button class="btn btn-sm btn-light footer-alignment" title="Alinear elementos">
+                                <i class="bi bi-align-center"></i>
+                            </button>
+                        </div>
+                        <div class="footer-content">
+                            <div class="footer-element footer-text" style="position: absolute; bottom: 10px; left: 10px;">
+                                <textarea class="footer-text" placeholder="Escriba aquí el pie de página...">Pie de página</textarea>
+                            </div>
+                            <div class="footer-element page-number" style="position: absolute; bottom: 10px; right: 10px;">
+                                <span class="page-number">${totalPages}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+            $('.document-container').append(newPage);
+            setupDropzones();
+            setupPageControls();
+            updatePageNumbers();
+            setupHeaderFooterInteractionsForNewPage(newPage);
+        });
+
+        // Setup header/footer interactions for new pages
+        function setupHeaderFooterInteractionsForNewPage(page) {
+            const headerElements = page.find('.header-element, .footer-element');
+            headerElements.each(function() {
+                makeElementDraggable($(this));
+                makeElementResizable($(this));
+                makeElementSelectable($(this));
+            });
+        }
+
+        // Update Page Numbers
+        function updatePageNumbers() {
+            const totalPages = $('.document-page').length;
+            $('.document-page').each(function(index) {
+                const pageNum = index + pageSettings.startNumber;
+                let text = '';
+                if (pageSettings.numberFormat !== 'none') {
+                    switch (pageSettings.numberFormat) {
+                        case 'numeric':
+                            text = `${pageNum}`;
+                            break;
+                        case 'pageX':
+                            text = `Page ${pageNum}`;
+                            break;
+                        case 'pageXofY':
+                            text = `Page ${pageNum} of ${totalPages}`;
+                            break;
+                        case 'roman':
+                            text = romanNumerals(pageNum);
+                            break;
+                        case 'custom':
+                            text = pageSettings.customFormat
+                                .replace('{n}', pageNum)
+                                .replace('{y}', totalPages);
+                            break;
+                    }
+                }
+                $(this).find('.page-number').text(text);
+            });
+        }
+
+        // Page Setup
+        function setupPageSettings() {
+            $('#pageSetupBtn').click(function() {
+                $('#pageSetupModal').modal('show');
+            });
+
+            $('#pageNumberFormat').change(function() {
+                $('#customNumberFormat').toggle($(this).val() === 'custom');
+            });
+
+            $('#applyPageSetup').click(function() {
+                pageSettings.numberFormat = $('#pageNumberFormat').val();
+                pageSettings.startNumber = parseInt($('#startNumber').val()) || 1;
+                pageSettings.customFormat = $('#customFormat').val() || '';
+                pageSettings.margins = {
+                    top: parseFloat($('#marginTop').val()) || 25.4,
+                    bottom: parseFloat($('#marginBottom').val()) || 25.4,
+                    left: parseFloat($('#marginLeft').val()) || 25.4,
+                    right: parseFloat($('#marginRight').val()) || 25.4
+                };
+                pageSettings.pageSize = $('#pageSize').val();
+
+                $(':root').css({
+                    '--default-margin': `${pageSettings.margins.top}mm`
+                });
+                $('.document-page').each(function() {
+                    $(this).css({
+                        'padding': `${pageSettings.margins.top}mm ${pageSettings.margins.right}mm ${pageSettings.margins.bottom}mm ${pageSettings.margins.left}mm`
+                    });
+                    updatePageDimensions($(this));
+                });
+
+                updatePageNumbers();
+                $('#pageSetupModal').modal('hide');
+            });
+        }
+
+        // Save Document
+        $('#saveDocument').click(function() {
+            const element = document.createElement('div');
+            const style = document.createElement('style');
+            style.textContent = `
+                .document-page { position: relative; margin: 0; background: #fff; }
+                .document-page.carta.portrait { width: 215.9mm; min-height: 279.4mm; }
+                .document-page.carta.landscape { width: 279.4mm; min-height: 215.9mm; }
+                .document-page.oficio.portrait { width: 215.9mm; min-height: 355.6mm; }
+                .document-page.oficio.landscape { width: 355.6mm; min-height: 215.9mm; }
+                .document-page.a4.portrait { width: 210mm; min-height: 297mm; }
+                .document-page.a4.landscape { width: 297mm; min-height: 210mm; }
+                .page-header { position: absolute; top: 0; left: 0; right: 0; height: 50mm; }
+                .page-footer { position: absolute; bottom: 0; left: 0; right: 0; height: 20mm; }
+                .content-area { margin: 60mm ${pageSettings.margins.right}mm 30mm ${pageSettings.margins.left}mm; }
+                .header-element, .footer-element { position: absolute; }
+                .header-image, .footer-image { max-width: 100%; height: auto; }
+                table { width: 100%; border-collapse: collapse; }
+                td, th { border: 1px solid #000; padding: 5px; }
+                .chart-container { height: 300px; }
+                .image-container img { max-width: 100%; height: auto; }
+                .page-number { font-size: 12px; color: #6c757d; }
+                .header-content, .footer-content { position: relative; height: 100%; }
+            `;
+            element.appendChild(style);
+
+            $('.document-page').each(function() {
+                const isLandscape = $(this).hasClass('landscape');
+                const size = $(this).data('size');
+                const pageClone = $(this).clone();
+                pageClone
+                    .removeClass('animate__animated animate__fadeInUp')
+                    .addClass(`${size} ${isLandscape ? 'landscape' : 'portrait'}`)
+                    .css({ 'position': 'relative', 'top': '0', 'left': '0' });
+                pageClone.find('.page-controls, .header-controls, .resize-handle').remove();
+                pageClone.find('.page-header, .page-footer').removeClass('editing');
+                pageClone.find('.header-element, .footer-element').removeClass('selected');
+                $(element).append(pageClone);
+            });
+
+            const opt = {
+                margin: [pageSettings.margins.top, pageSettings.margins.right, pageSettings.margins.bottom, pageSettings.margins.left],
+                filename: 'documento.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+                jsPDF: {
+                    unit: 'mm',
+                    format: pageSettings.pageSize === 'carta' ? [215.9, 279.4] :
+                           pageSettings.pageSize === 'oficio' ? [215.9, 355.6] : [210, 297],
+                    orientation: 'portrait',
+                    putOnlyUsedFonts: true
+                },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            html2pdf().from(element).set(opt).save();
+        });
+
+        // Mode Toggle
+        function setupModeToggle() {
+            const modeToggle = $('#modeToggle');
+            modeToggle.click(function() {
+                $('body').toggleClass('preview-mode');
+                if ($('body').hasClass('preview-mode')) {
+                    modeToggle.html('<i class="bi bi-pencil me-2"></i>Modo Edición');
+                    $('.document-container').addClass('animate__animated animate__fadeIn');
+                    $('.page-header, .page-footer').removeClass('editing');
+                    $('.header-element, .footer-element').removeClass('selected');
+                    selectedElement = null;
+                } else {
+                    modeToggle.html('<i class="bi bi-eye me-2"></i>Modo Vista Previa');
+                    $('.sidebar, .toolbar, .navbar').addClass('animate__animated animate__fadeIn');
+                }
+                setTimeout(() => {
+                    $('.document-container, .sidebar, .toolbar, .navbar').removeClass('animate__animated animate__fadeIn');
+                }, 500);
+            });
+        }
+
+        // Sidebar Toggle
+        $('.toggle-sidebar').click(function() {
+            $('.sidebar').toggleClass('show');
+            $('.sidebar').addClass('animate__animated animate__slideInLeft');
+            setTimeout(() => $('.sidebar').removeClass('animate__animated animate__slideInLeft'), 500);
+        });
+
+        // Helper functions for dragging and resizing (referenced in setupHeaderFooterEditing)
+        function makeElementDraggable(element) {
+            element.draggable({
+                containment: element.parent(),
+                cursor: 'move',
+                start: function(e, ui) {
+                    selectedElement = element;
+                    element.addClass('selected').siblings().removeClass('selected');
+                },
+                stop: function() {
+                    isDragging = false;
+                }
+            });
+        }
+
+        function makeElementResizable(element) {
+            if (!element.find('.resize-handle').length) {
+                const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+                handles.forEach(handle => {
+                    element.append(`<div class="resize-handle ${handle}"></div>`);
+                });
+            }
+            
+            element.resizable({
+                handles: 'nw, n, ne, e, se, s, sw, w',
+                containment: 'parent',
+                start: function() {
+                    selectedElement = element;
+                    element.addClass('selected').siblings().removeClass('selected');
+                },
+                stop: function(event, ui) {
+                    const width = ui.size.width;
+                    const height = ui.size.height;
+                    element.css({
+                        width: width + 'px',
+                        height: height + 'px'
+                    });
+                }
+            });
+        }
+
+        function makeElementSelectable(element) {
+            element.click(function(e) {
+                e.stopPropagation();
+                $('.header-element, .footer-element').removeClass('selected');
+                element.addClass('selected');
+                selectedElement = element;
+            });
+        }
     </script>
 </body>
 </html>
