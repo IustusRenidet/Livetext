@@ -81,7 +81,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 50 * 1024 * 1024, files: 5 }, // 50MB per file, max 5 files
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|gif|mp4|webm/;
     const mimetype = filetypes.test(file.mimetype);
@@ -93,7 +93,7 @@ const upload = multer({
 
 const resourceUpload = multer({
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 50 * 1024 * 1024, files: 5 }, // 50MB per file, max 5 files
   fileFilter: (req, file, cb) => {
     const allowed = [
       'application/vnd.ms-powerpoint',
