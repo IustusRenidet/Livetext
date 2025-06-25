@@ -25,7 +25,14 @@ const client = new MongoClient(uri);
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const emailQueue = new Queue('email-notifications', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
 const postQueue = new Queue('post-publishing', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+let openai;
+try {
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+} catch (err) {
+  console.error('Error initializing OpenAI:', err);
+  openai = null;
+}
 
 app.use(compression());
 app.use(morgan('combined'));
@@ -1769,6 +1776,9 @@ app.post('/api/validate-capture', requireAuth, async (req, res) => {
 
 // Servicio de chat IA utilizando OpenAI
 app.post('/api/chat', requireAuth, async (req, res) => {
+  if (!openai) {
+    return res.status(500).json({ error: 'Servicio de chat no configurado' });
+  }
   const { messages } = req.body;
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
