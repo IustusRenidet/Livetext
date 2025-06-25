@@ -1164,7 +1164,7 @@
         <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
             aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body" id="errorToastBody">Error al procesar la solicitud.</div>
+                <div class="toast-body" id="errorToastBody" aria-live="polite">Error al procesar la solicitud.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
             </div>
@@ -1407,7 +1407,7 @@
                             document.getElementById('deleteConfirmationModalLabel').textContent = `Confirmar Eliminación de ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`;
                             document.getElementById('confirmDelete').onclick = async () => {
                                 try {
-                                    await axios.delete(`/${itemType}/${itemId}`); // Ajustado a rutas específicas
+                                    await axios.delete(`/api/${itemType}/${itemId}`);
                                     deleteModal.hide();
                                     loadContent(itemType); // Recargar lista
                                     showToast('Éxito', 'Eliminación realizada con éxito');
@@ -1466,6 +1466,7 @@
             setTimeout(() => bsToast.hide(), 5000); // Ocultar después de 5 segundos
         }
     </script>
+    <script src="accessibility.js"></script>
 </body>
 
 </html>
