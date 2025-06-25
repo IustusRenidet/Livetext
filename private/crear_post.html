@@ -805,4 +805,281 @@
         <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">Publicación creada exitosamente.</div>
-                <button type="button" class="btn-close btn-close-white me
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="errorToastBody">Error al crear la publicación.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+        <div id="wordLimitToast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Has alcanzado el límite de 400 palabras.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row mb-4 justify-content-center">
+                <div class="col-auto">
+                    <div class="social-icons d-flex gap-4 justify-content-center">
+                        <a href="https://www.facebook.com/Comunidad.Tesci/?locale=es_LA" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fab fa-facebook-square"></i>
+                        </a>
+                        <a href="https://www.instagram.com/comunidad.tesci" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://tesci.edomex.gob.mx/" target="_blank" class="text-white fs-4 animate__animated animate__swing">
+                            <i class="fas fa-globe"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="fw-bold mb-2">Centro de Lenguas Extranjeras CLEM</p>
+                    <p class="mb-2">
+                        <i class="fas fa-phone-alt me-2"></i> 55 5864 3170 Ext. 712, 730 |
+                        <i class="fas fa-envelope me-2"></i> didiomas@cuautitlan.tecnm.mx
+                    </p>
+                    <p class="mb-3">
+                        <i class="fas fa-map-marker-alt me-2"></i> Av. Nopaltepec s/n Col. La Perla C.P. 54740, Cuautitlán Izcalli, Estado de México
+                    </p>
+                    <p class="mb-0 text-muted">© 2025 Livetext - Todos los derechos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let mediaFiles = [];
+            const MAX_WORDS = 400;
+            moment.tz.setDefault('America/Mexico_City');
+
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: { toolbar: [['bold', 'italic', 'underline']] },
+                placeholder: 'Escribe tu mensaje...'
+            });
+
+            function applyScreenClass() {
+                const qlContainer = document.querySelector('.ql-container');
+                const qlEditor = document.querySelector('.ql-editor');
+                if (window.innerWidth <= 992) {
+                    qlContainer.classList.add('small-screen');
+                    qlEditor.classList.add('small-screen');
+                } else {
+                    qlContainer.classList.remove('small-screen');
+                    qlEditor.classList.remove('small-screen');
+                }
+            }
+            window.addEventListener('resize', applyScreenClass);
+            applyScreenClass();
+
+            function updateWordCount() {
+                const content = quill.getText().trim();
+                const words = content ? content.split(/\s+/).length : 0;
+                const wordCountDisplay = document.getElementById('wordCount');
+                wordCountDisplay.textContent = `${words}/${MAX_WORDS} palabras`;
+                if (words > MAX_WORDS) {
+                    wordCountDisplay.classList.add('exceeded');
+                    quill.setText(content.split(/\s+/).slice(0, MAX_WORDS).join(' ') + ' ');
+                    new bootstrap.Toast(document.getElementById('wordLimitToast')).show();
+                } else {
+                    wordCountDisplay.classList.remove('exceeded');
+                }
+            }
+            quill.on('text-change', updateWordCount);
+
+            function updateMediaPreview() {
+                const previewGrid = document.getElementById('mediaPreviewGrid');
+                previewGrid.innerHTML = '';
+                mediaFiles.forEach((file, index) => {
+                    const url = URL.createObjectURL(file);
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'media-preview-item';
+                    const mediaElement = file.type.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                    mediaElement.src = url;
+                    mediaElement.setAttribute('loading', 'lazy');
+                    if (file.type.startsWith('video')) mediaElement.controls = true;
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'media-remove';
+                    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    removeBtn.onclick = () => {
+                        mediaFiles.splice(index, 1);
+                        updateMediaPreview();
+                        updatePreview();
+                    };
+                    previewItem.appendChild(mediaElement);
+                    previewItem.appendChild(removeBtn);
+                    previewGrid.appendChild(previewItem);
+                });
+                new Sortable(previewGrid, {
+                    animation: 150,
+                    onEnd: evt => {
+                        const [moved] = mediaFiles.splice(evt.oldIndex, 1);
+                        mediaFiles.splice(evt.newIndex, 0, moved);
+                        updateMediaPreview();
+                    }
+                });
+            }
+
+            function updatePreview() {
+                const title = document.getElementById('postTitle').value || 'Título de la publicación';
+                const content = quill.root.innerHTML || 'Escribe algo para ver la vista previa...';
+                const category = document.getElementById('postCategory').value || 'Sin categoría';
+                const dateTime = document.getElementById('schedulePost').checked && document.getElementById('postDate').value && document.getElementById('postTime').value
+                    ? moment(`${document.getElementById('postDate').value} ${document.getElementById('postTime').value}`, 'YYYY-MM-DD HH:mm').format('DD/MM/YYYY HH:mm')
+                    : moment().tz('America/Mexico_City').format('DD/MM/YYYY HH:mm');
+                const tags = document.getElementById('postTags').value.split(',').map(t => t.trim()).filter(t => t);
+                const allowComments = document.getElementById('allowComments').checked;
+                const mediaMode = document.getElementById('mediaMode').value;
+                const textFormat = document.getElementById('textFormat').value || 'medium';
+                const previewContent = document.getElementById('previewContent');
+                previewContent.innerHTML = `
+                    <div class="${textFormat}">${content}</div>
+                    <p><small>Categoría: ${category}</small></p>
+                    <p><small>Fecha: ${dateTime}</small></p>
+                    ${tags.length ? `<p><small>Etiquetas: ${tags.join(', ')}</small></p>` : ''}
+                    ${allowComments ? `<p><small>Comentarios habilitados</small></p>` : ''}
+                `;
+                const previewMedia = document.getElementById('previewMedia');
+                previewMedia.innerHTML = '';
+                if (mediaFiles.length) {
+                    if (mediaMode === 'gallery' && mediaFiles.length >= 4) {
+                        const grid = document.createElement('div');
+                        grid.className = 'preview-media-grid';
+                        mediaFiles.forEach(file => {
+                            const url = URL.createObjectURL(file);
+                            const mediaElement = file.type.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                            mediaElement.src = url;
+                            mediaElement.setAttribute('loading', 'lazy');
+                            if (file.type.startsWith('video')) { mediaElement.controls = true; mediaElement.muted = true; }
+                            grid.appendChild(mediaElement);
+                        });
+                        previewMedia.appendChild(grid);
+                    } else {
+                        const carousel = document.createElement('div');
+                        carousel.className = 'carousel slide';
+                        carousel.id = 'mediaCarousel';
+                        carousel.setAttribute('data-bs-ride', mediaMode === 'auto' ? 'carousel' : 'false');
+                        const inner = document.createElement('div');
+                        inner.className = 'carousel-inner';
+                        mediaFiles.forEach((file, index) => {
+                            const item = document.createElement('div');
+                            item.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                            const url = URL.createObjectURL(file);
+                            const mediaElement = file.type.startsWith('image') ? document.createElement('img') : document.createElement('video');
+                            mediaElement.src = url;
+                            mediaElement.setAttribute('loading', 'lazy');
+                            mediaElement.className = 'd-block w-100';
+                            if (file.type.startsWith('video')) { mediaElement.controls = true; mediaElement.muted = true; }
+                            item.appendChild(mediaElement);
+                            inner.appendChild(item);
+                        });
+                        carousel.appendChild(inner);
+                        if (mediaFiles.length > 1) {
+                            const prev = document.createElement('button');
+                            prev.className = 'carousel-control-prev';
+                            prev.type = 'button';
+                            prev.setAttribute('data-bs-target', '#mediaCarousel');
+                            prev.setAttribute('data-bs-slide', 'prev');
+                            prev.innerHTML = '<span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>';
+                            const next = document.createElement('button');
+                            next.className = 'carousel-control-next';
+                            next.type = 'button';
+                            next.setAttribute('data-bs-target', '#mediaCarousel');
+                            next.setAttribute('data-bs-slide', 'next');
+                            next.innerHTML = '<span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>';
+                            carousel.appendChild(prev);
+                            carousel.appendChild(next);
+                        }
+                        previewMedia.appendChild(carousel);
+                    }
+                }
+                const isTruncated = previewContent.scrollHeight > previewContent.clientHeight;
+                const readMore = document.getElementById('readMore');
+                if (isTruncated) {
+                    previewContent.classList.remove('expanded');
+                    readMore.style.display = 'block';
+                } else {
+                    readMore.style.display = 'none';
+                }
+            }
+
+            document.getElementById('postMedia').addEventListener('change', e => {
+                mediaFiles = [...mediaFiles, ...Array.from(e.target.files)];
+                updateMediaPreview();
+                updatePreview();
+            });
+
+            ['postTitle', 'postCategory', 'postDate', 'postTime', 'postTags', 'textFormat', 'allowComments', 'mediaMode'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.addEventListener('input', updatePreview);
+            });
+
+            document.getElementById('schedulePost').addEventListener('change', () => {
+                document.querySelectorAll('.schedule-fields').forEach(field => {
+                    field.style.display = document.getElementById('schedulePost').checked ? 'block' : 'none';
+                    const input = field.querySelector('input');
+                    input.required = document.getElementById('schedulePost').checked;
+                });
+                updatePreview();
+            });
+
+            document.getElementById('readMore').addEventListener('click', () => {
+                const previewContent = document.getElementById('previewContent');
+                previewContent.classList.toggle('expanded');
+                document.getElementById('readMore').textContent = previewContent.classList.contains('expanded') ? 'Leer menos' : 'Leer más';
+            });
+
+            async function submitForm(isDraft = false) {
+                const formData = new FormData(document.getElementById('postForm'));
+                formData.append('content', quill.root.innerHTML);
+                formData.append('isDraft', isDraft);
+                if (!document.getElementById('schedulePost').checked) {
+                    formData.delete('date');
+                    formData.delete('time');
+                }
+                mediaFiles.forEach(file => formData.append('postMedia', file));
+                try {
+                    await axios.post('/api/posts', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                    new bootstrap.Toast(document.getElementById('successToast')).show();
+                    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+                } catch (error) {
+                    if (error.response && error.response.status === 401) {
+                        window.location.href = '/login.html';
+                    } else {
+                        document.getElementById('errorToastBody').textContent = error.response?.data?.error || 'Error al crear la publicación';
+                        new bootstrap.Toast(document.getElementById('errorToast')).show();
+                    }
+                }
+            }
+
+            document.getElementById('postForm').addEventListener('submit', e => {
+                e.preventDefault();
+                submitForm(false);
+            });
+
+            document.getElementById('draftButton').addEventListener('click', () => submitForm(true));
+
+            updatePreview();
+            updateWordCount();
+        });
+    </script>
+</body>
+</html>
