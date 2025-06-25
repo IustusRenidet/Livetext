@@ -6,6 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   btn.textContent = 'Accesibilidad';
   document.body.appendChild(btn);
 
+  const narratorBtn = document.createElement('button');
+  narratorBtn.id = 'narratorToggle';
+  narratorBtn.className = 'btn btn-secondary accessibility-toggle narrator-toggle';
+  narratorBtn.type = 'button';
+  narratorBtn.textContent = 'Narrador';
+  narratorBtn.setAttribute('aria-pressed', 'false');
+  document.body.appendChild(narratorBtn);
+
   const style = document.createElement('style');
   style.textContent = `
   .accessibility-toggle {
@@ -14,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
     right: 1rem;
     z-index: 10000;
   }
+  .narrator-toggle {
+    right: 6rem;
+   }
   .high-contrast, .high-contrast a {
     background-color: #000 !important;
     color: #fff !important;
@@ -29,6 +40,30 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('largeText', large);
   });
 
+  let narratorEnabled = localStorage.getItem('narratorEnabled') === 'true';
+  narratorBtn.setAttribute('aria-pressed', narratorEnabled);
+
+  narratorBtn.addEventListener('click', () => {
+    narratorEnabled = !narratorEnabled;
+    narratorBtn.setAttribute('aria-pressed', narratorEnabled);
+    localStorage.setItem('narratorEnabled', narratorEnabled);
+  });
+
+  function speak(text) {
+    if (!narratorEnabled || !window.speechSynthesis) return;
+    const content = (text || '').trim();
+    if (!content) return;
+    const utter = new SpeechSynthesisUtterance(content);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+  }
+
+  document.body.addEventListener('focusin', e => {
+    const el = e.target;
+    const label = el.getAttribute('aria-label') || el.getAttribute('alt') || el.textContent;
+    speak(label);
+  });
+
   if (localStorage.getItem('highContrast') === 'true') {
     document.body.classList.add('high-contrast');
   }
@@ -41,6 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el.setAttribute('aria-label', el.placeholder);
   });
   document.querySelectorAll('img:not([alt])').forEach(img => {
-    img.setAttribute('alt', '');
+    img.setAttribute('alt', 'imagen sin descripcion');
   });
 });
