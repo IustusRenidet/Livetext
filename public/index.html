@@ -738,6 +738,53 @@
                 chatContainer.style.display = 'none';
             });
 
+            // Chat IA
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const messages = [];
+
+            chatSend.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+            document.querySelectorAll('.quick-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    chatInput.value = btn.textContent;
+                    sendChatMessage();
+                });
+            });
+
+            function addChatMessage(sender, text) {
+                const div = document.createElement('div');
+                div.className = 'mb-2';
+                div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            async function sendChatMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                addChatMessage('Tú', text);
+                messages.push({ role: 'user', content: text });
+                chatInput.value = '';
+                try {
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        messages.push({ role: 'assistant', content: data.reply });
+                        addChatMessage('IA', data.reply);
+                    } else {
+                        addChatMessage('Error', data.error || 'Error');
+                    }
+                } catch (err) {
+                    addChatMessage('Error', 'No se pudo conectar');
+                }
+            }
+
             // Animación para el enlace de darse de baja
             const unsubscribeLink = document.getElementById('unsubscribeLink');
             unsubscribeLink.addEventListener('mouseover', () => {

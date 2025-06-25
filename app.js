@@ -155,7 +155,7 @@ function requireAuth(req, res, next) {
 
 const restrictedPages = [
   '/crear_calendario', '/editar_events', '/dashboard', '/crear_form',
-  '/editor', '/crear_post', '/editar_posts', '/dashboard_documentos',
+  '/editor', '/crear_post', '/editar_posts', '/editar_forms', '/editar_resources', '/dashboard_documentos',
   '/dashboard_pagos', '/perfil', '/subir_recurso', '/chat'
 ];
 
@@ -173,7 +173,7 @@ app.get('/editar_events', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_events.html'));
 });
 app.get('/editor.js', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'private', 'editor.js'));
+  res.sendFile(path.join(__dirname, 'public', 'editor.js'));
 });
 app.get('/dashboard', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'dashboard.html'));
@@ -189,6 +189,12 @@ app.get('/crear_post', requireAuth, (req, res) => {
 });
 app.get('/editar_posts', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_posts.html'));
+});
+app.get('/editar_forms', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editar_forms.html'));
+});
+app.get('/editar_resources', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editar_resources.html'));
 });
 app.get('/dashboard_documentos', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'dashboard_documentos.html'));
@@ -489,6 +495,10 @@ Equipo LIVETEXT
   return { message: 'Recurso creado exitosamente.', insertedId: result.insertedId };
 }
 
+function parseBool(value) {
+  return value === true || value === 'true' || value === 'on' || value === 1 || value === '1';
+}
+
 async function createPost(db, postData, files, userId, isDraft = false) {
   console.log('Creating post:', postData, files);
   const { title, content, category, allowComments, mediaMode, tags, date, time, schedulePost } = postData;
@@ -500,19 +510,20 @@ async function createPost(db, postData, files, userId, isDraft = false) {
     allowedAttributes: {}
   });
   const now = moment.tz('America/Mexico_City').toDate();
+  const schedule = parseBool(schedulePost);
   let postDateTime = now;
-  if (schedulePost === 'true' && date && time) {
+  if (schedule && date && time) {
     postDateTime = moment.tz(`${date} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Mexico_City').toDate();
     if (!moment(postDateTime).isValid()) throw new Error('Formato de fecha u hora inválido.');
     if (!isDraft && postDateTime < now) throw new Error('No puedes programar una publicación en el pasado.');
-  } else if (schedulePost === 'true') {
+  } else if (schedule) {
     throw new Error('Fecha y hora son obligatorios cuando se programa la publicación.');
   }
   const post = {
     title: title.trim(),
     content: sanitizedContent,
     category,
-    allowComments: allowComments === 'true',
+    allowComments: parseBool(allowComments),
     mediaMode: mediaMode || 'auto',
     tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
     date: postDateTime,
@@ -575,19 +586,20 @@ async function updatePost(db, postId, postData, files, userId, isDraft = false) 
     allowedAttributes: {}
   });
   const now = moment.tz('America/Mexico_City').toDate();
+  const schedule = parseBool(schedulePost);
   let postDateTime = now;
-  if (schedulePost === 'true' && date && time) {
+  if (schedule && date && time) {
     postDateTime = moment.tz(`${date} ${time}`, 'YYYY-MM-DD HH:mm', 'America/Mexico_City').toDate();
     if (!moment(postDateTime).isValid()) throw new Error('Formato de fecha u hora inválido.');
     if (!isDraft && postDateTime < now) throw new Error('No puedes programar una publicación en el pasado.');
-  } else if (schedulePost === 'true') {
+  } else if (schedule) {
     throw new Error('Fecha y hora son obligatorios cuando se programa la publicación.');
   }
   const updateData = {
     title: title.trim(),
     content: sanitizedContent,
     category,
-    allowComments: allowComments === 'true',
+    allowComments: parseBool(allowComments),
     mediaMode: mediaMode || 'auto',
     tags: tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
     date: postDateTime,
@@ -869,6 +881,23 @@ async function updateResource(db, id, data, files, userId) {
   );
   if (result.matchedCount === 0) throw new Error('Recurso no encontrado o no tienes permisos.');
   await redis.del('resources:cache');
+  const subscribers = await db
+    .collection('newsletter_subscribers')
+    .find({ subscribed: true, notificationTypes: { $in: ['resources'] } })
+    .toArray();
+  for (const subscriber of subscribers) {
+    emailQueue.add({
+      from: 'no-reply@livetextweb.com',
+      to: subscriber.email,
+      subject: `Recurso actualizado: ${update.title}`,
+      html: `Recurso Actualizado
+Hola, ${subscriber.name},
+Se ha actualizado el recurso: ${update.title}
+<a href="http://localhost:3000/index.html#resource-${id}">Ver detalles</a>
+Saludos,
+Equipo LIVETEXT`
+    });
+  }
   return { message: 'Recurso actualizado exitosamente.' };
 }
 
@@ -1132,7 +1161,7 @@ app.delete('/events/:id', requireAuth, async (req, res) => {
 app.post('/api/posts', requireAuth, upload.array('postMedia', 5), async (req, res) => {
   try {
     console.log('Received post request:', req.body, req.files);
-    const isDraft = req.body.isDraft === 'true';
+    const isDraft = parseBool(req.body.isDraft);
     const result = await createPost(db, req.body, req.files, req.session.user._id, isDraft);
     res.status(201).json(result);
   } catch (error) {
@@ -1167,7 +1196,7 @@ app.put('/api/posts/:id', requireAuth, upload.array('postMedia', 5), async (req,
   try {
     console.log('Received put request for post:', req.params.id, req.body, req.files);
     const { id } = req.params;
-    const isDraft = req.body.isDraft === 'true';
+    const isDraft = parseBool(req.body.isDraft);
     const result = await updatePost(db, id, req.body, req.files, req.session.user._id, isDraft);
     res.status(200).json(result);
   } catch (error) {
@@ -1773,6 +1802,9 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
   }
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ error: 'Servicio de chat no configurado' });
+  }
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -1783,7 +1815,8 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     res.json({ reply });
   } catch (error) {
     console.error('Error en chat IA:', error);
-    res.status(500).json({ error: 'Error en servicio de chat' });
+    const errMsg = error?.error?.message || error?.message;
+    res.status(500).json({ error: errMsg || 'Error en servicio de chat' });
   }
 });
 

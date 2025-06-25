@@ -1097,6 +1097,8 @@
 
             async function submitForm(isDraft = false) {
                 const formData = new FormData(document.getElementById('postForm'));
+                formData.set('allowComments', document.getElementById('allowComments').checked);
+                formData.set('schedulePost', document.getElementById('schedulePost').checked);
                 formData.append('content', quill.root.innerHTML);
                 formData.append('isDraft', isDraft);
                 if (!document.getElementById('schedulePost').checked) {
@@ -1109,7 +1111,7 @@
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                     new bootstrap.Toast(document.getElementById('successToast')).show();
-                    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+                    setTimeout(() => window.location.href = '/dashboard', 1500);
                 } catch (error) {
                     if (error.response && error.response.status === 401) {
                         window.location.href = '/login.html';
@@ -1134,7 +1136,7 @@
             document.getElementById('confirmDelete').addEventListener('click', async () => {
                 try {
                     const response = await axios.delete(`/api/posts/${postId}`);
-                    window.location.href = '/dashboard.html';
+                    window.location.href = '/dashboard';
                 } catch (error) {
                     document.getElementById('errorToastBody').textContent = error.response?.data?.error || 'Error al eliminar publicación';
                     new bootstrap.Toast(document.getElementById('errorToast')).show();
