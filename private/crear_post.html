@@ -804,19 +804,19 @@
     <div class="toast-container">
         <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">Publicación creada exitosamente.</div>
+                <div class="toast-body" aria-live="polite">Publicación creada exitosamente.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
         <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body" id="errorToastBody">Error al crear la publicación.</div>
+                <div class="toast-body" id="errorToastBody" aria-live="polite">Error al crear la publicación.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
         <div id="wordLimitToast" class="toast align-items-center text-white bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">Has alcanzado el límite de 400 palabras.</div>
+                <div class="toast-body" aria-live="polite">Has alcanzado el límite de 400 palabras.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
@@ -1095,5 +1095,6 @@
             updateWordCount();
         });
     </script>
+    <script src="accessibility.js"></script>
 </body>
 </html>

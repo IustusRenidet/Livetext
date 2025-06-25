@@ -19,6 +19,14 @@ const cookieParser = require('cookie-parser');
 const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
+const TRAINING_DATA_FILE = path.join(__dirname, 'training-data.json');
+let trainingData = [];
+try {
+  trainingData = JSON.parse(fs.readFileSync(TRAINING_DATA_FILE, 'utf8'));
+} catch {
+  trainingData = [];
+}
+
 const app = express();
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
@@ -1594,7 +1602,7 @@ app.post('/upload-resource', requireAuth, resourceUpload.any(), async (req, res)
   }
 });
 
-app.get('/api/resources', requireAuth, async (req, res) => {
+app.get('/api/resources', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -1605,7 +1613,7 @@ app.get('/api/resources', requireAuth, async (req, res) => {
   }
 });
 
-app.get('/api/resources/:id', requireAuth, async (req, res) => {
+app.get('/api/resources/:id', async (req, res) => {
   try {
     const resource = await getResource(db, req.params.id);
     if (!resource) return res.status(404).json({ error: 'Recurso no encontrado' });
@@ -1631,6 +1639,32 @@ app.delete('/api/resources/:id', requireAuth, async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+// Public endpoint for listing educational resources
+app.get('/educational-resources', async (req, res) => {
+  try {
+    const filter = req.query.filter && req.query.filter !== 'all' ? req.query.filter : null;
+    const search = req.query.search ? req.query.search.trim() : null;
+    const query = { isPublic: true };
+    if (filter) query.category = filter;
+    if (search) query.title = { $regex: new RegExp(search, 'i') };
+    const resources = await db
+      .collection('resources')
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+    const formatted = resources.map(r => ({
+      title: r.title,
+      category: r.category,
+      uploadDate: r.createdAt,
+      filePaths: (r.files || []).map(f => f.path),
+      fileTypes: (r.files || []).map(f => path.extname(f.originalname).slice(1).toLowerCase())
+    }));
+    res.json(formatted);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener recursos' });
   }
 });
 
@@ -1797,26 +1831,50 @@ app.post('/api/validate-capture', requireAuth, async (req, res) => {
 });
 
 // Servicio de chat IA utilizando OpenAI
-app.post('/api/chat', requireAuth, async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
   }
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Servicio de chat no configurado' });
-  }
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages,
-      temperature: 0.7
-    });
-    const reply = completion.choices?.[0]?.message?.content || '';
-    res.json({ reply });
+    const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.content?.toLowerCase() || '';
+    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f?¿!,.]/g, '').toLowerCase();
+    const words = new Set(normalize(lastUserMsg).split(/\s+/));
+    let bestMatch = null;
+    let bestScore = 0;
+    for (const qa of trainingData) {
+      const qWords = new Set(normalize(qa.question).split(/\s+/));
+      const intersection = [...words].filter(w => qWords.has(w));
+      const score = intersection.length / Math.min(qWords.size, words.size);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = qa;
+      }
+    }
+    if (bestMatch && bestScore >= 0.5) {
+      return res.json({ reply: bestMatch.answer });
+    }
+    return res.json({ reply: 'Lo siento, no tengo información sobre eso. Puedes consultar directamente al CLE.' });
   } catch (error) {
     console.error('Error en chat IA:', error);
     const errMsg = error?.error?.message || error?.message;
     res.status(500).json({ error: errMsg || 'Error en servicio de chat' });
+  }
+});
+
+// Entrenamiento de la IA con pares pregunta/respuesta
+app.post('/api/train', requireAuth, async (req, res) => {
+  const { question, answer } = req.body;
+  if (!question || !answer) {
+    return res.status(400).json({ error: 'Datos incompletos' });
+  }
+  trainingData.push({ question, answer });
+  try {
+    fs.writeFileSync(TRAINING_DATA_FILE, JSON.stringify(trainingData, null, 2));
+    res.status(201).json({ success: true });
+  } catch (error) {
+    console.error('Error al guardar entrenamiento:', error);
+    res.status(500).json({ error: 'No se pudo guardar' });
   }
 });
 
