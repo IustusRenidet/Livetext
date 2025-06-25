@@ -238,6 +238,7 @@ async function ensureIndexes(db) {
   await db.collection('forms').createIndex({ userId: 1, createdAt: -1 });
   await db.collection('form_submissions').createIndex({ formId: 1, createdAt: -1 });
   await db.collection('form_submissions').createIndex({ 'responses.fieldId': 1, 'responses.value': 1 }); // For email uniqueness
+  await db.collection('templates').createIndex({ userId: 1, createdAt: -1 });
 }
 
 async function registerUser(db, userData) {
@@ -909,6 +910,47 @@ async function deleteDocument(db, id, userId) {
   });
   if (result.deletedCount === 0) throw new Error('Documento no encontrado o no tienes permisos.');
   return { message: 'Documento eliminado.' };
+}
+
+// Template helpers
+async function createTemplate(db, templateData, userId) {
+  const template = {
+    ...templateData,
+    userId: new ObjectId(userId),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  const result = await db.collection('templates').insertOne(template);
+  return { message: 'Plantilla guardada.', insertedId: result.insertedId };
+}
+
+async function updateTemplate(db, id, templateData, userId) {
+  const result = await db.collection('templates').updateOne(
+    { _id: new ObjectId(id), userId: new ObjectId(userId) },
+    { $set: { ...templateData, updatedAt: new Date() } }
+  );
+  if (result.matchedCount === 0) throw new Error('Plantilla no encontrada o no tienes permisos.');
+  return { message: 'Plantilla actualizada.' };
+}
+
+async function getTemplate(db, id) {
+  return db.collection('templates').findOne({ _id: new ObjectId(id) });
+}
+
+async function getTemplates(db, userId) {
+  return db.collection('templates')
+    .find({ userId: new ObjectId(userId) })
+    .sort({ updatedAt: -1 })
+    .toArray();
+}
+
+async function deleteTemplate(db, id, userId) {
+  const result = await db.collection('templates').deleteOne({
+    _id: new ObjectId(id),
+    userId: new ObjectId(userId)
+  });
+  if (result.deletedCount === 0) throw new Error('Plantilla no encontrada o no tienes permisos.');
+  return { message: 'Plantilla eliminada.' };
 }
 
 async function getForm(db, id) {
@@ -1592,6 +1634,53 @@ app.put('/api/documents/:id', requireAuth, async (req, res) => {
 app.delete('/api/documents/:id', requireAuth, async (req, res) => {
   try {
     const result = await deleteDocument(db, req.params.id, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Template routes
+app.post('/api/templates', requireAuth, async (req, res) => {
+  try {
+    const result = await createTemplate(db, req.body, req.session.user._id);
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/templates', requireAuth, async (req, res) => {
+  try {
+    const templates = await getTemplates(db, req.session.user._id);
+    res.json(templates);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener plantillas' });
+  }
+});
+
+app.get('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const template = await getTemplate(db, req.params.id);
+    if (!template) return res.status(404).json({ error: 'Plantilla no encontrada' });
+    res.json(template);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener plantilla' });
+  }
+});
+
+app.put('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await updateTemplate(db, req.params.id, req.body, req.session.user._id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/templates/:id', requireAuth, async (req, res) => {
+  try {
+    const result = await deleteTemplate(db, req.params.id, req.session.user._id);
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
