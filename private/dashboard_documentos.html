@@ -593,6 +593,33 @@
             loadTemplates(exampleTemplates);
             loadRecentDocuments(exampleDocuments);
         });
+        
     </script>
+<script>
+$(document).ready(async () => {
+  try {
+    const response = await fetch('/api/documents');
+    if (!response.ok) throw new Error('Failed to load documents.');
+    const documents = await response.json();
+    documents.forEach(doc => {
+      const docItem = `
+        <div class="col-md-4 col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">${sanitizeHtml(doc.title)}</h5>
+              <p class="card-text">Última modificación: ${moment(doc.updatedAt).format('DD/MM/YYYY')}</p>
+              <a href="/editor.html?id=${doc._id}" class="btn btn-primary">Abrir</a>
+            </div>
+          </div>
+        </div>
+      `;
+      $('#recent-documents').append(docItem);
+    });
+  } catch (error) {
+    console.error('Error loading documents:', error);
+    alert('Failed to load documents.');
+  }
+});
+</script>
 </body>
 </html>
