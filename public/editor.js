@@ -617,7 +617,7 @@ $('.add-header-image, .add-footer-image').on('click', function () {
         success: function (response) {
           const imageElement = $(`
             <div class="${isHeader ? 'header-element' : 'footer-element'}" style="position: absolute; top: 20px; left: 50px; width: 100px; height: 50px;">
-              <img src="${response.url}" class="${isHeader ? 'header-image' : 'footer-image'}" style="width: 100%; height: 100%; object-fit: contain;">
+              <img src="${response.url}" alt="Imagen" class="${isHeader ? 'header-image' : 'footer-image'}" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
           `);
           container.append(imageElement);
