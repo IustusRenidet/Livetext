@@ -519,8 +519,14 @@ async function createPost(db, postData, files, userId, isDraft = false) {
   const wordCount = rawContent.trim().split(/\s+/).length;
   if (wordCount > 400) throw new Error('El contenido excede el límite de 400 palabras.');
   const sanitizedContent = sanitizeHtml(rawContent, {
-    allowedTags: ['b', 'i', 'u', 'p', 'br'],
-    allowedAttributes: {}
+    allowedTags: [
+      'b', 'i', 'u', 'p', 'br', 'strong', 'em', 'span', 'ul', 'ol', 'li',
+      'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+    ],
+    allowedAttributes: {
+      a: ['href', 'target'],
+      span: ['style']
+    }
   });
   const now = moment.tz('America/Mexico_City').toDate();
   let postDateTime = now;
@@ -598,8 +604,14 @@ async function updatePost(db, postId, postData, files, userId, isDraft = false) 
   const wordCount = rawContent.trim().split(/\s+/).length;
   if (wordCount > 400) throw new Error('El contenido excede el límite de 400 palabras.');
   const sanitizedContent = sanitizeHtml(rawContent, {
-    allowedTags: ['b', 'i', 'u', 'p', 'br'],
-    allowedAttributes: {}
+    allowedTags: [
+      'b', 'i', 'u', 'p', 'br', 'strong', 'em', 'span', 'ul', 'ol', 'li',
+      'a', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+    ],
+    allowedAttributes: {
+      a: ['href', 'target'],
+      span: ['style']
+    }
   });
   const now = moment.tz('America/Mexico_City').toDate();
   let postDateTime = now;
@@ -686,6 +698,10 @@ async function getPosts(db, page = 1, limit = 10, category = null) {
   const cacheKey = `posts:cache:${page}:${limit}:${category || 'all'}`;
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached);
+  await db.collection('posts').updateMany(
+    { isPublic: false, date: { $lte: new Date() } },
+    { $set: { isPublic: true } }
+  );
   const query = { isPublic: true };
   if (category) query.category = category;
   const posts = await db.collection('posts')
@@ -707,6 +723,10 @@ async function getPost(db, postId) {
   const cacheKey = `post:${postId}`;
   const cached = await redis.get(cacheKey);
   if (cached) return JSON.parse(cached);
+  await db.collection('posts').updateMany(
+    { isPublic: false, date: { $lte: new Date() } },
+    { $set: { isPublic: true } }
+  );
   const post = await db.collection('posts').findOne({ _id: new ObjectId(postId), isPublic: true });
   if (!post) throw new Error('Publicación no encontrada.');
   const formattedPost = {

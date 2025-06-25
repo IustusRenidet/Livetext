@@ -853,6 +853,21 @@
                 placeholder: 'Escribe tu mensaje...'
             });
 
+            window.validateFiles = input => {
+                const files = Array.from(input.files);
+                if (mediaFiles.length + files.length > 5) {
+                    alert('Máximo 5 archivos.');
+                    input.value = '';
+                    return [];
+                }
+                if (files.some(f => f.size > MAX_FILE_SIZE)) {
+                    alert('Un archivo supera el límite de 50MB.');
+                    input.value = '';
+                    return [];
+                }
+                return files;
+            };
+
             // Apply small-screen class on resize
             function applyScreenClass() {
                 const qlContainer = document.querySelector('.ql-container');
@@ -1058,17 +1073,8 @@
             }
 
             document.getElementById('postMedia').addEventListener('change', e => {
-                const files = Array.from(e.target.files);
-                if (mediaFiles.length + files.length > 5) {
-                    alert('Máximo 5 archivos.');
-                    e.target.value = '';
-                    return;
-                }
-                if (files.some(f => f.size > MAX_FILE_SIZE)) {
-                    alert('Un archivo supera el límite de 50MB.');
-                    e.target.value = '';
-                    return;
-                }
+                const files = validateFiles(e.target);
+                if (!files.length) return;
                 mediaFiles = [...mediaFiles, ...files];
                 updateMediaPreview();
             });
