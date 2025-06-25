@@ -1831,27 +1831,30 @@ app.post('/api/validate-capture', requireAuth, async (req, res) => {
 });
 
 // Servicio de chat IA utilizando OpenAI
-app.post('/api/chat', requireAuth, async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
   }
   try {
     const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.content?.toLowerCase() || '';
-    const custom = trainingData.find(t => lastUserMsg.includes(t.question.toLowerCase()));
-    if (custom) {
-      return res.json({ reply: custom.answer });
+    const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f?¿!,.]/g, '').toLowerCase();
+    const words = new Set(normalize(lastUserMsg).split(/\s+/));
+    let bestMatch = null;
+    let bestScore = 0;
+    for (const qa of trainingData) {
+      const qWords = new Set(normalize(qa.question).split(/\s+/));
+      const intersection = [...words].filter(w => qWords.has(w));
+      const score = intersection.length / Math.min(qWords.size, words.size);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = qa;
+      }
     }
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ error: 'Servicio de chat no configurado' });
+    if (bestMatch && bestScore >= 0.5) {
+      return res.json({ reply: bestMatch.answer });
     }
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages,
-      temperature: 0.7
-    });
-    const reply = completion.choices?.[0]?.message?.content || '';
-    res.json({ reply });
+    return res.json({ reply: 'Lo siento, no tengo información sobre eso. Puedes consultar directamente al CLE.' });
   } catch (error) {
     console.error('Error en chat IA:', error);
     const errMsg = error?.error?.message || error?.message;
