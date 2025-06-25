@@ -257,18 +257,14 @@
     }
 
     .chat-container {
-        position: fixed;
-        bottom: 90px;
-        right: 20px;
         width: 350px;
         max-height: 500px;
         background: var(--dark-bg);
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        display: none;
+        display: flex;
         flex-direction: column;
-        animation: slideInRight 0.3s ease;
-    }
+    
 
     .chat-header {
         background: var(--primary-color);
@@ -435,11 +431,8 @@
 
         .chat-container {
             width: 100%;
-            bottom: 0;
-            right: 0;
             border-radius: 10px 10px 0 0;
         }
-
         .newsletter-card {
             padding: 1.5rem;
         }
@@ -561,44 +554,47 @@
     </div>
 
     <!-- Chat flotante -->
-    <div class="floating-button animate__animated animate__bounceIn" id="chatButton">
+    <div class="floating-button animate__animated animate__bounceIn" id="chatButton" data-bs-toggle="modal" data-bs-target="#chatModal">
         <i class="fas fa-comment-dots"></i>
     </div>
-    <div class="chat-container" id="chatContainer">
-        <div class="chat-header">
-            <div class="d-flex align-items-center">
-                <button class="btn btn-sm text-white me-2" id="toggleChatType">
-                    <i class="fas fa-robot"></i>
-                </button>
-                <h5 class="chat-title mb-0" id="chatTitle">Chat IA</h5>
-            </div>
-            <button class="close-chat" id="closeChat">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="quick-options" id="quickOptions">
-            <button class="quick-option">¿Cómo inscribirme?</button>
-            <button class="quick-option">Fechas de cursos</button>
-            <button class="quick-option">Costo de cursos</button>
-            <button class="quick-option">Certificaciones</button>
-        </div>
-        <div class="asesor-info d-none" id="asesorInfo">
-            <div class="p-3 bg-light border-top">
-                <div class="d-flex align-items-center mb-2">
-                    <div class="online-indicator me-2"></div>
-                    <span class="fw-bold" id="asesorNombre">Conectando...</span>
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content chat-container">
+                <div class="chat-header">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-sm text-white me-2" id="toggleChatType">
+                            <i class="fas fa-robot"></i>
+                        </button>
+                        <h5 class="chat-title mb-0" id="chatTitle">Chat IA</h5>
+                    </div>
+                    <button type="button" class="close-chat" data-bs-dismiss="modal" aria-label="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <small class="text-muted" id="asesorStatus">Por favor espere...</small>
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="quick-options" id="quickOptions">
+                    <button class="quick-option">¿Cómo inscribirme?</button>
+                    <button class="quick-option">Fechas de cursos</button>
+                    <button class="quick-option">Costo de cursos</button>
+                    <button class="quick-option">Certificaciones</button>
+                </div>
+                <div class="asesor-info d-none" id="asesorInfo">
+                    <div class="p-3 bg-light border-top">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="online-indicator me-2"></div>
+                            <span class="fw-bold" id="asesorNombre">Conectando...</span>
+                        </div>
+                        <small class="text-muted" id="asesorStatus">Por favor espere...</small>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
+                    <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
+                </div>
             </div>
-        </div>
-        <div class="chat-input-container">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
-            <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <!-- Notificación Toast -->
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert"
             aria-live="assertive" aria-atomic="true">
@@ -715,12 +711,6 @@
                 percentPosition: true
             });
 
-            // Toggle chat
-            const chatButton = document.getElementById('chatButton');
-            const chatContainer = document.getElementById('chatContainer');
-            chatButton.addEventListener('click', () => {
-                chatContainer.style.display = chatContainer.style.display === 'none' ? 'flex' : 'none';
-            });
 
             // Toggle tipo de chat
             const toggleChatType = document.getElementById('toggleChatType');
@@ -741,16 +731,7 @@
                 }
             });
 
-            // Cerrar chat
-            document.getElementById('closeChat').addEventListener('click', () => {
-                chatContainer.style.display = 'none';
-            });
-
             // Animación para el enlace de darse de baja
-            const unsubscribeLink = document.getElementById('unsubscribeLink');
-            unsubscribeLink.addEventListener('mouseover', () => {
-                unsubscribeLink.classList.add('animate__tada');
-            });
             unsubscribeLink.addEventListener('animationend', () => {
                 unsubscribeLink.classList.remove('animate__tada');
             });

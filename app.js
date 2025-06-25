@@ -1835,6 +1835,9 @@ app.post('/api/chat', async (req, res) => {
     res.json({ reply });
   } catch (error) {
     console.error('Error en chat IA:', error);
+    if (error instanceof OpenAI.APIError) {
+      return res.status(error.status || 500).json({ error: error.message });
+    }
     res.status(500).json({ error: 'Error en servicio de chat' });
   }
 });
