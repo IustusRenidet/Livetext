@@ -21,6 +21,7 @@ let isResizing = false;
 let dragStart = { x: 0, y: 0 };
 let elementStart = { x: 0, y: 0 };
 let autofillFields = [];
+let excelRows = [];
 
 // Page dimensions in mm
 const pageSizes = {
@@ -726,6 +727,15 @@ $('#create-autofill-btn').on('click', function () {
 
 // Batch Generation Logic
 $('#batch-generate-btn').on('click', function () {
+  $('#fill-document-btn').hide();
+  $('#generate-batch-btn').show();
+  $('#batch-generate-modal').modal('show');
+  populateAutofillMappings();
+});
+
+$('#fill-from-excel-btn').on('click', function () {
+  $('#generate-batch-btn').hide();
+  $('#fill-document-btn').show();
   $('#batch-generate-modal').modal('show');
   populateAutofillMappings();
 });
@@ -758,6 +768,7 @@ $('#excel-file').on('change', function (e) {
       const sheet = workbook.Sheets[sheetName];
       const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
       const headers = json[0];
+      excelRows = json.slice(1);
       $('.form-select', '#autofill-mappings').each(function () {
         const $select = $(this);
         $select.empty().append('<option value="">Seleccione columna</option>');
@@ -874,6 +885,38 @@ $('#generate-batch-btn').on('click', async function () {
     $('#batch-generate-modal').modal('hide');
   };
   reader.readAsArrayBuffer(file);
+});
+
+$('#fill-document-btn').on('click', async function () {
+  if (!excelRows.length) {
+    alert('Por favor, cargue un archivo Excel.');
+    return;
+  }
+  const mappings = {};
+  let valid = true;
+  autofillFields.forEach(field => {
+    const columnIndex = $(`#map-${field}`).val();
+    if (!columnIndex) {
+      alert(`Por favor, asigne una columna para el campo "${field}".`);
+      valid = false;
+    }
+    mappings[field] = parseInt(columnIndex);
+  });
+  if (!valid) return;
+
+  const row = excelRows[0];
+  $('.page').each(function (pageIndex) {
+    $(this).find('.autofill-field').each(function () {
+      const field = $(this).data('field');
+      const value = row[mappings[field]] || '';
+      $(this).text(value);
+    });
+    editors[pageIndex].save().then(output => {
+      pages[pageIndex].content = output;
+    });
+  });
+
+  $('#batch-generate-modal').modal('hide');
 });
 
 // Initialize on page load

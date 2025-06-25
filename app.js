@@ -14,6 +14,7 @@ const Queue = require('bull');
 const sanitizeHtml = require('sanitize-html');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const app = express();
@@ -22,6 +23,7 @@ const client = new MongoClient(uri);
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const emailQueue = new Queue('email-notifications', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
 const postQueue = new Queue('post-publishing', { redis: { url: process.env.REDIS_URL || 'redis://localhost:6379' } });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 app.use(compression());
 app.use(morgan('combined'));
@@ -153,7 +155,7 @@ function requireAuth(req, res, next) {
 const restrictedPages = [
   '/crear_calendario', '/editar_events', '/dashboard', '/crear_form',
   '/editor', '/crear_post', '/editar_posts', '/dashboard_documentos',
-  '/dashboard_pagos', '/perfil', '/subir_recurso'
+  '/dashboard_pagos', '/perfil', '/subir_recurso', '/chat'
 ];
 
 app.use((req, res, next) => {
@@ -198,6 +200,9 @@ app.get('/perfil', requireAuth, (req, res) => {
 });
 app.get('/subir_recurso', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'subir_recurso.html'));
+});
+app.get('/chat', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'chat.html'));
 });
 
 async function connect() {
@@ -1729,6 +1734,50 @@ app.get('/api/stats', requireAuth, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+});
+
+// Validación de línea de captura con servicio gubernamental
+app.post('/api/validate-capture', requireAuth, async (req, res) => {
+  const { capture } = req.body;
+  if (!capture) return res.status(400).json({ error: 'Falta línea de captura' });
+
+  try {
+    const params = new URLSearchParams({ lineaCaptura: capture });
+    const response = await fetch('https://sfpya.edomexico.gob.mx/controlv/consultas/ConsultaDatos.jsp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    });
+
+    const html = await response.text();
+    const valid = !/no\s+se\s+encontr/i.test(html);
+    res.json({ valid });
+  } catch (error) {
+    console.error('Error al validar captura:', error);
+    res.status(500).json({ error: 'Error al validar captura' });
+  }
+});
+
+// Servicio de chat IA utilizando OpenAI
+app.post('/api/chat', requireAuth, async (req, res) => {
+  const { messages } = req.body;
+  if (!Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Formato de mensajes inválido' });
+  }
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages,
+      temperature: 0.7
+    });
+    const reply = completion.choices?.[0]?.message?.content || '';
+    res.json({ reply });
+  } catch (error) {
+    console.error('Error en chat IA:', error);
+    res.status(500).json({ error: 'Error en servicio de chat' });
   }
 });
 

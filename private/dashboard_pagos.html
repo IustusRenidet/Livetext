@@ -854,31 +854,31 @@
             });
         }
 
-        // Validation of government capture number (simulated)
-        function validateCaptureNumber(captureNumber, paymentId) {
+        // Validación de línea de captura
+        async function validateCaptureNumber(captureNumber, paymentId) {
             showToast('info', 'Validando línea de captura con sistema gubernamental...');
-            
-            // Simulate API call to government system
-            setTimeout(() => {
-                // Simulated validation logic
-                const isValid = captureNumber.length === 19 && !captureNumber.includes('555');
-                
-                // Update payment data
+
+            try {
+                const response = await fetch('/api/validate-capture', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ capture: captureNumber })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Error');
+
                 const payment = paymentsData.find(p => p.id === paymentId);
                 if (payment) {
-                    payment.govValidation = isValid ? 'valid' : 'invalid';
-                    
-                    // Show result
-                    if (isValid) {
-                        showToast('success', 'Línea de captura válida - Pago confirmado en sistema gubernamental');
-                    } else {
-                        showToast('error', 'Línea de captura inválida - No se encontró el pago en sistema gubernamental');
-                    }
-                    
-                    // Re-render table to show updated validation
+                    payment.govValidation = result.valid ? 'valid' : 'invalid';
+                    showToast(result.valid ? 'success' : 'error', result.valid ?
+                        'Línea de captura válida - Pago confirmado en sistema gubernamental' :
+                        'Línea de captura inválida - No se encontró el pago en sistema gubernamental');
                     applyFilters();
                 }
-            }, 2000);
+            } catch (e) {
+                console.error(e);
+                showToast('error', 'No se pudo validar la línea de captura');
+            }
         }
 
         function viewPaymentDetails(paymentId) {
