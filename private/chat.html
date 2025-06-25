@@ -23,6 +23,12 @@
             <input type="text" id="chatInput" class="form-control" placeholder="Escribe tu mensaje...">
             <button id="sendBtn" class="btn btn-primary">Enviar</button>
         </div>
+        <div class="mt-4">
+            <h5>Entrenar IA</h5>
+            <input type="text" id="trainQuestion" class="form-control mb-2" placeholder="Pregunta">
+            <input type="text" id="trainAnswer" class="form-control mb-2" placeholder="Respuesta">
+            <button id="trainBtn" class="btn btn-success">Guardar</button>
+        </div>
     </div>
     <script>
         const messages = [];
@@ -62,8 +68,27 @@
                 addMessage('Error', 'No se pudo conectar');
             }
         }
+
+        document.getElementById('trainBtn').addEventListener('click', async () => {
+            const question = document.getElementById('trainQuestion').value.trim();
+            const answer = document.getElementById('trainAnswer').value.trim();
+            if (!question || !answer) return;
+            const res = await fetch('/api/train', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, answer })
+            });
+            if (res.ok) {
+                document.getElementById('trainQuestion').value = '';
+                document.getElementById('trainAnswer').value = '';
+                alert('Guardado');
+            } else {
+                alert('Error al guardar');
+            }
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="accessibility.js"></script>
 </body>
 </html>
 
