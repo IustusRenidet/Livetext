@@ -155,7 +155,7 @@ function requireAuth(req, res, next) {
 
 const restrictedPages = [
   '/crear_calendario', '/editar_events', '/dashboard', '/crear_form',
-  '/editor', '/crear_post', '/editar_posts', '/dashboard_documentos',
+  '/editor', '/crear_post', '/editar_posts', '/editar_forms', '/editar_resources', '/dashboard_documentos',
   '/dashboard_pagos', '/perfil', '/subir_recurso', '/chat'
 ];
 
@@ -189,6 +189,12 @@ app.get('/crear_post', requireAuth, (req, res) => {
 });
 app.get('/editar_posts', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'editar_posts.html'));
+});
+app.get('/editar_forms', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editar_forms.html'));
+});
+app.get('/editar_resources', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'private', 'editar_resources.html'));
 });
 app.get('/dashboard_documentos', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'private', 'dashboard_documentos.html'));
