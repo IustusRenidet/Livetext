@@ -500,9 +500,10 @@ async function createPost(db, postData, files, userId, isDraft = false) {
   console.log('Creating post:', postData, files);
   const { title, content, category, allowComments, mediaMode, tags, date, time, schedulePost } = postData;
   if (!title || content == null) throw new Error('Título y contenido son obligatorios.');
-  const rawContent = Array.isArray(content)
-    ? content.filter(c => typeof c === 'string').pop() || ''
-    : (typeof content === 'string' ? content : '');
+  const raw = Array.isArray(content)
+    ? content.filter(c => typeof c === 'string').pop()
+    : content;
+  const rawContent = typeof raw === 'string' ? raw : String(raw || '');
   const wordCount = rawContent.trim().split(/\s+/).length;
   if (wordCount > 400) throw new Error('El contenido excede el límite de 400 palabras.');
   const sanitizedContent = sanitizeHtml(rawContent, {
@@ -578,9 +579,10 @@ Equipo LIVETEXT
 async function updatePost(db, postId, postData, files, userId, isDraft = false) {
   console.log('Updating post:', postId, postData, files);
   const { title, content, category, allowComments, mediaMode, tags, date, time, schedulePost } = postData;
-  const rawContent = Array.isArray(content)
-    ? content.filter(c => typeof c === 'string').pop() || ''
-    : (typeof content === 'string' ? content : '');
+  const raw = Array.isArray(content)
+    ? content.filter(c => typeof c === 'string').pop()
+    : content;
+  const rawContent = typeof raw === 'string' ? raw : String(raw || '');
   const wordCount = rawContent.trim().split(/\s+/).length;
   if (wordCount > 400) throw new Error('El contenido excede el límite de 400 palabras.');
   const sanitizedContent = sanitizeHtml(rawContent, {
