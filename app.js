@@ -1732,6 +1732,30 @@ app.get('/api/stats', requireAuth, async (req, res) => {
   }
 });
 
+// Validación de línea de captura con servicio gubernamental
+app.post('/api/validate-capture', requireAuth, async (req, res) => {
+  const { capture } = req.body;
+  if (!capture) return res.status(400).json({ error: 'Falta línea de captura' });
+
+  try {
+    const params = new URLSearchParams({ lineaCaptura: capture });
+    const response = await fetch('https://sfpya.edomexico.gob.mx/controlv/consultas/ConsultaDatos.jsp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    });
+
+    const html = await response.text();
+    const valid = !/no\s+se\s+encontr/i.test(html);
+    res.json({ valid });
+  } catch (error) {
+    console.error('Error al validar captura:', error);
+    res.status(500).json({ error: 'Error al validar captura' });
+  }
+});
+
 app.post('/upload-resource', requireAuth, resourceUpload.any(), async (req, res) => {
   try {
     const files = (req.files || []).filter(f => f.fieldname.startsWith('files'));
