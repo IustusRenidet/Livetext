@@ -1,8 +1,10 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
 const express = require('express');
 const session = require('express-session');
 const { MongoClient, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
-const path = require('path');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const moment = require('moment-timezone');
@@ -136,7 +138,6 @@ const validateFormSubmission = [
 
 let db;
 
-require('dotenv').config();
 const transporter = nodemailer.createTransport({
   host: process.env.MAIL_HOST,
   port: process.env.MAIL_PORT,
