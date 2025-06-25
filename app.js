@@ -27,6 +27,22 @@ try {
   trainingData = [];
 }
 
+function findAnswer(question) {
+  const normalize = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\sáéíóúñ¿?]/gi, " ").replace(/\s+/g, " ").trim();
+  const qWords = new Set(normalize(question).split(" "));
+  let bestScore = 0;
+  let bestAnswer = null;
+  for (const qa of trainingData) {
+    const aWords = new Set(normalize(qa.question).split(" "));
+    const inter = [...qWords].filter(w => aWords.has(w)).length;
+    const union = new Set([...qWords, ...aWords]).size;
+    const score = union ? inter / union : 0;
+    if (score > bestScore) { bestScore = score; bestAnswer = qa.answer; }
+  }
+  return bestScore >= 0.3 ? bestAnswer : null;
+}
+
+
 const app = express();
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
@@ -1837,13 +1853,13 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
   }
   try {
-    const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0]?.content?.toLowerCase() || '';
-    const custom = trainingData.find(t => lastUserMsg.includes(t.question.toLowerCase()));
+    const lastUserMsg = messages.filter(m => m.role === "user").slice(-1)[0]?.content || "";
+    const custom = findAnswer(lastUserMsg);
     if (custom) {
-      return res.json({ reply: custom.answer });
+      return res.json({ reply: custom });
     }
     if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ error: 'Servicio de chat no configurado' });
+      return res.status(200).json({ reply: "Lo siento, no tengo una respuesta disponible." });
     }
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
