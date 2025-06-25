@@ -1796,6 +1796,9 @@ app.post('/api/chat', requireAuth, async (req, res) => {
   if (!Array.isArray(messages)) {
     return res.status(400).json({ error: 'Formato de mensajes inválido' });
   }
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ error: 'Servicio de chat no configurado' });
+  }
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
@@ -1806,7 +1809,8 @@ app.post('/api/chat', requireAuth, async (req, res) => {
     res.json({ reply });
   } catch (error) {
     console.error('Error en chat IA:', error);
-    res.status(500).json({ error: 'Error en servicio de chat' });
+    const errMsg = error?.error?.message || error?.message;
+    res.status(500).json({ error: errMsg || 'Error en servicio de chat' });
   }
 });
 
