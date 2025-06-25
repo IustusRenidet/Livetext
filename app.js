@@ -1783,7 +1783,7 @@ app.post('/api/validate-capture', requireAuth, async (req, res) => {
 });
 
 // Servicio de chat IA utilizando OpenAI
-app.post('/api/chat', requireAuth, async (req, res) => {
+app.post('/api/chat', async (req, res) => {
   if (!openai) {
     return res.status(500).json({ error: 'Servicio de chat no configurado' });
   }

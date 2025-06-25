@@ -309,6 +309,14 @@
         border-radius: 5px;
     }
 
+    .message {
+        margin-bottom: 0.5rem;
+    }
+
+    .message strong {
+        color: var(--secondary-color);
+    }
+
     .quick-options {
         padding: 0.5rem;
         display: flex;
@@ -951,6 +959,48 @@
                     await loadComments(activePost);
                 }
             });
+
+            // Chat IA en la página de inicio
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const chatHistory = [];
+
+            function appendMessage(sender, text) {
+                const div = document.createElement('div');
+                div.className = 'message';
+                div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            async function sendChat() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                appendMessage('Tú', text);
+                chatHistory.push({ role: 'user', content: text });
+                chatInput.value = '';
+                try {
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: chatHistory })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        chatHistory.push({ role: 'assistant', content: data.reply });
+                        appendMessage('IA', data.reply);
+                    } else {
+                        appendMessage('Error', data.error || 'Error');
+                    }
+                } catch (err) {
+                    console.error('Error en chat:', err);
+                    appendMessage('Error', 'No se pudo conectar');
+                }
+            }
+
+            chatSend.addEventListener('click', sendChat);
+            chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
 
             // Cargar posts iniciales
             loadPosts('all');
