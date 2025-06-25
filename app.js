@@ -1603,6 +1603,31 @@ app.get('/api/resources/:id', requireAuth, async (req, res) => {
   }
 });
 
+app.get('/educational-resources', async (req, res) => {
+  try {
+    const { filter = 'all', search = '' } = req.query;
+    const query = { isPublic: true };
+    if (filter !== 'all') query.category = filter;
+    if (search) query.title = { $regex: search, $options: 'i' };
+    const resources = await db.collection('resources')
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+    const result = resources.map(r => ({
+      id: r._id,
+      title: r.title,
+      category: r.category,
+      uploadDate: r.createdAt,
+      filePaths: (r.files || []).map(f => f.path),
+      fileTypes: (r.files || []).map(f => path.extname(f.originalname || '').substring(1).toLowerCase())
+    }));
+    res.json(result);
+  } catch (error) {
+    console.error('Error al obtener recursos educativos:', error);
+    res.status(500).json({ error: 'Error al obtener recursos' });
+  }
+});
+
 app.put('/api/resources/:id', requireAuth, resourceUpload.any(), async (req, res) => {
   try {
     const files = (req.files || []).filter(f => f.fieldname.startsWith('files'));
