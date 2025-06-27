@@ -9,6 +9,7 @@ async function main() {
     await client.connect();
     const db = client.db('livetext');
 
+
     const collections = [
       'resources',
       'form_submissions',
@@ -27,6 +28,12 @@ async function main() {
         dummy: true
       });
       console.log(`Inserted into ${name}: ${result.insertedId}`);
+=======
+    const collections = await db.collections();
+    for (const coll of collections) {
+      await coll.insertOne({ dummyRecord: true, insertedAt: new Date() });
+      console.log(`Inserted dummy record into ${coll.collectionName}`);
+
     }
   } catch (err) {
     console.error('Error inserting dummy records:', err);
