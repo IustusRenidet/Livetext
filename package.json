@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "add-dummy": "node addDummyRecords.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "bull": "^4.16.5",
