@@ -8,3 +8,4 @@
 | Commit             | `git commit -m "Mensaje"`     |
 | Subir (push)       | `git push origin main`        |
 | Bajar (pull)       | `git pull origin main`        |
+| Insertar registros de prueba | `npm run add-dummy` |
