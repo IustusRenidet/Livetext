@@ -1,0 +1,11 @@
+.form-control, .form-select, textarea.form-control {
+  background: #fff;
+  color: #000b24;
+}
+.form-control:focus, .form-select:focus, textarea.form-control:focus {
+  background: #fff;
+  color: #000b24;
+}
+.form-control::placeholder, textarea.form-control::placeholder {
+  color: #6c757d;
+}
