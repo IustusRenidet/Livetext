@@ -7,10 +7,10 @@
     <title>LIVETEXT - Cursos de Idiomas</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/custom.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
 </head>
 <style>
     :root {
@@ -104,39 +104,37 @@
         transform: scale(1.05);
     }
 
-    .content-grid {
+
+    .posts-feed {
         margin-top: 2rem;
-        column-count: 3;
-        column-gap: 1rem;
     }
 
-    .grid-item {
-        background: var(--light-bg);
-        border-radius: 10px;
+    .feed-item {
+        background: var(--white);
+        border-radius: 24px;
         overflow: hidden;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease;
-        break-inside: avoid;
+        margin-bottom: 2rem;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
     }
 
-    .grid-item:hover {
-        transform: translateY(-5px);
-    }
-
-    .grid-item img,
-    .grid-item video {
+    .feed-item img,
+    .feed-item video {
         width: 100%;
         max-height: 400px;
         object-fit: cover;
     }
 
-    .grid-item .post-content {
-        padding: 1rem;
+    .feed-item .post-content {
+        padding: 1.5rem 2rem;
         color: var(--primary-color);
     }
 
-    .grid-item .post-actions {
+    .feed-item .post-content h4 {
+        font-weight: bold;
+        margin-bottom: .5rem;
+    }
+
+    .feed-item .post-actions {
         display: flex;
         gap: 1rem;
         padding: 0.5rem 1rem;
@@ -421,10 +419,6 @@
     }
 
     @media (max-width: 768px) {
-        .content-grid {
-            column-count: 1;
-        }
-
         .chat-container {
             width: 100%;
             bottom: 0;
@@ -541,12 +535,10 @@
                 </div>
             </div>
 
-            <!-- Grid de publicaciones -->
+            <!-- Feed de publicaciones -->
             <div class="row animate__animated animate__fadeIn">
                 <div class="col-12">
-                    <div class="content-grid" id="publicaciones-container">
-                        <div class="grid-sizer"></div>
-                    </div>
+                    <div class="posts-feed" id="postsFeed"></div>
                 </div>
             </div>
         </div>
@@ -697,6 +689,18 @@
         </div>
     </div>
 
+    <!-- Modal para ver multimedia -->
+    <div class="modal fade" id="mediaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0 text-center">
+                    <img id="mediaModalImg" class="w-100 h-auto d-none">
+                    <video id="mediaModalVideo" class="w-100 d-none" controls></video>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
@@ -705,13 +709,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const grid = document.querySelector('#publicaciones-container');
-            const masonry = new Masonry(grid, {
-                itemSelector: '.grid-item',
-                columnWidth: '.grid-sizer',
-                percentPosition: true
+        function truncateHtml(text, limit = 200) {
+            if (!text || text.length <= limit) return { html: text, shortened: false };
+            const short = text.slice(0, limit) + '... ';
+            return { html: short + `<span class="show-more-link">Ver más</span>`, shortened: true };
+        }
+
+        function buildCommentTree(comments) {
+            const map = {};
+            comments.forEach(c => {
+                c.replies = [];
+                map[c._id] = c;
             });
+            const roots = [];
+            comments.forEach(c => {
+                if (c.parentId && map[c.parentId]) {
+                    map[c.parentId].replies.push(c);
+                } else {
+                    roots.push(c);
+                }
+            });
+            return roots;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
 
             // Toggle chat
             const chatButton = document.getElementById('chatButton');
@@ -900,32 +921,51 @@
                 }
             });
 
+            function openMedia(media) {
+                const modal = new bootstrap.Modal(document.getElementById('mediaModal'));
+                const img = document.getElementById('mediaModalImg');
+                const video = document.getElementById('mediaModalVideo');
+                img.classList.add('d-none');
+                video.classList.add('d-none');
+                if (media.tagName === 'IMG') {
+                    img.src = media.src;
+                    img.classList.remove('d-none');
+                } else {
+                    video.src = media.src;
+                    video.classList.remove('d-none');
+                }
+                modal.show();
+            }
+
+            document.getElementById('mediaModal').addEventListener('hidden.bs.modal', () => {
+                document.getElementById('mediaModalImg').src = '';
+                const vid = document.getElementById('mediaModalVideo');
+                vid.pause();
+                vid.src = '';
+            });
+
             // Cargar y mostrar posts
             async function loadPosts(filter = 'all') {
                 try {
-                    const response = await fetch('http://localhost:3000/api/posts');
+                    const response = await fetch('/api/posts');
                     const posts = await response.json();
-                    const container = document.getElementById('publicaciones-container');
-                    container.innerHTML = '<div class="grid-sizer"></div>';
+                    const container = document.getElementById('postsFeed');
+                    container.innerHTML = '';
 
                     const filteredPosts = filter === 'all' ? posts : posts.filter(post => post.category === filter);
                     filteredPosts.forEach(post => {
                         const item = document.createElement('div');
-                        item.className = 'grid-item';
-                        item.innerHTML = `
-                            <div class="post-media">
-                                ${post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
+                        item.className = 'feed-item';
+                        const mediaHtml = post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
                                     <div class="preview-media-grid">
                                         ${post.media.map(m => `<${m.contentType.startsWith('image') ? 'img' : 'video'} src="${m.path}" ${m.contentType.startsWith('video') ? 'controls muted' : ''} style="height: 200px; object-fit: cover; border-radius: 12px;">`).join('')}
-                                    </div>
-                                ` : `
+                                    </div>` : `
                                     <div id="postCarousel${post._id}" class="carousel slide" data-bs-ride="${post.mediaMode === 'auto' ? 'carousel' : 'false'}">
                                         <div class="carousel-inner">
                                             ${post.media.map((m, index) => `
                                                 <div class="carousel-item ${index === 0 ? 'active' : ''}">
                                                     <${m.contentType.startsWith('image') ? 'img' : 'video'} src="${m.path}" class="d-block w-100" ${m.contentType.startsWith('video') ? 'controls muted' : ''} style="max-height: 400px; object-fit: cover;">
-                                                </div>
-                                            `).join('')}
+                                                </div>`).join('')}
                                         </div>
                                         ${post.media.length > 1 ? `
                                             <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel${post._id}" data-bs-slide="prev">
@@ -937,19 +977,30 @@
                                                 <span class="visually-hidden">Next</span>
                                             </button>
                                         ` : ''}
-                                    </div>
-                                `) : '<img src="https://via.placeholder.com/400x300" alt="Placeholder">'}
-                            </div>
+                                    </div>`)
+                                : '<img src="https://via.placeholder.com/400x300" alt="Placeholder">';
+                        item.innerHTML = `
+                            <div class="post-media">${mediaHtml}</div>
                             <div class="post-content">
                                 <h4>${post.title}</h4>
-                                <p>${post.content}</p>
+                                <p class="expandable"></p>
                                 <small>Categoría: ${post.category} | ${moment(post.date).format('DD/MM/YYYY HH:mm')}</small>
                             </div>
                             <div class="post-actions">
                                 <button class="btn btn-sm btn-secondary comment-btn" data-id="${post._id}" ${post.allowComments ? '' : 'disabled'}>Comentarios</button>
-                            </div>
-                        `;
+                            </div>`;
                         container.appendChild(item);
+
+                        const textData = truncateHtml(post.content);
+                        const p = item.querySelector('.post-content .expandable');
+                        p.innerHTML = textData.html;
+                        p.dataset.full = post.content;
+                        if (!textData.shortened) p.classList.remove('expandable');
+
+                        item.querySelectorAll('.post-media img, .post-media video').forEach(media => {
+                            media.addEventListener('click', () => openMedia(media));
+                        });
+
                         const btn = item.querySelector('.comment-btn');
                         if (btn) {
                             btn.addEventListener('click', () => {
@@ -961,8 +1012,6 @@
                         }
                     });
 
-                    masonry.reloadItems();
-                    masonry.layout();
                 } catch (error) {
                     console.error('Error al cargar posts:', error);
                     document.getElementById('errorToastBody').textContent = 'Error al cargar las publicaciones.';
@@ -979,12 +1028,33 @@
                 });
             });
 
+            function renderComment(comment) {
+                const div = document.createElement('div');
+                div.className = 'comment';
+                div.innerHTML = `<p class="expandable"></p><button class="btn btn-link btn-sm reply-btn" data-id="${comment._id}">Responder</button>`;
+                const p = div.querySelector('p');
+                const tData = truncateHtml(comment.content);
+                p.innerHTML = tData.html;
+                p.dataset.full = comment.content;
+                if (!tData.shortened) p.classList.remove('expandable');
+                if (comment.replies && comment.replies.length) {
+                    const repliesDiv = document.createElement('div');
+                    repliesDiv.className = 'replies';
+                    comment.replies.forEach(r => repliesDiv.appendChild(renderComment(r)));
+                    div.appendChild(repliesDiv);
+                }
+                return div;
+            }
+
             async function loadComments(postId) {
                 try {
                     const res = await fetch(`/api/posts/${postId}/comments`);
                     const comments = await res.json();
+                    const tree = buildCommentTree(comments);
                     const list = document.getElementById('commentsList');
-                    list.innerHTML = comments.map(c => `<div class="border-bottom pb-2 mb-2">${c.content}</div>`).join('') || '<p>No hay comentarios</p>';
+                    list.innerHTML = '';
+                    tree.forEach(c => list.appendChild(renderComment(c)));
+                    if (!tree.length) list.innerHTML = '<p>No hay comentarios</p>';
                 } catch (err) {
                     console.error('Error al cargar comentarios:', err);
                 }
@@ -1031,15 +1101,33 @@
             modalChatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendModalChat(); });
             document.getElementById('sendComment').addEventListener('click', async () => {
                 const content = document.getElementById('commentInput').value.trim();
+                const parentId = document.getElementById('commentInput').dataset.parentId || null;
                 if (!content || !activePost) return;
                 const res = await fetch(`/api/posts/${activePost}/comments`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content })
+                    body: JSON.stringify({ content, parentId })
                 });
                 if (res.ok) {
                     document.getElementById('commentInput').value = '';
+                    document.getElementById('commentInput').dataset.parentId = '';
                     await loadComments(activePost);
+                }
+            });
+
+            document.getElementById('commentsModal').addEventListener('hidden.bs.modal', () => {
+                document.getElementById('commentInput').dataset.parentId = '';
+            });
+
+            document.addEventListener('click', e => {
+                if (e.target.classList.contains('show-more-link')) {
+                    const p = e.target.closest('.expandable');
+                    p.innerHTML = p.dataset.full;
+                    p.classList.add('expanded');
+                }
+                if (e.target.classList.contains('reply-btn')) {
+                    document.getElementById('commentInput').dataset.parentId = e.target.dataset.id;
+                    document.getElementById('commentInput').focus();
                 }
             });
 
@@ -1049,5 +1137,4 @@
     </script>
     <script src="accessibility.js"></script>
 </body>
-
 </html>
