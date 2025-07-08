@@ -844,7 +844,7 @@ async function deleteForm(db, formId, userId) {
 }
 
 async function createComment(db, postId, commentData, visitorId) {
-  const { content } = commentData;
+  const { content, parentId } = commentData;
   if (!content) throw new Error('El comentario no puede estar vacío.');
   const sanitizedContent = sanitizeHtml(content, {
     allowedTags: [],
@@ -854,6 +854,7 @@ async function createComment(db, postId, commentData, visitorId) {
     postId: new ObjectId(postId),
     visitorId,
     content: sanitizedContent,
+    parentId: parentId ? new ObjectId(parentId) : null,
     createdAt: new Date()
   };
   const result = await db.collection('comments').insertOne(comment);
@@ -867,7 +868,7 @@ async function getComments(db, postId) {
   if (cached) return JSON.parse(cached);
   const comments = await db.collection('comments')
     .find({ postId: new ObjectId(postId) })
-    .sort({ createdAt: -1 })
+    .sort({ createdAt: 1 })
     .toArray();
   await redis.setex(cacheKey, 300, JSON.stringify(comments));
   return comments;

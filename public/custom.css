@@ -1,0 +1,35 @@
+.form-control, .form-select, textarea.form-control {
+  background: #fff;
+  color: #000b24;
+}
+.form-control:focus, .form-select:focus, textarea.form-control:focus {
+  background: #fff;
+  color: #000b24;
+}
+.form-control::placeholder, textarea.form-control::placeholder {
+  color: #6c757d;
+}
+
+.comment {
+  margin-bottom: 0.5rem;
+}
+.comment .replies {
+  margin-left: 1rem;
+  border-left: 2px solid #ccc;
+  padding-left: 1rem;
+}
+.expandable {
+  max-height: 6em;
+  overflow: hidden;
+}
+.expandable.expanded {
+  max-height: none;
+}
+.show-more-link {
+  cursor: pointer;
+  color: #0d6efd;
+}
+.post-media img,
+.post-media video {
+  cursor: pointer;
+}
