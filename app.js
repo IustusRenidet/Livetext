@@ -526,10 +526,11 @@ function parseBool(value) {
 async function createPost(db, postData, files, userId, isDraft = false) {
   console.log('Creating post:', postData, files);
   const { title, content, category, allowComments, mediaMode, tags, date, time, schedulePost } = postData;
-  if (!title || !content) throw new Error('Título y contenido son obligatorios.');
-  const wordCount = content.trim().split(/\s+/).length;
+  if (!title || content === undefined || content === null) throw new Error('Título y contenido son obligatorios.');
+  const contentStr = typeof content === 'string' ? content : String(content);
+  const wordCount = contentStr.trim().split(/\s+/).length;
   if (wordCount > 400) throw new Error('El contenido excede el límite de 400 palabras.');
-  const sanitizedContent = sanitizeHtml(content, {
+  const sanitizedContent = sanitizeHtml(contentStr, {
     allowedTags: ['b', 'i', 'u', 'p', 'br'],
     allowedAttributes: {}
   });
@@ -603,9 +604,10 @@ Equipo LIVETEXT
 async function updatePost(db, postId, postData, files, userId, isDraft = false) {
   console.log('Updating post:', postId, postData, files);
   const { title, content, category, allowComments, mediaMode, tags, date, time, schedulePost } = postData;
-  const wordCount = content.trim().split(/\s+/).length;
+  const contentStr = typeof content === 'string' ? content : String(content);
+  const wordCount = contentStr.trim().split(/\s+/).length;
   if (wordCount > 400) throw new Error('El contenido excede el límite de 400 palabras.');
-  const sanitizedContent = sanitizeHtml(content, {
+  const sanitizedContent = sanitizeHtml(contentStr, {
     allowedTags: ['b', 'i', 'u', 'p', 'br'],
     allowedAttributes: {}
   });
