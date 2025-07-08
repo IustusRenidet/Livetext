@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
 </head>
 <style>
     :root {
@@ -137,6 +136,36 @@
     }
 
     .grid-item .post-actions {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .posts-feed {
+        margin-top: 2rem;
+    }
+
+    .feed-item {
+        background: var(--light-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .feed-item img,
+    .feed-item video {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+    }
+
+    .feed-item .post-content {
+        padding: 1rem;
+        color: var(--primary-color);
+    }
+
+    .feed-item .post-actions {
         display: flex;
         gap: 1rem;
         padding: 0.5rem 1rem;
@@ -541,12 +570,10 @@
                 </div>
             </div>
 
-            <!-- Grid de publicaciones -->
+            <!-- Feed de publicaciones -->
             <div class="row animate__animated animate__fadeIn">
                 <div class="col-12">
-                    <div class="content-grid" id="publicaciones-container">
-                        <div class="grid-sizer"></div>
-                    </div>
+                    <div class="posts-feed" id="postsFeed"></div>
                 </div>
             </div>
         </div>
@@ -706,12 +733,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const grid = document.querySelector('#publicaciones-container');
-            const masonry = new Masonry(grid, {
-                itemSelector: '.grid-item',
-                columnWidth: '.grid-sizer',
-                percentPosition: true
-            });
+            const feed = document.querySelector('#postsFeed');
 
             // Toggle chat
             const chatButton = document.getElementById('chatButton');
@@ -905,13 +927,13 @@
                 try {
                     const response = await fetch('http://localhost:3000/api/posts');
                     const posts = await response.json();
-                    const container = document.getElementById('publicaciones-container');
-                    container.innerHTML = '<div class="grid-sizer"></div>';
+                    const container = document.getElementById('postsFeed');
+                    container.innerHTML = '';
 
                     const filteredPosts = filter === 'all' ? posts : posts.filter(post => post.category === filter);
                     filteredPosts.forEach(post => {
                         const item = document.createElement('div');
-                        item.className = 'grid-item';
+                        item.className = 'feed-item';
                         item.innerHTML = `
                             <div class="post-media">
                                 ${post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
@@ -961,8 +983,6 @@
                         }
                     });
 
-                    masonry.reloadItems();
-                    masonry.layout();
                 } catch (error) {
                     console.error('Error al cargar posts:', error);
                     document.getElementById('errorToastBody').textContent = 'Error al cargar las publicaciones.';
