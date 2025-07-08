@@ -110,6 +110,7 @@
     }
 
     .feed-item {
+
         background: var(--white);
         border-radius: 24px;
         overflow: hidden;
@@ -709,6 +710,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
+
         function truncateHtml(text, limit = 200) {
             if (!text || text.length <= limit) return { html: text, shortened: false };
             const short = text.slice(0, limit) + '... ';
@@ -956,7 +958,12 @@
                     filteredPosts.forEach(post => {
                         const item = document.createElement('div');
                         item.className = 'feed-item';
+
                         const mediaHtml = post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
+
+                        item.innerHTML = `
+                            <div class="post-media">
+                                ${post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
                                     <div class="preview-media-grid">
                                         ${post.media.map(m => `<${m.contentType.startsWith('image') ? 'img' : 'video'} src="${m.path}" ${m.contentType.startsWith('video') ? 'controls muted' : ''} style="height: 200px; object-fit: cover; border-radius: 12px;">`).join('')}
                                     </div>` : `
