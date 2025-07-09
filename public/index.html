@@ -960,10 +960,6 @@
                         item.className = 'feed-item';
 
                         const mediaHtml = post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
-
-                        item.innerHTML = `
-                            <div class="post-media">
-                                ${post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
                                     <div class="preview-media-grid">
                                         ${post.media.map(m => `<${m.contentType.startsWith('image') ? 'img' : 'video'} src="${m.path}" ${m.contentType.startsWith('video') ? 'controls muted' : ''} style="height: 200px; object-fit: cover; border-radius: 12px;">`).join('')}
                                     </div>` : `
@@ -986,6 +982,7 @@
                                         ` : ''}
                                     </div>`)
                                 : '<img src="https://via.placeholder.com/400x300" alt="Placeholder">';
+
                         item.innerHTML = `
                             <div class="post-media">${mediaHtml}</div>
                             <div class="post-content">
