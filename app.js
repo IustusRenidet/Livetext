@@ -905,12 +905,24 @@ async function createDocument(db, docData, userId) {
 }
 
 async function updateDocument(db, id, docData, userId) {
+  const existing = await db.collection('documents').findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
+  if (!existing) throw new Error('Documento no encontrado o no tienes permisos.');
+  await saveDocumentVersion(db, id, userId, existing);
   const result = await db.collection('documents').updateOne(
     { _id: new ObjectId(id), userId: new ObjectId(userId) },
     { $set: { ...docData, updatedAt: new Date() } }
   );
   if (result.matchedCount === 0) throw new Error('Documento no encontrado o no tienes permisos.');
   return { message: 'Documento actualizado.' };
+}
+
+async function saveDocumentVersion(db, docId, userId, data) {
+  await db.collection('versiones_documento').insertOne({
+    documentId: new ObjectId(docId),
+    userId: new ObjectId(userId),
+    data,
+    createdAt: new Date()
+  });
 }
 
 async function getDocument(db, id) {
@@ -1709,6 +1721,34 @@ app.delete('/api/documents/:id', requireAuth, async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+app.get('/api/documents/:id/versions', requireAuth, async (req, res) => {
+  try {
+    const versions = await db.collection('versiones_documento')
+      .find({ documentId: new ObjectId(req.params.id), userId: new ObjectId(req.session.user._id) })
+      .sort({ createdAt: -1 })
+      .toArray();
+    res.json(versions);
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener versiones' });
+  }
+});
+
+app.post('/api/documents/:id/versions/:versionId/restore', requireAuth, async (req, res) => {
+  try {
+    const version = await db.collection('versiones_documento').findOne({
+      _id: new ObjectId(req.params.versionId),
+      documentId: new ObjectId(req.params.id),
+      userId: new ObjectId(req.session.user._id)
+    });
+    if (!version) return res.status(404).json({ error: 'Versión no encontrada' });
+    await saveDocumentVersion(db, req.params.id, req.session.user._id, await getDocument(db, req.params.id));
+    await db.collection('documents').updateOne({ _id: new ObjectId(req.params.id) }, { $set: { ...version.data, updatedAt: new Date() } });
+    res.json({ message: 'Versión restaurada' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al restaurar versión' });
   }
 });
 

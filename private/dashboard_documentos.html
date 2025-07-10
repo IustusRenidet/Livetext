@@ -532,48 +532,17 @@
                 }, 800);
             }, 1000);
 
-            // Search functionality (client-side filtering example)
             const searchInput = document.querySelector('.search-input');
-            const cards = document.querySelectorAll('.template-card');
+            let documentsData = [];
 
-            searchInput.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase();
-                cards.forEach(card => {
-                    const title = card.querySelector('.card-title').textContent.toLowerCase();
-                    const text = card.querySelector('.card-text').textContent.toLowerCase();
-                    if (title.includes(query) || text.includes(query)) {
-                        card.style.display = 'block';
-                        card.classList.add('animate__animated', 'animate__fadeIn');
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
-
-            // Dynamic loading placeholder
-            function loadTemplates(templates) {
-                const container = document.querySelector('.document-grid:first-of-type');
-                const template = document.getElementById('template-card');
-                templates.forEach(data => {
-                    const clone = template.content.cloneNode(true);
-                    clone.querySelector('.card-title').textContent = data.title;
-                    clone.querySelector('.card-text').textContent = `Última modificación: ${data.date}${data.dynamic ? ' (Dinámico)' : ''}`;
-                    const editBtn = clone.querySelector('.btn-custom');
-                    editBtn.setAttribute('href', `/editor${data.dynamic ? '?template=dynamic' : ''}`);
-                    container.appendChild(clone);
-                });
-            }
-
-            function loadRecentDocuments(documents) {
+            function renderDocuments(docs) {
                 const container = document.querySelector('.document-grid:last-of-type');
+                container.innerHTML = '';
                 const template = document.getElementById('document-card');
-                documents.forEach(data => {
+                docs.forEach(data => {
                     const clone = template.content.cloneNode(true);
                     clone.querySelector('.card-title').textContent = data.title;
                     clone.querySelector('.card-text').textContent = `Última modificación: ${moment(data.updatedAt).format('DD/MM/YYYY')}`;
-                    if (data.preview) {
-                        clone.querySelector('.document-preview').src = data.preview;
-                    }
                     const openBtn = clone.querySelector('.btn-custom');
                     openBtn.setAttribute('href', `/editor?id=${data._id}`);
                     const menu = document.createElement('div');
@@ -599,7 +568,8 @@
                     btn.addEventListener('click', async e => {
                         e.preventDefault();
                         const id = btn.getAttribute('data-id');
-                        if (confirm('¿Eliminar documento?')) {
+                        const ok = await showConfirm('¿Eliminar documento?');
+                        if (ok) {
                             await fetch(`/api/documents/${id}`, { method: 'DELETE' });
                             btn.closest('.template-card').remove();
                         }
@@ -607,12 +577,34 @@
                 });
             }
 
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                const filtered = documentsData.filter(d => d.title.toLowerCase().includes(query));
+                renderDocuments(filtered);
+            });
+
+            // Dynamic loading placeholder
+            function loadTemplates(templates) {
+                const container = document.querySelector('.document-grid:first-of-type');
+                const template = document.getElementById('template-card');
+                templates.forEach(data => {
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector('.card-title').textContent = data.title;
+                    clone.querySelector('.card-text').textContent = `Última modificación: ${data.date}${data.dynamic ? ' (Dinámico)' : ''}`;
+                    const editBtn = clone.querySelector('.btn-custom');
+                    editBtn.setAttribute('href', `/editor${data.dynamic ? '?template=dynamic' : ''}`);
+                    container.appendChild(clone);
+                });
+            }
+
+
             async function loadDocuments() {
                 try {
                     const response = await fetch('/api/documents');
                     if (!response.ok) throw new Error('No se pudieron cargar los documentos');
                     const docs = await response.json();
-                    loadRecentDocuments(docs);
+                    documentsData = docs;
+                    renderDocuments(docs);
                 } catch (err) {
                     console.error(err);
                 }
@@ -648,7 +640,32 @@ $(document).ready(async () => {
     alert('Failed to load documents.');
   }
 });
+
+function showConfirm(message) {
+  return new Promise(resolve => {
+    document.getElementById('confirmMessage').textContent = message;
+    const modalEl = document.getElementById('confirmModal');
+    const modal = new bootstrap.Modal(modalEl);
+    document.getElementById('confirmOk').onclick = () => {
+      modal.hide();
+      resolve(true);
+    };
+    modalEl.addEventListener('hidden.bs.modal', () => resolve(false), { once: true });
+    modal.show();
+  });
+}
 </script>
-    <script src="accessibility.js"></script>
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-body" id="confirmMessage"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmOk">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="accessibility.js"></script>
 </body>
 </html>
