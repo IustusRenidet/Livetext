@@ -18,6 +18,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const validator = require('validator');
 
 const TRAINING_DATA_FILE = path.join(__dirname, 'training-data.json');
 let trainingData = [];
@@ -135,7 +136,16 @@ const validateForm = [
   body('fields.*.label').trim().notEmpty().withMessage('La etiqueta del campo es obligatoria').isLength({ max: 50 }).withMessage('La etiqueta no puede exceder los 50 caracteres'),
   body('fields.*.required').isBoolean().withMessage('El campo requerido debe ser un booleano'),
   body('fields.*.placeholder').optional().trim().isLength({ max: 100 }).withMessage('El placeholder no puede exceder los 100 caracteres'),
-  body('fields.*.options').if((value, { req }) => ['select', 'radio', 'checkbox'].includes(req.body.fields[req.path.split('/').pop()]?.type)).isArray({ min: 1 }).withMessage('Las opciones son obligatorias para select, radio o checkbox'),
+  body('fields').custom(fields => {
+    fields.forEach(f => {
+      if (['select', 'radio', 'checkbox'].includes(f.type)) {
+        if (!Array.isArray(f.options) || f.options.length === 0) {
+          throw new Error('Las opciones son obligatorias para select, radio o checkbox');
+        }
+      }
+    });
+    return true;
+  })
 ];
 
 // Validation middleware for form submissions
@@ -143,21 +153,28 @@ const validateFormSubmission = [
   body('formId').trim().notEmpty().withMessage('El ID del formulario es obligatorio').isMongoId().withMessage('ID de formulario inválido'),
   body('responses').custom(value => Array.isArray(value)).withMessage('Las respuestas deben ser un arreglo'),
   body('responses.*.fieldId').trim().notEmpty().withMessage('El ID del campo es obligatorio'),
-  body('responses.*.value').trim().notEmpty().withMessage('El valor del campo es obligatorio'),
-  body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'email')).isEmail().withMessage('Correo electrónico inválido'),
-  body('responses.*.value').if((value, { req }) => req.body.responses.some(r => r.type === 'tel')).matches(/^\+?\d{10,15}$/).withMessage('Número de teléfono inválido'),
-  body('responses.*.value').if((value, { req }) => {
-    const response = req.body.responses.find(r => r.type === 'number' && r.label && r.label.toLowerCase().includes('línea de captura'));
-    return response && response.value === value;
-  }).matches(/^\d{27}$/).withMessage('La línea de captura debe tener exactamente 27 dígitos'),
-  body('responses.*.value').if((value, { req }) => {
-    const response = req.body.responses.find(r => r.type === 'number' && r.label && r.label.toLowerCase().includes('número de control'));
-    return response && response.value === value;
-  }).matches(/^\d{9}$/).withMessage('El número de control debe tener exactamente 9 dígitos'),
-  body('responses.*.value').if((value, { req }) => {
-    const response = req.body.responses.find(r => r.type === 'number' && (!r.label || (!r.label.toLowerCase().includes('línea de captura') && !r.label.toLowerCase().includes('número de control'))));
-    return response && response.value === value;
-  }).matches(/^\d{1,10}$/).withMessage('El valor numérico debe tener entre 1 y 10 dígitos'),
+  body('responses.*').custom(r => {
+    if (typeof r.value === 'undefined' || r.value === null || r.value === '') {
+      throw new Error('El valor del campo es obligatorio');
+    }
+    if (r.type === 'email' && !validator.isEmail(String(r.value))) {
+      throw new Error('Correo electrónico inválido');
+    }
+    if (r.type === 'tel' && !/^\+?\d{10,15}$/.test(String(r.value))) {
+      throw new Error('Número de teléfono inválido');
+    }
+    if (r.type === 'number') {
+      const value = String(r.value);
+      if (r.label && r.label.toLowerCase().includes('línea de captura')) {
+        if (!/^\d{27}$/.test(value)) throw new Error('La línea de captura debe tener exactamente 27 dígitos');
+      } else if (r.label && r.label.toLowerCase().includes('número de control')) {
+        if (!/^\d{9}$/.test(value)) throw new Error('El número de control debe tener exactamente 9 dígitos');
+      } else {
+        if (!/^\d{1,10}$/.test(value)) throw new Error('El valor numérico debe tener entre 1 y 10 dígitos');
+      }
+    }
+    return true;
+  }),
 ];
 
 let db;
