@@ -386,6 +386,21 @@ async function unsubscribeNewsletter(db, email) {
   return { message: 'Te has dado de baja exitosamente.' };
 }
 
+async function notifySubscribers(db, type, buildSubject, buildHtml) {
+  const subscribers = await db
+    .collection('newsletter_subscribers')
+    .find({ subscribed: true, notificationTypes: { $in: [type, 'all'] } })
+    .toArray();
+  for (const subscriber of subscribers) {
+    emailQueue.add({
+      from: 'no-reply@livetextweb.com',
+      to: subscriber.email,
+      subject: buildSubject(subscriber),
+      html: buildHtml(subscriber)
+    });
+  }
+}
+
 async function createEvent(db, eventData, userId) {
   const { type, title, course, date, startTime, endTime, location, instructor, description, isRecurring, recurrenceDays, recurrenceEnd, color } = eventData;
   if (!date || !startTime || !endTime) throw new Error('Fecha, hora de inicio y hora de fin son obligatorios.');
@@ -412,22 +427,12 @@ async function createEvent(db, eventData, userId) {
   };
   const result = await db.collection('calendar_events').insertOne(eventToInsert);
   await redis.del('events:cache');
-  const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['events'] } }).toArray();
-  for (const subscriber of subscribers) {
-    emailQueue.add({
-      from: 'no-reply@livetextweb.com',
-      to: subscriber.email,
-      subject: `Nuevo evento: ${title}`,
-      html: `Nuevo Evento
-Hola, ${subscriber.name},
-Se ha creado un nuevo evento: ${title}
-Fecha: ${moment.tz(startDateTime, 'America/Mexico_City').format('LLL')} - ${moment.tz(endDateTime, 'America/Mexico_City').format('LT')}
-<a href="http://localhost:3000/index.html#event-${result.insertedId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-    });
-  }
+  await notifySubscribers(
+    db,
+    'events',
+    () => `Nuevo evento: ${title}`,
+    (s) => `Nuevo Evento<br>Hola, ${s.name},<br>Se ha creado un nuevo evento: ${title}<br>Fecha: ${moment.tz(startDateTime, 'America/Mexico_City').format('LLL')} - ${moment.tz(endDateTime, 'America/Mexico_City').format('LT')}<br><a href="http://localhost:3000/index.html#event-${result.insertedId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+  );
   return { message: 'Evento creado exitosamente.', insertedId: result.insertedId };
 }
 
@@ -467,22 +472,12 @@ async function updateEvent(db, eventId, eventData, userId) {
   );
   if (result.matchedCount === 0) throw new Error('Evento no encontrado o no tienes permisos.');
   await redis.del('events:cache');
-  const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['events'] } }).toArray();
-  for (const subscriber of subscribers) {
-    emailQueue.add({
-      from: 'no-reply@livetextweb.com',
-      to: subscriber.email,
-      subject: `Evento actualizado: ${title}`,
-      html: `Evento Actualizado
-Hola, ${subscriber.name},
-Se ha actualizado el evento: ${title}
-Fecha: ${moment.tz(start, 'America/Mexico_City').format('LLL')} - ${moment.tz(end, 'America/Mexico_City').format('LT')}
-<a href="http://localhost:3000/index.html#event-${eventId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-    });
-  }
+  await notifySubscribers(
+    db,
+    'events',
+    () => `Evento actualizado: ${title}`,
+    (s) => `Evento Actualizado<br>Hola, ${s.name},<br>Se ha actualizado el evento: ${title}<br>Fecha: ${moment.tz(start, 'America/Mexico_City').format('LLL')} - ${moment.tz(end, 'America/Mexico_City').format('LT')}<br><a href="http://localhost:3000/index.html#event-${eventId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+  );
   return { message: 'Evento actualizado exitosamente.' };
 }
 
@@ -517,22 +512,12 @@ async function createResource(db, resourceData, files, userId) {
   }
   const result = await db.collection('resources').insertOne(resource);
   await redis.del('resources:cache');
-  const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['resources'] } }).toArray();
-  for (const subscriber of subscribers) {
-    emailQueue.add({
-      from: 'no-reply@livetextweb.com',
-      to: subscriber.email,
-      subject: `Nuevo recurso: ${title}`,
-      html: `Nuevo Recurso
-Hola, ${subscriber.name},
-Se ha publicado un nuevo recurso: ${title}
-Categoría: ${category}
-<a href="http://localhost:3000/index.html#resource-${result.insertedId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-    });
-  }
+  await notifySubscribers(
+    db,
+    'resources',
+    () => `Nuevo recurso: ${title}`,
+    (s) => `Nuevo Recurso<br>Hola, ${s.name},<br>Se ha publicado un nuevo recurso: ${title}<br>Categoría: ${category}<br><a href="http://localhost:3000/index.html#resource-${result.insertedId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+  );
   return { message: 'Recurso creado exitosamente.', insertedId: result.insertedId };
 }
 
@@ -591,22 +576,12 @@ async function createPost(db, postData, files, userId, isDraft = false) {
         { delay: postDateTime.getTime() - now.getTime() }
       );
     } else if (!isDraft) {
-      const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['posts'] } }).toArray();
-      for (const subscriber of subscribers) {
-        emailQueue.add({
-          from: 'no-reply@livetextweb.com',
-          to: subscriber.email,
-          subject: `Nueva publicación: ${title}`,
-          html: `Nueva Publicación
-Hola, ${subscriber.name},
-Se ha creado una nueva publicación: ${title}
-Fecha: ${moment.tz(postDateTime, 'America/Mexico_City').format('LLL')}
-<a href="http://localhost:3000/index.html#post-${result.insertedId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-        });
-      }
+      await notifySubscribers(
+        db,
+        'posts',
+        () => `Nueva publicación: ${title}`,
+        (s) => `Nueva Publicación<br>Hola, ${s.name},<br>Se ha creado una nueva publicación: ${title}<br>Fecha: ${moment.tz(postDateTime, 'America/Mexico_City').format('LLL')}<br><a href="http://localhost:3000/index.html#post-${result.insertedId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+      );
     }
     return { message: `Publicación ${isDraft ? 'guardada como borrador' : 'creada'} exitosamente.`, insertedId: result.insertedId };
   } catch (error) {
@@ -671,22 +646,12 @@ async function updatePost(db, postId, postData, files, userId, isDraft = false) 
         { delay: postDateTime.getTime() - now.getTime() }
       );
     } else if (!isDraft) {
-      const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['posts'] } }).toArray();
-      for (const subscriber of subscribers) {
-        emailQueue.add({
-          from: 'no-reply@livetextweb.com',
-          to: subscriber.email,
-          subject: `Publicación actualizada: ${title}`,
-          html: `Publicación Actualizada
-Hola, ${subscriber.name},
-Se ha actualizado la publicación: ${title}
-Fecha: ${moment.tz(postDateTime, 'America/Mexico_City').format('LLL')}
-<a href="http://localhost:3000/index.html#post-${postId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-        });
-      }
+      await notifySubscribers(
+        db,
+        'posts',
+        () => `Publicación actualizada: ${title}`,
+        (s) => `Publicación Actualizada<br>Hola, ${s.name},<br>Se ha actualizado la publicación: ${title}<br>Fecha: ${moment.tz(postDateTime, 'America/Mexico_City').format('LLL')}<br><a href="http://localhost:3000/index.html#post-${postId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+      );
     }
     return { message: `Publicación ${isDraft ? 'guardada como borrador' : 'actualizada'} exitosamente.` };
   } catch (error) {
@@ -760,21 +725,12 @@ async function createForm(db, formData, userId) {
   };
   const result = await db.collection('forms').insertOne(form);
   await redis.del('forms:cache');
-  const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
-  for (const subscriber of subscribers) {
-    emailQueue.add({
-      from: 'no-reply@livetextweb.com',
-      to: subscriber.email,
-      subject: `Nuevo formulario: ${title}`,
-      html: `Nuevo Formulario
-Hola, ${subscriber.name},
-Se ha publicado un nuevo formulario: ${title}
-<a href="http://localhost:3000/index.html#form-${result.insertedId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-    });
-  }
+  await notifySubscribers(
+    db,
+    'forms',
+    () => `Nuevo formulario: ${title}`,
+    (s) => `Nuevo Formulario<br>Hola, ${s.name},<br>Se ha publicado un nuevo formulario: ${title}<br><a href="http://localhost:3000/index.html#form-${result.insertedId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+  );
   return { message: 'Formulario creado exitosamente.', insertedId: result.insertedId };
 }
 
@@ -805,21 +761,12 @@ async function updateForm(db, formId, formData, userId) {
   );
   if (result.matchedCount === 0) throw new Error('Formulario no encontrado o no tienes permisos.');
   await redis.del('forms:cache');
-  const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
-  for (const subscriber of subscribers) {
-    emailQueue.add({
-      from: 'no-reply@livetextweb.com',
-      to: subscriber.email,
-      subject: `Formulario actualizado: ${title}`,
-      html: `Formulario Actualizado
-Hola, ${subscriber.name},
-Se ha actualizado el formulario: ${title}
-<a href="http://localhost:3000/index.html#form-${formId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-    });
-  }
+  await notifySubscribers(
+    db,
+    'forms',
+    () => `Formulario actualizado: ${title}`,
+    (s) => `Formulario Actualizado<br>Hola, ${s.name},<br>Se ha actualizado el formulario: ${title}<br><a href="http://localhost:3000/index.html#form-${formId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+  );
   return { message: 'Formulario actualizado exitosamente.' };
 }
 
@@ -926,23 +873,12 @@ async function updateResource(db, id, data, files, userId) {
   );
   if (result.matchedCount === 0) throw new Error('Recurso no encontrado o no tienes permisos.');
   await redis.del('resources:cache');
-  const subscribers = await db
-    .collection('newsletter_subscribers')
-    .find({ subscribed: true, notificationTypes: { $in: ['resources'] } })
-    .toArray();
-  for (const subscriber of subscribers) {
-    emailQueue.add({
-      from: 'no-reply@livetextweb.com',
-      to: subscriber.email,
-      subject: `Recurso actualizado: ${update.title}`,
-      html: `Recurso Actualizado
-Hola, ${subscriber.name},
-Se ha actualizado el recurso: ${update.title}
-<a href="http://localhost:3000/index.html#resource-${id}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT`
-    });
-  }
+  await notifySubscribers(
+    db,
+    'resources',
+    () => `Recurso actualizado: ${update.title}`,
+    (s) => `Recurso Actualizado<br>Hola, ${s.name},<br>Se ha actualizado el recurso: ${update.title}<br><a href="http://localhost:3000/index.html#resource-${id}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+  );
   return { message: 'Recurso actualizado exitosamente.' };
 }
 
@@ -1310,15 +1246,12 @@ app.post('/api/forms', requireAuth, validateForm, async (req, res) => {
     await redis.del('forms:cache');
 
     if (active) {
-      const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
-      for (const subscriber of subscribers) {
-        emailQueue.add({
-          from: 'no-reply@livetextweb.com',
-          to: subscriber.email,
-          subject: `Nuevo formulario: ${sanitizedForm.name}`,
-          html: `Nuevo Formulario\nHola, ${subscriber.name},\nSe ha publicado un nuevo formulario: ${sanitizedForm.name}\n<a href="http://localhost:3000/pagos.html#form-${result.insertedId}">Ver detalles</a>\nSaludos,\nEquipo LIVETEXT`
-        });
-      }
+      await notifySubscribers(
+        db,
+        'forms',
+        () => `Nuevo formulario: ${sanitizedForm.name}`,
+        (s) => `Nuevo Formulario<br>Hola, ${s.name},<br>Se ha publicado un nuevo formulario: ${sanitizedForm.name}<br><a href="http://localhost:3000/pagos.html#form-${result.insertedId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+      );
     }
 
     res.status(201).json({ message: 'Formulario creado exitosamente.', insertedId: result.insertedId });
@@ -1435,15 +1368,12 @@ app.put('/api/forms/:id', requireAuth, validateForm, async (req, res) => {
     await redis.del('forms:cache');
 
     if (active) {
-      const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['forms'] } }).toArray();
-      for (const subscriber of subscribers) {
-        emailQueue.add({
-          from: 'no-reply@livetextweb.com',
-          to: subscriber.email,
-          subject: `Formulario actualizado: ${sanitizedForm.name}`,
-          html: `Formulario Actualizado\nHola, ${subscriber.name},\nSe ha actualizado el formulario: ${sanitizedForm.name}\n<a href="http://localhost:3000/pagos.html#form-${id}">Ver detalles</a>\nSaludos,\nEquipo LIVETEXT`
-        });
-      }
+      await notifySubscribers(
+        db,
+        'forms',
+        () => `Formulario actualizado: ${sanitizedForm.name}`,
+        (s) => `Formulario Actualizado<br>Hola, ${s.name},<br>Se ha actualizado el formulario: ${sanitizedForm.name}<br><a href="http://localhost:3000/pagos.html#form-${id}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+      );
     }
 
     res.status(200).json({ message: 'Formulario actualizado exitosamente.' });
@@ -1948,22 +1878,12 @@ postQueue.process(async (job) => {
     );
     await redis.del('posts:cache');
     await redis.del(`post:${postId}`);
-    const subscribers = await db.collection('newsletter_subscribers').find({ subscribed: true, notificationTypes: { $in: ['posts'] } }).toArray();
-    for (const subscriber of subscribers) {
-      emailQueue.add({
-        from: 'no-reply@livetextweb.com',
-        to: subscriber.email,
-        subject: `Nueva publicación: ${post.title}`,
-        html: `Nueva Publicación
-Hola, ${subscriber.name},
-Se ha publicado una nueva publicación: ${post.title}
-Fecha: ${moment.tz(post.date, 'America/Mexico_City').format('LLL')}
-<a href="http://localhost:3000/index.html#post-${postId}">Ver detalles</a>
-Saludos,
-Equipo LIVETEXT
-`
-      });
-    }
+    await notifySubscribers(
+      db,
+      'posts',
+      () => `Nueva publicación: ${post.title}`,
+      (s) => `Nueva Publicación<br>Hola, ${s.name},<br>Se ha publicado una nueva publicación: ${post.title}<br>Fecha: ${moment.tz(post.date, 'America/Mexico_City').format('LLL')}<br><a href="http://localhost:3000/index.html#post-${postId}">Ver detalles</a><br>Saludos,<br>Equipo LIVETEXT`
+    );
   } catch (error) {
     console.error('Error al procesar publicación programada:', error);
   }
