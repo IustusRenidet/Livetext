@@ -30,6 +30,7 @@ if (!window.editorJsAvailable) {
   console.warn('Editor.js library not loaded; using fallback editor');
 }
 
+
 // Detect availability of jQuery UI drag/drop
 window.dragLibAvailable =
   typeof $.fn.draggable === 'function' && typeof $.fn.droppable === 'function';
