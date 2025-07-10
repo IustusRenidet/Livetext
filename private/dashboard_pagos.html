@@ -600,7 +600,7 @@
             try {
                 const [formsRes, submissionsRes] = await Promise.all([
                     fetch('/api/forms?formType=payment'),
-                    fetch('/api/form-submissions')
+                    fetch('/api/form-submissions?formType=payment')
                 ]);
                 if (!formsRes.ok || !submissionsRes.ok) throw new Error('No se pudieron obtener los registros');
 
@@ -619,7 +619,8 @@
                 });
 
                 paymentsData = submissions.map(s => {
-                    const form = formsMap[s.formId] || {};
+                    const form = formsMap[s.formId];
+                    if (!form) return null;
                     const fieldMap = {};
                     if (form.fields) {
                         form.fields.forEach(fl => { fieldMap[fl.id] = fl; });
@@ -644,13 +645,13 @@
                         studentType,
                         controlNumber,
                         captureNumber,
-                        govValidation: 'pending',
+                        govValidation: s.govValidation || 'pending',
                         date: s.createdAt,
                         status: s.status,
                         files: s.files || [],
                         observations: []
                     };
-                });
+                }).filter(Boolean);
 
                 filteredData = [...paymentsData];
                 updateStatistics();
