@@ -398,5 +398,9 @@
   {
     "question": "¿Puedo acreditar inglés con el CLE para titulación?",
     "answer": "Sí, si cumples con los niveles requeridos por tu carrera."
+  },
+  {
+    "question": "Hola",
+    "answer": "Hola como estás!"
   }
 ]
