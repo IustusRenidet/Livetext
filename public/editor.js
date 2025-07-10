@@ -24,6 +24,32 @@ let elementStart = { x: 0, y: 0 };
 let autofillFields = [];
 let excelRows = [];
 
+// Simple fallback header tool in case CDN scripts fail
+class SimpleHeader {
+  static get toolbox() {
+    return {
+      title: 'Header',
+      icon:
+        '<svg width="17" height="15" viewBox="0 0 17 15" xmlns="http://www.w3.org/2000/svg"><path d="M2 0h2v6h7V0h2v15h-2V8H4v7H2V0z"/></svg>'
+    };
+  }
+  constructor({ data }) {
+    this.data = data || { text: '', level: 1 };
+    this.tag = `h${this.data.level}`;
+    this.element = null;
+  }
+  render() {
+    this.element = document.createElement(this.tag);
+    this.element.contentEditable = true;
+    this.element.innerHTML = this.data.text || '';
+    return this.element;
+  }
+  save(blockContent) {
+    return { text: blockContent.innerHTML, level: this.data.level };
+  }
+}
+window.SimpleHeader = SimpleHeader;
+
 // Utility: show a Bootstrap modal instead of alert()
 if (!window.showAlert) {
   window.showAlert = function(message, title = 'Aviso') {
@@ -43,11 +69,12 @@ const pageSizes = {
 
 // Initialize Editor.js for a specific page
 window.initializeEditor = function(pageIndex) {
+  const HeaderTool = window.Header || window.SimpleHeader;
   const editor = new EditorJS({
     holder: `editor-page-${pageIndex}`,
     tools: {
       header: {
-        class: Header,
+        class: HeaderTool,
         config: { levels: [1, 2, 3], defaultLevel: 1 }
       },
       list: List,
@@ -70,6 +97,7 @@ window.initializeEditor = function(pageIndex) {
   });
   editors[pageIndex] = editor;
   makeDroppable(pageIndex);
+  setupFileDrop(pageIndex);
 };
 
 // Add a new page
@@ -187,6 +215,29 @@ function makeDroppable(pageIndex) {
     },
     over: function () { $(this).addClass('dropzone-active'); },
     out: function () { $(this).removeClass('dropzone-active'); }
+  });
+}
+
+function setupFileDrop(pageIndex) {
+  const holder = document.getElementById(`editor-page-${pageIndex}`);
+  if (!holder) return;
+  holder.addEventListener('dragover', (e) => {
+    if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+      e.preventDefault();
+    }
+  });
+  holder.addEventListener('drop', (e) => {
+    if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+    fetch('/api/upload-image', { method: 'POST', body: formData })
+      .then((res) => res.json())
+      .then((data) => {
+        editors[pageIndex].blocks.insert('image', { url: data.url });
+      })
+      .catch(() => showAlert('Error al cargar la imagen.'));
   });
 }
 
@@ -310,6 +361,19 @@ $('.header, .footer').on('blur', function () {
 });
 
 // Page configuration modal
+$('#page-config-btn').on('click', () => {
+  $('#page-size').val(pageSettings.size);
+  $('#page-orientation').val(pageSettings.orientation);
+  $('#page-numbering').val(pageSettings.numbering).trigger('change');
+  $('#start-number').val(pageSettings.startNumber);
+  $('#custom-format').val(pageSettings.customFormat);
+  $('#same-header-all').prop('checked', pageSettings.sameHeaderAll);
+  $('#margin-top').val(pageSettings.margins.top);
+  $('#margin-bottom').val(pageSettings.margins.bottom);
+  $('#margin-left').val(pageSettings.margins.left);
+  $('#margin-right').val(pageSettings.margins.right);
+  $('#page-config-modal').modal('show');
+});
 $('#page-numbering').on('change', function () {
   $('#custom-format-container').toggle($(this).val() === 'custom');
 });
