@@ -24,6 +24,19 @@ let elementStart = { x: 0, y: 0 };
 let autofillFields = [];
 let excelRows = [];
 
+// Detect availability of Editor.js loaded via CDN
+window.editorJsAvailable = typeof EditorJS !== 'undefined';
+if (!window.editorJsAvailable) {
+  console.warn('Editor.js library not loaded; using fallback editor');
+}
+
+// Detect availability of jQuery UI drag/drop
+window.dragLibAvailable =
+  typeof $.fn.draggable === 'function' && typeof $.fn.droppable === 'function';
+if (!window.dragLibAvailable) {
+  console.warn('jQuery UI not loaded; using native drag and drop');
+}
+
 // Simple fallback header tool in case CDN scripts fail
 class SimpleHeader {
   static get toolbox() {
@@ -69,6 +82,23 @@ const pageSizes = {
 
 // Initialize Editor.js for a specific page
 window.initializeEditor = function(pageIndex) {
+  const holder = document.getElementById(`editor-page-${pageIndex}`);
+  if (!window.editorJsAvailable) {
+    holder.contentEditable = true;
+    holder.classList.add('fallback-editor');
+    if (typeof pages[pageIndex].content === 'string') {
+      holder.innerHTML = pages[pageIndex].content;
+    }
+    holder.addEventListener('input', () => {
+      pages[pageIndex].content = holder.innerHTML;
+    });
+    editors[pageIndex] = {
+      save: async () => pages[pageIndex].content
+    };
+    makeDroppable(pageIndex);
+    setupFileDrop(pageIndex);
+    return;
+  }
   const HeaderTool = window.Header || window.SimpleHeader;
   const editor = new EditorJS({
     holder: `editor-page-${pageIndex}`,
@@ -189,33 +219,60 @@ function toRoman(num) {
 }
 
 // Drag-and-drop elements
-$('.element-icon').draggable({
-  helper: 'clone',
-  revert: 'invalid',
-  appendTo: 'body',
-  zIndex: 10000,
-  scroll: false,
-  start: function (event, ui) {
-    ui.helper.addClass('animate__animated animate__pulse');
-    ui.helper.css({ width: $(this).width(), height: $(this).height() });
-  },
-  stop: function () {
-    $('.dropzone-active').removeClass('dropzone-active');
-  }
-});
+if (window.dragLibAvailable) {
+  $('.element-icon').draggable({
+    helper: 'clone',
+    revert: 'invalid',
+    appendTo: 'body',
+    zIndex: 10000,
+    scroll: false,
+    start: function (event, ui) {
+      ui.helper.addClass('animate__animated animate__pulse');
+      ui.helper.css({ width: $(this).width(), height: $(this).height() });
+    },
+    stop: function () {
+      $('.dropzone-active').removeClass('dropzone-active');
+    }
+  });
+} else {
+  $('.element-icon')
+    .attr('draggable', true)
+    .on('dragstart', function (e) {
+      e.originalEvent.dataTransfer.setData('text/plain', $(this).data('type'));
+    });
+}
 
 function makeDroppable(pageIndex) {
-  $(`#editor-page-${pageIndex}`).droppable({
-    accept: '.element-icon',
-    tolerance: 'pointer',
-    drop: function (event, ui) {
-      const type = ui.draggable.data('type');
-      addElement(type, event, pageIndex);
-      $(this).removeClass('dropzone-active');
-    },
-    over: function () { $(this).addClass('dropzone-active'); },
-    out: function () { $(this).removeClass('dropzone-active'); }
-  });
+  const selector = `#editor-page-${pageIndex}`;
+  if (window.dragLibAvailable) {
+    $(selector).droppable({
+      accept: '.element-icon',
+      tolerance: 'pointer',
+      drop: function (event, ui) {
+        const type = ui.draggable.data('type');
+        addElement(type, event, pageIndex);
+        $(this).removeClass('dropzone-active');
+      },
+      over: function () { $(this).addClass('dropzone-active'); },
+      out: function () { $(this).removeClass('dropzone-active'); }
+    });
+  } else {
+    const holder = document.querySelector(selector);
+    if (!holder) return;
+    holder.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      holder.classList.add('dropzone-active');
+    });
+    holder.addEventListener('dragleave', () => {
+      holder.classList.remove('dropzone-active');
+    });
+    holder.addEventListener('drop', (e) => {
+      e.preventDefault();
+      holder.classList.remove('dropzone-active');
+      const type = e.dataTransfer.getData('text/plain');
+      addElement(type, e, pageIndex);
+    });
+  }
 }
 
 function setupFileDrop(pageIndex) {
@@ -235,7 +292,14 @@ function setupFileDrop(pageIndex) {
     fetch('/api/upload-image', { method: 'POST', body: formData })
       .then((res) => res.json())
       .then((data) => {
-        editors[pageIndex].blocks.insert('image', { url: data.url });
+        if (window.editorJsAvailable) {
+          editors[pageIndex].blocks.insert('image', { url: data.url });
+        } else {
+          const img = document.createElement('img');
+          img.src = data.url;
+          img.style.maxWidth = '100%';
+          document.getElementById(`editor-page-${pageIndex}`).appendChild(img);
+        }
       })
       .catch(() => showAlert('Error al cargar la imagen.'));
   });
@@ -248,13 +312,31 @@ window.addElement = function(type, event, editorIndex) {
   try {
     switch (type) {
       case 'text':
-        editor.blocks.insert('paragraph', { text: 'New Text' });
+        if (window.editorJsAvailable) {
+          editor.blocks.insert('paragraph', { text: 'New Text' });
+        } else {
+          $(`#editor-page-${editorIndex}`).append(
+            '<p contenteditable="true">Nuevo texto</p>'
+          );
+        }
         break;
       case 'heading':
-        editor.blocks.insert('header', { text: 'New Heading', level: 1 });
+        if (window.editorJsAvailable) {
+          editor.blocks.insert('header', { text: 'New Heading', level: 1 });
+        } else {
+          $(`#editor-page-${editorIndex}`).append(
+            '<h2 contenteditable="true">Nuevo título</h2>'
+          );
+        }
         break;
       case 'image':
-        editor.blocks.insert('image', { url: '/placeholder.png' });
+        if (window.editorJsAvailable) {
+          editor.blocks.insert('image', { url: '/placeholder.png' });
+        } else {
+          $(`#editor-page-${editorIndex}`).append(
+            '<img src="/placeholder.png" alt="Imagen" style="max-width:100%">'
+          );
+        }
         break;
       case 'table':
         $('#table-modal').modal('show');
@@ -263,7 +345,13 @@ window.addElement = function(type, event, editorIndex) {
         $('#chart-modal').modal('show');
         break;
       case 'list':
-        editor.blocks.insert('list', { style: 'unordered', items: ['Item 1'] });
+        if (window.editorJsAvailable) {
+          editor.blocks.insert('list', { style: 'unordered', items: ['Item 1'] });
+        } else {
+          $(`#editor-page-${editorIndex}`).append(
+            '<ul contenteditable="true"><li>Elemento 1</li></ul>'
+          );
+        }
         break;
       case 'columns2':
       case 'columns3':
@@ -523,6 +611,15 @@ window.loadDocument = async function() {
       pages = data.pages;
       pageSettings = data.settings;
       autofillFields = data.autofillFields || [];
+      if (!window.editorJsAvailable) {
+        pages = pages.map(p => {
+          if (typeof p.content === 'object' && p.content.blocks) {
+            const html = p.content.blocks.map(b => b.data.text || '').join('<br>');
+            return { ...p, content: html };
+          }
+          return p;
+        });
+      }
       pages.forEach((page, i) => {
         const pageHtml = `
           <div class="page" id="page-${i}">
