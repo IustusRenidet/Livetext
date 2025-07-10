@@ -699,12 +699,13 @@ async function getPosts(db, page = 1, limit = 10, category = null) {
   if (cached) return JSON.parse(cached);
   const query = { isPublic: true };
   if (category) query.category = category;
-  const posts = await db.collection('posts')
+  let cursor = db.collection('posts')
     .find(query)
-    .sort({ date: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+    .sort({ date: -1 });
+  if (limit > 0) {
+    cursor = cursor.skip((page - 1) * limit).limit(limit);
+  }
+  const posts = await cursor.toArray();
   const formattedPosts = posts.map(post => ({
     ...post,
     createdAt: moment.tz(post.createdAt, 'America/Mexico_City').toDate(),
@@ -1200,7 +1201,7 @@ app.post('/api/posts', requireAuth, upload.array('postMedia', 5), async (req, re
 app.get('/api/posts', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = req.query.limit === undefined ? 10 : parseInt(req.query.limit);
     const category = req.query.category || null;
     const posts = await getPosts(db, page, limit, category);
     res.json(posts);
