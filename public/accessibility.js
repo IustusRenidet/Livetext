@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   .accessibility-toggle {
     position: fixed;
     bottom: 1rem;
-    right: 1rem;
+    left: 1rem;
     z-index: 10000;
   }
   .high-contrast, .high-contrast a {

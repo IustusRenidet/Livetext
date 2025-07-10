@@ -787,25 +787,20 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
+        /* Estilo del chat (coincide con el de index.html) */
         .chat-container {
             position: fixed;
             bottom: 90px;
             right: 20px;
             width: 350px;
-            height: 500px;
+            max-height: 500px;
             background: var(--dark-bg);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             display: none;
             flex-direction: column;
             z-index: 1050;
-            overflow: hidden;
-            animation: chatAppear 0.3s forwards;
-        }
-
-        @keyframes chatAppear {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            animation: slideInRight 0.3s ease;
         }
 
         .infinite-scroll-error,
