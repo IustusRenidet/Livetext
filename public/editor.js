@@ -24,6 +24,12 @@ let elementStart = { x: 0, y: 0 };
 let autofillFields = [];
 let excelRows = [];
 
+// Detect availability of Editor.js loaded via CDN
+window.editorJsAvailable = typeof EditorJS !== 'undefined';
+if (!window.editorJsAvailable) {
+  console.warn('Editor.js library not loaded; using fallback editor');
+}
+
 // Simple fallback header tool in case CDN scripts fail
 class SimpleHeader {
   static get toolbox() {
@@ -69,6 +75,23 @@ const pageSizes = {
 
 // Initialize Editor.js for a specific page
 window.initializeEditor = function(pageIndex) {
+  const holder = document.getElementById(`editor-page-${pageIndex}`);
+  if (!window.editorJsAvailable) {
+    holder.contentEditable = true;
+    holder.classList.add('fallback-editor');
+    if (typeof pages[pageIndex].content === 'string') {
+      holder.innerHTML = pages[pageIndex].content;
+    }
+    holder.addEventListener('input', () => {
+      pages[pageIndex].content = holder.innerHTML;
+    });
+    editors[pageIndex] = {
+      save: async () => pages[pageIndex].content
+    };
+    makeDroppable(pageIndex);
+    setupFileDrop(pageIndex);
+    return;
+  }
   const HeaderTool = window.Header || window.SimpleHeader;
   const editor = new EditorJS({
     holder: `editor-page-${pageIndex}`,
@@ -523,6 +546,15 @@ window.loadDocument = async function() {
       pages = data.pages;
       pageSettings = data.settings;
       autofillFields = data.autofillFields || [];
+      if (!window.editorJsAvailable) {
+        pages = pages.map(p => {
+          if (typeof p.content === 'object' && p.content.blocks) {
+            const html = p.content.blocks.map(b => b.data.text || '').join('<br>');
+            return { ...p, content: html };
+          }
+          return p;
+        });
+      }
       pages.forEach((page, i) => {
         const pageHtml = `
           <div class="page" id="page-${i}">
