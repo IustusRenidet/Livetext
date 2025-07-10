@@ -644,6 +644,7 @@
 
             .navbar-actions {
                 gap: 5px;
+                flex-wrap: wrap;
             }
 
             .navbar-actions .btn {
@@ -998,6 +999,10 @@
                         <label for="start-number" class="form-label">Número Inicial</label>
                         <input type="number" class="form-control" id="start-number" value="1" min="1">
                     </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="same-header-all" checked>
+                        <label class="form-check-label" for="same-header-all">Usar mismo encabezado en todas las páginas</label>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Márgenes (mm)</label>
                         <div class="row">
@@ -1077,11 +1082,27 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alert-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alert-modal-title">Aviso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alert-modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest/dist/header.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest/dist/list.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest/dist/image.min.js"></script>
