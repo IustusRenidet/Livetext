@@ -402,7 +402,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content animate__animated animate__fadeInUp">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">Subir Formulario de Pago</h5>
+                    <h5 class="modal-title" id="paymentModalLabel">Formulario</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -490,17 +490,18 @@
                 italiano: 'border-green',
             };
 
-            // Load payment forms dynamically
+            const formType = new URLSearchParams(window.location.search).get('type') || 'payment';
+            // Load payment or exam forms dynamically
             const loadForms = async () => {
                 try {
-                    const response = await axios.get('/api/forms?formType=payment');
+                    const response = await axios.get(`/api/forms?formType=${formType}`);
                     formsContainer.innerHTML = response.data.map(form => `
                         <div class="col-12 col-md-6 col-lg-4 mb-4">
                             <div class="form-card ${courseColors[form.course] || 'border-blue'}">
                                 <h5>${form.name}</h5>
                                 <p><strong>Curso:</strong> ${form.course.charAt(0).toUpperCase() + form.course.slice(1)}</p>
                                 <p><strong>Descripción:</strong> ${form.description || 'Sin descripción'}</p>
-                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="${form._id}" data-form-data='${JSON.stringify(form)}'>Subir Pago</button>
+                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="${form._id}" data-form-data='${JSON.stringify(form)}'>${formType === 'exam' ? 'Responder' : 'Subir Pago'}</button>
                             </div>
                         </div>
                     `).join('');
@@ -511,6 +512,7 @@
             };
 
             loadForms();
+            document.getElementById('paymentModalLabel').textContent = formType === 'exam' ? 'Formulario de Examen' : 'Subir Formulario de Pago';
 
             // Render dynamic fields in modal
             paymentModal.addEventListener('show.bs.modal', (event) => {
