@@ -403,4 +403,29 @@
     "question": "Hola",
     "answer": "Hola como estás!"
   }
+,
+  {
+    "question": "¿Cómo se dice 'hola' en inglés?",
+    "answer": "Se dice 'hello'."
+  },
+  {
+    "question": "¿Cómo se dice 'buenos días' en francés?",
+    "answer": "Se dice 'bonjour'."
+  },
+  {
+    "question": "¿Cómo pregunto la hora en inglés?",
+    "answer": "Puedes decir: 'What time is it?'"
+  },
+  {
+    "question": "Dime una frase común en francés",
+    "answer": "Parlez-vous français? significa '¿Habla usted francés?'"
+  },
+  {
+    "question": "¿Cuál es la diferencia entre 'who' y 'whom'?",
+    "answer": "'Who' se usa como sujeto y 'whom' como objeto de la oración."
+  },
+  {
+    "question": "¿Qué significa 'merci'?",
+    "answer": "Significa 'gracias' en francés."
+  }
 ]

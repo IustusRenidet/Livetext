@@ -18,6 +18,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const OpenAI = require('openai');
 const MongoDBStore = require('connect-mongodb-session')(session);
+const bannedWords = ['puta', 'mierda', 'pendejo', 'cabron'];
 const validator = require('validator');
 
 const TRAINING_DATA_FILE = path.join(__dirname, 'training-data.json');
@@ -811,6 +812,10 @@ async function deleteForm(db, formId, userId) {
 async function createComment(db, postId, commentData, visitorId) {
   const { content, parentId } = commentData;
   if (!content) throw new Error('El comentario no puede estar vacío.');
+  const lower = content.toLowerCase();
+  if (bannedWords.some(w => lower.includes(w))) {
+    throw new Error('El comentario contiene lenguaje no permitido.');
+  }
   const sanitizedContent = sanitizeHtml(content, {
     allowedTags: [],
     allowedAttributes: {}
@@ -1879,6 +1884,9 @@ app.post('/api/chat', async (req, res) => {
   }
   try {
     const lastUserMsg = messages.filter(m => m.role === "user").slice(-1)[0]?.content || "";
+    if (bannedWords.some(w => lastUserMsg.toLowerCase().includes(w))) {
+      return res.status(400).json({ error: 'Lenguaje no permitido' });
+    }
     const custom = findAnswer(lastUserMsg);
     if (custom) {
       return res.json({ reply: custom });

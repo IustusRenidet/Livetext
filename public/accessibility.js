@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     left: 1rem;
     z-index: 10000;
   }
+  #screenReaderToggle {
+    left: 7rem;
+  }
   .high-contrast, .high-contrast a {
     background-color: #000 !important;
     color: #fff !important;
