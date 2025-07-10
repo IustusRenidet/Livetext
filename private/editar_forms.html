@@ -49,7 +49,7 @@
             document.getElementById('active').checked = data.active;
         } catch (err) {
             console.error(err);
-            alert('Error al cargar el formulario');
+            showAlert('Error al cargar el formulario');
         }
     });
 
@@ -66,14 +66,15 @@
         };
         try {
             await axios.put(`/api/forms/${id}`, payload);
-            alert('Formulario actualizado');
+            showAlert('Formulario actualizado');
             window.location.href = '/dashboard';
         } catch (err) {
             console.error(err);
-            alert('Error al actualizar');
+            showAlert('Error al actualizar');
         }
     });
     </script>
+    <script src="/modal.js"></script>
     <script src="accessibility.js"></script>
 </body>
 </html>

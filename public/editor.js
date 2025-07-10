@@ -25,12 +25,14 @@ let autofillFields = [];
 let excelRows = [];
 
 // Utility: show a Bootstrap modal instead of alert()
-window.showAlert = function(message, title = 'Aviso') {
-  $('#alert-modal-title').text(title);
-  $('#alert-modal-body').text(message);
-  const modal = new bootstrap.Modal(document.getElementById('alert-modal'));
-  modal.show();
-};
+if (!window.showAlert) {
+  window.showAlert = function(message, title = 'Aviso') {
+    $('#alert-modal-title').text(title);
+    $('#alert-modal-body').text(message);
+    const modal = new bootstrap.Modal(document.getElementById('alert-modal'));
+    modal.show();
+  };
+}
 
 // Page dimensions in mm
 const pageSizes = {

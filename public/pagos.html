@@ -628,7 +628,7 @@
                                 preview.style.display = file.type === 'application/pdf' ? 'none' : 'block';
                                 preview.classList.add('animate__animated', 'animate__zoomIn');
                             } else {
-                                alert('Por favor, sube una imagen JPG, PNG o PDF válida (máximo 5MB).');
+                                showAlert('Por favor, sube una imagen JPG, PNG o PDF válida (máximo 5MB).');
                                 fileInput.value = '';
                                 preview.style.display = 'none';
                             }
@@ -676,34 +676,34 @@
 
                     // Client-side validation
                     if (type === 'email' && value && !validator.isEmail(value)) {
-                        alert('Por favor, ingresa un correo electrónico válido.');
+                        showAlert('Por favor, ingresa un correo electrónico válido.');
                         validationFailed = true;
                         return;
                     }
                     if (type === 'tel' && value && !/^\+?\d{10,15}$/.test(value)) {
-                        alert('Por favor, ingresa un número de teléfono válido (10-15 dígitos).');
+                        showAlert('Por favor, ingresa un número de teléfono válido (10-15 dígitos).');
                         validationFailed = true;
                         return;
                     }
                     if (type === 'number' && value) {
                         const maxDigits = parseInt(input.getAttribute('maxlength') || '10');
                         if (!/^\d+$/.test(value)) {
-                            alert('Por favor, ingresa un número válido.');
+                            showAlert('Por favor, ingresa un número válido.');
                             validationFailed = true;
                             return;
                         }
                         if (value.length > maxDigits) {
-                            alert(`El campo ${field.querySelector('label').textContent} debe tener máximo ${maxDigits} dígitos.`);
+                            showAlert(`El campo ${field.querySelector('label').textContent} debe tener máximo ${maxDigits} dígitos.`);
                             validationFailed = true;
                             return;
                         }
                         if (field.querySelector('label').textContent.toLowerCase().includes('línea de captura') && value.length !== 27) {
-                            alert('La línea de captura debe tener exactamente 27 dígitos.');
+                            showAlert('La línea de captura debe tener exactamente 27 dígitos.');
                             validationFailed = true;
                             return;
                         }
                         if (field.querySelector('label').textContent.toLowerCase().includes('número de control') && value.length !== 9) {
-                            alert('El número de control debe tener exactamente 9 dígitos.');
+                            showAlert('El número de control debe tener exactamente 9 dígitos.');
                             validationFailed = true;
                             return;
                         }
@@ -736,7 +736,7 @@
                     bootstrap.Modal.getInstance(paymentModal).hide();
                 } catch (error) {
                     console.error('Error al enviar formulario:', error);
-                    alert(error.response?.data?.error || 'Error al enviar el formulario. Por favor, intenta de nuevo.');
+                    showAlert(error.response?.data?.error || 'Error al enviar el formulario. Por favor, intenta de nuevo.');
                 }
             });
 
@@ -761,6 +761,7 @@
             });
         });
     </script>
+    <script src="/modal.js"></script>
     <script src="accessibility.js"></script>
 </body>
 </html>
