@@ -637,7 +637,7 @@ $(document).ready(async () => {
     });
   } catch (error) {
     console.error('Error loading documents:', error);
-    alert('Failed to load documents.');
+    showAlert('Failed to load documents.');
   }
 });
 
@@ -666,6 +666,7 @@ function showConfirm(message) {
     </div>
   </div>
 </div>
+<script src="/modal.js"></script>
 <script src="accessibility.js"></script>
 </body>
 </html>
