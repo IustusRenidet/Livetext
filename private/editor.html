@@ -368,6 +368,32 @@
         .editor-content.dropzone-active {
             border-color: var(--secondary-color);
             background: rgba(230, 126, 34, 0.1);
+            color: black !important;
+        }
+
+        .editor-content, .header-content, .footer-content, .column {
+            color: black !important;
+        }
+
+        .columns {
+            display: grid;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .columns-1 { grid-template-columns: 1fr; }
+        .columns-2 { grid-template-columns: repeat(2, 1fr); }
+        .columns-3 { grid-template-columns: repeat(3, 1fr); }
+        .columns-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .column {
+            border: 1px dashed #ccc;
+            min-height: 50px;
+            padding: 5px;
+        }
+
+        .custom-block {
+            position: relative;
         }
 
         .header-controls {
@@ -618,6 +644,7 @@
 
             .navbar-actions {
                 gap: 5px;
+                flex-wrap: wrap;
             }
 
             .navbar-actions .btn {
@@ -799,6 +826,9 @@
         <div class="element-icon" data-type="table"><i class="fas fa-table"></i> Tabla</div>
         <div class="element-icon" data-type="chart"><i class="fas fa-chart-bar"></i> Gráfica</div>
         <div class="element-icon" data-type="list"><i class="fas fa-list"></i> Lista</div>
+        <div class="element-icon" data-type="columns2"><i class="fas fa-columns"></i> 2 Columnas</div>
+        <div class="element-icon" data-type="columns3"><i class="fas fa-th-large"></i> 3 Columnas</div>
+        <div class="element-icon" data-type="columns4"><i class="fas fa-th"></i> 4 Columnas</div>
     </div>
 
     <!-- Editor Container -->
@@ -969,6 +999,10 @@
                         <label for="start-number" class="form-label">Número Inicial</label>
                         <input type="number" class="form-control" id="start-number" value="1" min="1">
                     </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="same-header-all" checked>
+                        <label class="form-check-label" for="same-header-all">Usar mismo encabezado en todas las páginas</label>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Márgenes (mm)</label>
                         <div class="row">
@@ -1048,11 +1082,27 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alert-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alert-modal-title">Aviso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="alert-modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest/dist/editorjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest/dist/header.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest/dist/list.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@editorjs/image@latest/dist/image.min.js"></script>

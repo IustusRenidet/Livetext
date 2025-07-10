@@ -787,26 +787,36 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
+        /* Estilo del chat (coincide con el de index.html) */
         .chat-container {
             position: fixed;
             bottom: 90px;
             right: 20px;
             width: 350px;
-            height: 500px;
+            max-height: 500px;
             background: var(--dark-bg);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             display: none;
             flex-direction: column;
             z-index: 1050;
-            overflow: hidden;
-            animation: chatAppear 0.3s forwards;
+            animation: slideInRight 0.3s ease;
         }
-
-        @keyframes chatAppear {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
         }
+        .chat-message {
+            padding: 0.4rem 0.6rem;
+            border-radius: 12px;
+            margin-bottom: 0.3rem;
+            max-width: 80%;
+        }
+        .chat-message.user { background: #d1ffe0; align-self: flex-end; }
+        .chat-message.ai { background: #f1f0f0; }
 
         .infinite-scroll-error,
         .infinite-scroll-last {
@@ -1160,6 +1170,44 @@
         </div>
     </footer>
 
+    <!-- Chat flotante -->
+    <div class="floating-button animate__animated animate__bounceIn" id="chatButton">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-sm text-white me-2" id="toggleChatType">
+                    <i class="fas fa-robot"></i>
+                </button>
+                <h5 class="chat-title mb-0" id="chatTitle">Chat IA</h5>
+            </div>
+            <button class="close-chat" id="closeChat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="quick-options" id="quickOptions">
+            <button class="quick-option">Horarios de inglés</button>
+            <button class="quick-option">Inscripción a francés</button>
+            <button class="quick-option">¿Necesito experiencia previa?</button>
+            <button class="quick-option">Contacto del CLE</button>
+        </div>
+        <div class="asesor-info d-none" id="asesorInfo">
+            <div class="p-3 bg-light border-top">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="online-indicator me-2"></div>
+                    <span class="fw-bold" id="asesorNombre">Conectando...</span>
+                </div>
+                <small class="text-muted" id="asesorStatus">Por favor espere...</small>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
+            <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container">
         <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
@@ -1456,6 +1504,91 @@
                     gutter: 20
                 });
             });
+
+            // Chat
+            const chatButton = document.getElementById('chatButton');
+            const chatContainer = document.getElementById('chatContainer');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const toggleChatType = document.getElementById('toggleChatType');
+            const chatTitle = document.getElementById('chatTitle');
+            const quickOptions = document.getElementById('quickOptions');
+            const asesorInfo = document.getElementById('asesorInfo');
+            const messages = [];
+            let chatInitialized = false;
+            let conversationStarted = false;
+
+            chatButton.addEventListener('click', () => {
+                const hidden = chatContainer.style.display === 'none';
+                chatContainer.style.display = hidden ? 'flex' : 'none';
+                if (hidden && !chatInitialized) {
+                    addChatMessage('IA', '¡Hola! ¿En qué puedo ayudarte?');
+                    chatInitialized = true;
+                }
+            });
+            document.getElementById('closeChat').addEventListener('click', () => {
+                chatContainer.style.display = 'none';
+            });
+
+            toggleChatType.addEventListener('click', () => {
+                if (chatTitle.textContent === 'Chat IA') {
+                    chatTitle.textContent = 'Chat con Asesor';
+                    toggleChatType.innerHTML = '<i class="fas fa-robot"></i>';
+                    quickOptions.classList.add('d-none');
+                    asesorInfo.classList.remove('d-none');
+                } else {
+                    chatTitle.textContent = 'Chat IA';
+                    toggleChatType.innerHTML = '<i class="fas fa-user"></i>';
+                    quickOptions.classList.remove('d-none');
+                    asesorInfo.classList.add('d-none');
+                }
+            });
+
+            chatSend.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+            document.querySelectorAll('.quick-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    chatInput.value = btn.textContent;
+                    sendChatMessage();
+                });
+            });
+
+            function addChatMessage(sender, text) {
+                const div = document.createElement('div');
+                div.className = `chat-message ${sender === 'Tú' ? 'user' : 'ai'}`;
+                div.textContent = text;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            async function sendChatMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                if (!conversationStarted) {
+                    quickOptions.classList.add('d-none');
+                    conversationStarted = true;
+                }
+                addChatMessage('Tú', text);
+                messages.push({ role: 'user', content: text });
+                chatInput.value = '';
+                try {
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        messages.push({ role: 'assistant', content: data.reply });
+                        addChatMessage('IA', data.reply);
+                    } else {
+                        addChatMessage('Error', data.error || 'Error');
+                    }
+                } catch (err) {
+                    addChatMessage('Error', 'No se pudo conectar');
+                }
+            }
         });
 
         function showToast(title, message) {

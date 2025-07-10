@@ -10,16 +10,39 @@ document.addEventListener('DOMContentLoaded', () => {
   style.textContent = `
   .accessibility-toggle {
     position: fixed;
-    bottom: 1rem;
-    right: 1rem;
+    left: 1rem;
     z-index: 10000;
   }
+  #accessibilityToggle { bottom: 1rem; }
+  #screenReaderToggle { bottom: 4.5rem; }
   .high-contrast, .high-contrast a {
     background-color: #000 !important;
     color: #fff !important;
   }
   `;
   document.head.appendChild(style);
+
+  const readerBtn = document.createElement('button');
+  readerBtn.id = 'screenReaderToggle';
+  readerBtn.className = 'btn btn-secondary accessibility-toggle ms-2';
+  readerBtn.type = 'button';
+  readerBtn.textContent = 'Narrador';
+  document.body.appendChild(readerBtn);
+
+  function speak(text) {
+    if (!window.speechSynthesis) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-MX';
+    window.speechSynthesis.speak(utterance);
+  }
+
+  let readerEnabled = false;
+  readerBtn.addEventListener('click', () => {
+    readerEnabled = !readerEnabled;
+    readerBtn.setAttribute('aria-pressed', readerEnabled);
+    speak(readerEnabled ? 'Narrador activado' : 'Narrador desactivado');
+    localStorage.setItem('screenReader', readerEnabled);
+  });
 
   btn.addEventListener('click', () => {
     document.body.classList.toggle('high-contrast');
@@ -42,5 +65,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelectorAll('img:not([alt])').forEach(img => {
     img.setAttribute('alt', '');
+  });
+
+  if (localStorage.getItem('screenReader') === 'true') {
+    readerEnabled = true;
+    readerBtn.setAttribute('aria-pressed', 'true');
+    speak('Narrador activado');
+  }
+
+  document.addEventListener('focusin', e => {
+    if (!readerEnabled) return;
+    const target = e.target;
+    const text = target.getAttribute('aria-label') || target.alt || target.innerText || target.value;
+    if (text) speak(text);
   });
 });

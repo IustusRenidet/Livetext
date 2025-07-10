@@ -13,7 +13,8 @@ window.pageSettings = {
   margins: { top: 10, bottom: 10, left: 10, right: 10 },
   numbering: 'none',
   startNumber: 1,
-  customFormat: ''
+  customFormat: '',
+  sameHeaderAll: true
 };
 let selectedElement = null;
 let isDragging = false;
@@ -22,6 +23,14 @@ let dragStart = { x: 0, y: 0 };
 let elementStart = { x: 0, y: 0 };
 let autofillFields = [];
 let excelRows = [];
+
+// Utility: show a Bootstrap modal instead of alert()
+window.showAlert = function(message, title = 'Aviso') {
+  $('#alert-modal-title').text(title);
+  $('#alert-modal-body').text(message);
+  const modal = new bootstrap.Modal(document.getElementById('alert-modal'));
+  modal.show();
+};
 
 // Page dimensions in mm
 const pageSizes = {
@@ -58,6 +67,7 @@ window.initializeEditor = function(pageIndex) {
     }
   });
   editors[pageIndex] = editor;
+  makeDroppable(pageIndex);
 };
 
 // Add a new page
@@ -152,36 +162,31 @@ function toRoman(num) {
 $('.element-icon').draggable({
   helper: 'clone',
   revert: 'invalid',
-  appendTo: 'body', // Append drag helper to body to escape sidebar constraints
-  zIndex: 10000, // Ensure helper is above all elements
-  scroll: false, // Disable auto-scroll to prevent sidebar interference
+  appendTo: 'body',
+  zIndex: 10000,
+  scroll: false,
   start: function (event, ui) {
     ui.helper.addClass('animate__animated animate__pulse');
-    ui.helper.css({
-      width: $(this).width(),
-      height: $(this).height()
-    });
+    ui.helper.css({ width: $(this).width(), height: $(this).height() });
   },
-  stop: function (event, ui) {
-    ui.helper.removeClass('animate__animated animate__pulse');
+  stop: function () {
+    $('.dropzone-active').removeClass('dropzone-active');
   }
 });
 
-$('.editor-content').droppable({
-  accept: '.element-icon',
-  tolerance: 'pointer', // Improve drop accuracy
-  drop: function (event, ui) {
-    const type = ui.draggable.data('type');
-    const editorIndex = $(this).attr('id').split('-')[2];
-    addElement(type, event, editorIndex);
-  },
-  over: function (event, ui) {
-    $(this).addClass('dropzone-active'); // Visual feedback
-  },
-  out: function (event, ui) {
-    $(this).removeClass('dropzone-active');
-  }
-});
+function makeDroppable(pageIndex) {
+  $(`#editor-page-${pageIndex}`).droppable({
+    accept: '.element-icon',
+    tolerance: 'pointer',
+    drop: function (event, ui) {
+      const type = ui.draggable.data('type');
+      addElement(type, event, pageIndex);
+      $(this).removeClass('dropzone-active');
+    },
+    over: function () { $(this).addClass('dropzone-active'); },
+    out: function () { $(this).removeClass('dropzone-active'); }
+  });
+}
 
 // Add elements to the editor
 window.addElement = function(type, event, editorIndex) {
@@ -207,12 +212,27 @@ window.addElement = function(type, event, editorIndex) {
       case 'list':
         editor.blocks.insert('list', { style: 'unordered', items: ['Item 1'] });
         break;
+      case 'columns2':
+      case 'columns3':
+      case 'columns4': {
+        const cols = parseInt(type.replace('columns', ''));
+        const container = $('<div class="columns columns-' + cols + '"></div>');
+        for (let i = 0; i < cols; i++) {
+          container.append('<div class="column" contenteditable="true">Columna ' + (i+1) + '</div>');
+        }
+        const wrapper = $('<div class="custom-block"></div>').append(container);
+        $(`#page-${currentPage} .editor-content`).append(wrapper);
+        makeElementDraggable(wrapper);
+        makeElementResizable(wrapper);
+        makeElementSelectable(wrapper);
+        break;
+      }
       default:
         console.warn(`Unsupported element type: ${type}`);
     }
   } catch (error) {
     console.error('Error adding element:', error);
-    alert('Failed to add element.');
+    showAlert('Failed to add element.');
   }
 };
 
@@ -222,7 +242,7 @@ $('#create-table-btn').on('click', () => {
   const cols = parseInt($('#table-columns').val());
   const includeHeader = $('#table-header').is(':checked');
   if (rows < 1 || cols < 1) {
-    alert('Rows and columns must be at least 1.');
+    showAlert('Rows and columns must be at least 1.');
     return;
   }
   const data = includeHeader
@@ -240,7 +260,7 @@ $('#create-chart-btn').on('click', () => {
     value: parseFloat($(el).find('.chart-value').val()) || 0
   })).get();
   if (data.length === 0) {
-    alert('At least one data point is required.');
+    showAlert('At least one data point is required.');
     return;
   }
   const chartCanvas = document.createElement('canvas');
@@ -279,6 +299,9 @@ $('.header, .footer').on('blur', function () {
   const content = sanitizeHtml($(this).html());
   if (isHeader) {
     pages[pageIndex].header = content;
+    if (pageSettings.sameHeaderAll) {
+      pages.forEach((p, i) => { if (i !== parseInt(pageIndex)) { p.header = content; $(`#page-${i} .header`).html(content); } });
+    }
   } else {
     pages[pageIndex].footer = content;
   }
@@ -297,7 +320,7 @@ $('#apply-page-config-btn').on('click', () => {
     right: parseFloat($('#margin-right').val()) || 10
   };
   if (margins.top < 10 || margins.bottom < 10 || margins.left < 10 || margins.right < 10) {
-    alert('Margins must be at least 10mm.');
+    showAlert('Margins must be at least 10mm.');
     return;
   }
   pageSettings = {
@@ -306,7 +329,8 @@ $('#apply-page-config-btn').on('click', () => {
     margins: margins,
     numbering: $('#page-numbering').val(),
     startNumber: parseInt($('#start-number').val()) || 1,
-    customFormat: $('#custom-format').val()
+    customFormat: $('#custom-format').val(),
+    sameHeaderAll: $('#same-header-all').is(':checked')
   };
   pages.forEach((_, i) => updatePageStyles(i));
   $('#page-config-modal').modal('hide');
@@ -330,7 +354,7 @@ $('#preview-btn').on('click', () => {
 $('#save-btn').on('click', async () => {
   const title = prompt('Enter document title:');
   if (!title) {
-    alert('Title is required.');
+    showAlert('Title is required.');
     return;
   }
   const documentData = {
@@ -374,11 +398,11 @@ $('#save-btn').on('click', async () => {
       })
       .from(element)
       .save();
-    alert('Document saved and exported as PDF.');
+    showAlert('Document saved and exported as PDF.');
     updateDashboard(title, new Date());
   } catch (error) {
     console.error('Error saving document:', error);
-    alert('Failed to save document.');
+    showAlert('Failed to save document.');
   }
 });
 
@@ -386,7 +410,7 @@ $('#save-btn').on('click', async () => {
 $('#save-template-btn').on('click', async () => {
   const title = prompt('Ingrese el título de la plantilla:');
   if (!title) {
-    alert('El título es obligatorio.');
+    showAlert('El título es obligatorio.');
     return;
   }
   const documentData = {
@@ -408,11 +432,11 @@ $('#save-template-btn').on('click', async () => {
       body: JSON.stringify(documentData)
     });
     if (!response.ok) throw new Error('Failed to save template.');
-    alert('Plantilla guardada exitosamente.');
+    showAlert('Plantilla guardada exitosamente.');
     updateDashboard(title, new Date());
   } catch (error) {
     console.error('Error saving template:', error);
-    alert('Error al guardar la plantilla.');
+    showAlert('Error al guardar la plantilla.');
   }
 });
 
@@ -445,13 +469,17 @@ window.loadDocument = async function() {
         initializeEditor(i);
         updatePageStyles(i);
       });
+      if (pageSettings.sameHeaderAll && pages.length) {
+        const commonHeader = pages[0].header;
+        pages.forEach((p, idx) => { if (idx !== 0) { p.header = commonHeader; $(`#page-${idx} .header`).html(commonHeader); } });
+      }
       switchPage(0);
     } else {
       initializeEditor(0);
     }
   } catch (error) {
     console.error('Error loading document:', error);
-    alert('Failed to load document. Starting with a blank page.');
+    showAlert('Failed to load document. Starting with a blank page.');
     initializeEditor(0);
   }
 };
@@ -593,7 +621,7 @@ function makeElementResizable(element) {
 function makeElementSelectable(element) {
   element.off('click.select').on('click.select', function (e) {
     e.stopPropagation();
-    $('.header-element, .footer-element').removeClass('selected');
+    $('.header-element, .footer-element, .custom-block').removeClass('selected');
     element.addClass('selected');
     selectedElement = element;
   });
@@ -624,7 +652,7 @@ $('.add-header-image, .add-footer-image').on('click', function () {
           setupHeaderFooterInteractions(container.closest('.header, .footer'));
         },
         error: function () {
-          alert('Error al cargar la imagen.');
+          showAlert('Error al cargar la imagen.');
         }
       });
     }
@@ -710,11 +738,11 @@ $('#add-autofill-btn').on('click', function () {
 $('#create-autofill-btn').on('click', function () {
   const name = $('#autofill-name').val().trim();
   if (!name) {
-    alert('El nombre del campo es obligatorio.');
+    showAlert('El nombre del campo es obligatorio.');
     return;
   }
   if (autofillFields.includes(name)) {
-    alert('El nombre del campo ya existe.');
+    showAlert('El nombre del campo ya existe.');
     return;
   }
   autofillFields.push(name);
@@ -784,7 +812,7 @@ $('#excel-file').on('change', function (e) {
 $('#generate-batch-btn').on('click', async function () {
   const fileInput = $('#excel-file')[0];
   if (!fileInput.files.length) {
-    alert('Por favor, cargue un archivo Excel.');
+    showAlert('Por favor, cargue un archivo Excel.');
     return;
   }
   const mappings = {};
@@ -792,7 +820,7 @@ $('#generate-batch-btn').on('click', async function () {
   autofillFields.forEach(field => {
     const columnIndex = $(`#map-${field}`).val();
     if (!columnIndex) {
-      alert(`Por favor, asigne una columna para el campo "${field}".`);
+      showAlert(`Por favor, asigne una columna para el campo "${field}".`);
       valid = false;
     }
     mappings[field] = parseInt(columnIndex);
@@ -889,7 +917,7 @@ $('#generate-batch-btn').on('click', async function () {
 
 $('#fill-document-btn').on('click', async function () {
   if (!excelRows.length) {
-    alert('Por favor, cargue un archivo Excel.');
+    showAlert('Por favor, cargue un archivo Excel.');
     return;
   }
   const mappings = {};
@@ -897,7 +925,7 @@ $('#fill-document-btn').on('click', async function () {
   autofillFields.forEach(field => {
     const columnIndex = $(`#map-${field}`).val();
     if (!columnIndex) {
-      alert(`Por favor, asigne una columna para el campo "${field}".`);
+      showAlert(`Por favor, asigne una columna para el campo "${field}".`);
       valid = false;
     }
     mappings[field] = parseInt(columnIndex);

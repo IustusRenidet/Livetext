@@ -402,7 +402,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content animate__animated animate__fadeInUp">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="paymentModalLabel">Subir Formulario de Pago</h5>
+                    <h5 class="modal-title" id="paymentModalLabel">Formulario</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -490,17 +490,18 @@
                 italiano: 'border-green',
             };
 
-            // Load payment forms dynamically
+            const formType = new URLSearchParams(window.location.search).get('type') || 'payment';
+            // Load payment or exam forms dynamically
             const loadForms = async () => {
                 try {
-                    const response = await axios.get('/api/forms?formType=payment');
+                    const response = await axios.get(`/api/forms?formType=${formType}`);
                     formsContainer.innerHTML = response.data.map(form => `
                         <div class="col-12 col-md-6 col-lg-4 mb-4">
                             <div class="form-card ${courseColors[form.course] || 'border-blue'}">
                                 <h5>${form.name}</h5>
                                 <p><strong>Curso:</strong> ${form.course.charAt(0).toUpperCase() + form.course.slice(1)}</p>
                                 <p><strong>Descripción:</strong> ${form.description || 'Sin descripción'}</p>
-                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="${form._id}" data-form-data='${JSON.stringify(form)}'>Subir Pago</button>
+                                <button class="btn-open-form" data-bs-toggle="modal" data-bs-target="#paymentModal" data-form-id="${form._id}" data-form-data='${JSON.stringify(form)}'>${formType === 'exam' ? 'Responder' : 'Subir Pago'}</button>
                             </div>
                         </div>
                     `).join('');
@@ -511,6 +512,7 @@
             };
 
             loadForms();
+            document.getElementById('paymentModalLabel').textContent = formType === 'exam' ? 'Formulario de Examen' : 'Subir Formulario de Pago';
 
             // Render dynamic fields in modal
             paymentModal.addEventListener('show.bs.modal', (event) => {
@@ -628,7 +630,7 @@
                                 preview.style.display = file.type === 'application/pdf' ? 'none' : 'block';
                                 preview.classList.add('animate__animated', 'animate__zoomIn');
                             } else {
-                                alert('Por favor, sube una imagen JPG, PNG o PDF válida (máximo 5MB).');
+                                showAlert('Por favor, sube una imagen JPG, PNG o PDF válida (máximo 5MB).');
                                 fileInput.value = '';
                                 preview.style.display = 'none';
                             }
@@ -676,19 +678,19 @@
 
                     // Client-side validation
                     if (type === 'email' && value && !validator.isEmail(value)) {
-                        alert('Por favor, ingresa un correo electrónico válido.');
+                        showAlert('Por favor, ingresa un correo electrónico válido.');
                         validationFailed = true;
                         return;
                     }
                     if (type === 'tel' && value && !/^\+?\d{10,15}$/.test(value)) {
-                        alert('Por favor, ingresa un número de teléfono válido (10-15 dígitos).');
+                        showAlert('Por favor, ingresa un número de teléfono válido (10-15 dígitos).');
                         validationFailed = true;
                         return;
                     }
                     if (type === 'number' && value) {
                         const maxDigits = parseInt(input.getAttribute('maxlength') || '10');
                         if (!/^\d+$/.test(value)) {
-                            alert('Por favor, ingresa un número válido.');
+                            showAlert('Por favor, ingresa un número válido.');
                             validationFailed = true;
                             return;
                         }
@@ -698,12 +700,12 @@
                             return;
                         }
                         if (field.querySelector('label').textContent.toLowerCase().includes('línea de captura') && value.length !== 27) {
-                            alert('La línea de captura debe tener exactamente 27 dígitos.');
+                            showAlert('La línea de captura debe tener exactamente 27 dígitos.');
                             validationFailed = true;
                             return;
                         }
                         if (field.querySelector('label').textContent.toLowerCase().includes('número de control') && value.length !== 9) {
-                            alert('El número de control debe tener exactamente 9 dígitos.');
+                            showAlert('El número de control debe tener exactamente 9 dígitos.');
                             validationFailed = true;
                             return;
                         }
@@ -736,7 +738,7 @@
                     bootstrap.Modal.getInstance(paymentModal).hide();
                 } catch (error) {
                     console.error('Error al enviar formulario:', error);
-                    alert(error.response?.data?.error || 'Error al enviar el formulario. Por favor, intenta de nuevo.');
+                    showAlert(error.response?.data?.error || 'Error al enviar el formulario. Por favor, intenta de nuevo.');
                 }
             });
 
@@ -761,6 +763,18 @@
             });
         });
     </script>
+    <div class="modal fade" id="alert-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alert-modal-title">Aviso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="alert-modal-body"></div>
+            </div>
+        </div>
+    </div>
+    <script src="utils.js"></script>
     <script src="accessibility.js"></script>
 </body>
 </html>

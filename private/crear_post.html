@@ -1026,12 +1026,12 @@
             document.getElementById('postMedia').addEventListener('change', e => {
                 const files = Array.from(e.target.files);
                 if (mediaFiles.length + files.length > 5) {
-                    alert('Máximo 5 archivos.');
+                    showAlert('Máximo 5 archivos.');
                     e.target.value = '';
                     return;
                 }
                 if (files.some(f => f.size > MAX_FILE_SIZE)) {
-                    alert('Un archivo supera el límite de 50MB.');
+                    showAlert('Un archivo supera el límite de 50MB.');
                     e.target.value = '';
                     return;
                 }
@@ -1096,6 +1096,18 @@
             updateWordCount();
         });
     </script>
+    <div class="modal fade" id="alert-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alert-modal-title">Aviso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="alert-modal-body"></div>
+            </div>
+        </div>
+    </div>
+    <script src="utils.js"></script>
     <script src="accessibility.js"></script>
 </body>
 </html>

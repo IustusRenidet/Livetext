@@ -398,5 +398,25 @@
   {
     "question": "¿Puedo acreditar inglés con el CLE para titulación?",
     "answer": "Sí, si cumples con los niveles requeridos por tu carrera."
+  },
+  {
+    "question": "¿Cómo puedo mejorar mi pronunciación en inglés?",
+    "answer": "Practica todos los días escuchando y repitiendo frases, y pide retroalimentación a tu profesor." 
+  },
+  {
+    "question": "¿Cuánto tiempo necesito para aprender francés básico?",
+    "answer": "Con estudio constante, en aproximadamente un semestre puedes comunicarte con frases sencillas." 
+  },
+  {
+    "question": "Dame una frase útil en francés",
+    "answer": "\u00abJe voudrais un caf\u00e9, s'il vous pla\u00eet\u00bb significa 'Quisiera un caf\u00e9, por favor'." 
+  },
+  {
+    "question": "What does 'idiom' mean in English?",
+    "answer": "An idiom is a common expression whose meaning isn't obvious from the individual words." 
+  },
+  {
+    "question": "How do I greet someone formally in English?",
+    "answer": "You can say 'Good morning', 'Good afternoon' or 'Good evening' depending on the time of day." 
   }
 ]

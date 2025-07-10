@@ -487,8 +487,9 @@
                         <tr>
                             <th>Estudiante</th>
                             <th>Formulario</th>
-                            <th>Línea de Captura</th>
-                            <th>Validación Gov.</th>
+                            <th id="extraCol1">Línea de Captura</th>
+                            <th id="extraCol2">Validación Gov.</th>
+                            <th id="scoreCol" style="display:none">Puntuación</th>
                             <th>Fecha</th>
                             <th>Estado</th>
                             <th>Archivos</th>
@@ -594,13 +595,14 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const formType = new URLSearchParams(window.location.search).get('type') || 'payment';
         let paymentsData = [];
         let formsMap = {};
         async function loadData() {
             try {
                 const [formsRes, submissionsRes] = await Promise.all([
-                    fetch('/api/forms?formType=payment'),
-                    fetch('/api/form-submissions')
+                    fetch(`/api/forms?formType=${formType}`),
+                    fetch(`/api/form-submissions?formType=${formType}`)
                 ]);
                 if (!formsRes.ok || !submissionsRes.ok) throw new Error('No se pudieron obtener los registros');
 
@@ -619,7 +621,8 @@
                 });
 
                 paymentsData = submissions.map(s => {
-                    const form = formsMap[s.formId] || {};
+                    const form = formsMap[s.formId];
+                    if (!form) return null;
                     const fieldMap = {};
                     if (form.fields) {
                         form.fields.forEach(fl => { fieldMap[fl.id] = fl; });
@@ -636,7 +639,7 @@
                         else if (label.includes('número de control')) controlNumber = r.value;
                         else if (label.includes('tipo') && label.includes('estudiante')) studentType = r.value;
                     });
-                    return {
+                    return Object.assign({
                         id: s._id,
                         formId: s.formId,
                         formName: form.name || s.formId,
@@ -644,13 +647,14 @@
                         studentType,
                         controlNumber,
                         captureNumber,
-                        govValidation: 'pending',
+                        govValidation: s.govValidation || 'pending',
+                        score: s.score || null,
                         date: s.createdAt,
                         status: s.status,
                         files: s.files || [],
                         observations: []
-                    };
-                });
+                    });
+                }).filter(Boolean);
 
                 filteredData = [...paymentsData];
                 updateStatistics();
@@ -670,6 +674,11 @@
                 setupFilters();
                 setupSearch();
             });
+            if (formType === 'exam') {
+                document.getElementById('extraCol1').style.display = 'none';
+                document.getElementById('extraCol2').style.display = 'none';
+                document.getElementById('scoreCol').style.display = '';
+            }
         });
 
         function updateStatistics() {
@@ -694,47 +703,65 @@
 
             pageData.forEach(payment => {
                 const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>
-                        <div class="fw-bold">${payment.student}</div>
-                        <small class="text-muted">${payment.studentType === 'interno' ? `Control: ${payment.controlNumber}` : 'Estudiante Externo'}</small>
-                    </td>
-                    <td>
-                        <span class="badge bg-secondary">${payment.formName}</span>
-                    </td>
-                    <td>
-                        <div class="font-monospace" style="font-size: 0.8rem;">${payment.captureNumber}</div>
-                        <button class="btn btn-link btn-sm p-0 mt-1" onclick="validateCaptureNumber('${payment.captureNumber}', ${payment.id})" title="Validar con Sistema Gov.">
-                            <i class="fas fa-sync-alt"></i> Validar
-                        </button>
-                    </td>
-                    <td>
-                        ${getValidationBadge(payment.govValidation)}
-                    </td>
-                    <td>${formatDate(payment.date)}</td>
-                    <td>
-                        ${getStatusBadge(payment.status)}
-                    </td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            ${payment.files.map(file => `
-                                <span class="file-icon" onclick="viewFile('${file.url}', '${file.name}', '${file.type}')" title="${file.name}">
-                                    <i class="fas fa-${file.type === 'image' ? 'image' : 'file-pdf'}"></i>
-                                </span>
-                            `).join('')}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex flex-wrap gap-1">
-                            <button class="btn btn-action btn-view" onclick="viewPaymentDetails(${payment.id})" title="Ver Detalles">
-                                <i class="fas fa-eye"></i>
+                if (formType === 'exam') {
+                    row.innerHTML = `
+                        <td>
+                            <div class="fw-bold">${payment.student}</div>
+                        </td>
+                        <td><span class="badge bg-secondary">${payment.formName}</span></td>
+                        <td>${payment.score !== null ? payment.score + '%' : 'N/A'}</td>
+                        <td>${formatDate(payment.date)}</td>
+                        <td>${getStatusBadge(payment.status)}</td>
+                        <td></td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-action btn-view" onclick="viewPaymentDetails(${payment.id})" title="Ver Detalles">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>`;
+                } else {
+                    row.innerHTML = `
+                        <td>
+                            <div class="fw-bold">${payment.student}</div>
+                            <small class="text-muted">${payment.studentType === 'interno' ? `Control: ${payment.controlNumber}` : 'Estudiante Externo'}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">${payment.formName}</span>
+                        </td>
+                        <td>
+                            <div class="font-monospace" style="font-size: 0.8rem;">${payment.captureNumber}</div>
+                            <button class="btn btn-link btn-sm p-0 mt-1" onclick="validateCaptureNumber('${payment.captureNumber}', ${payment.id})" title="Validar con Sistema Gov.">
+                                <i class="fas fa-sync-alt"></i> Validar
                             </button>
-                            <button class="btn btn-action" style="background: var(--secondary-color); color: white;" onclick="addObservation(${payment.id})" title="Agregar Observación">
-                                <i class="fas fa-comment"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
+                        </td>
+                        <td>
+                            ${getValidationBadge(payment.govValidation)}
+                        </td>
+                        <td>${formatDate(payment.date)}</td>
+                        <td>
+                            ${getStatusBadge(payment.status)}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                ${payment.files.map(file => `
+                                    <span class="file-icon" onclick="viewFile('${file.url}', '${file.name}', '${file.type}')" title="${file.name}">
+                                        <i class="fas fa-${file.type === 'image' ? 'image' : 'file-pdf'}"></i>
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <button class="btn btn-action btn-view" onclick="viewPaymentDetails(${payment.id})" title="Ver Detalles">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-action" style="background: var(--secondary-color); color: white;" onclick="addObservation(${payment.id})" title="Agregar Observación">
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                            </div>
+                        </td>`;
+                }
                 tbody.appendChild(row);
             });
 
@@ -857,6 +884,7 @@
 
         // Validación de línea de captura
         async function validateCaptureNumber(captureNumber, paymentId) {
+            if (formType !== 'payment') return;
             showToast('info', 'Validando línea de captura con sistema gubernamental...');
 
             try {

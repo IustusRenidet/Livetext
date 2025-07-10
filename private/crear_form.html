@@ -654,6 +654,7 @@
                         <option value="pre-registration">Pre-registro</option>
                         <option value="inscription">Inscripción</option>
                         <option value="other">Otro</option>
+                        <option value="exam">Examen (práctica)</option>
                     </select>
                 </div>
 
@@ -894,7 +895,8 @@
                 required: false,
                 options: fieldType === 'select' || fieldType === 'radio' || fieldType === 'checkbox' ? ['Opción 1', 'Opción 2'] : [],
                 maxDigits: fieldType === 'number' ? 10 : undefined,
-                conditionalFields: fieldType === 'radio' || fieldType === 'select' ? {} : undefined
+                conditionalFields: fieldType === 'radio' || fieldType === 'select' ? {} : undefined,
+                correctAnswer: document.getElementById('formType').value === 'exam' ? '' : undefined
             };
 
             formFields.push(field);
@@ -1204,6 +1206,16 @@
                 `;
             }
 
+            let answerHtml = '';
+            if (document.getElementById('formType').value === 'exam') {
+                answerHtml = `
+                    <div class="mb-3">
+                        <label class="form-label">Respuesta Correcta</label>
+                        <input type="text" class="form-control" value="${field.correctAnswer || ''}" onchange="updateFieldProperty('correctAnswer', this.value)">
+                    </div>
+                `;
+            }
+
             let maxDigitsHtml = field.type === 'number' ? `
                 <div class="mb-3">
                     <label class="form-label">Máximo de Dígitos</label>
@@ -1231,6 +1243,7 @@
                 ${maxDigitsHtml}
                 ${optionsHtml}
                 ${conditionalFieldsHtml}
+                ${answerHtml}
             `;
 
             propertiesPanel.style.display = 'block';
