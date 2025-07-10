@@ -361,6 +361,19 @@ $('.header, .footer').on('blur', function () {
 });
 
 // Page configuration modal
+$('#page-config-btn').on('click', () => {
+  $('#page-size').val(pageSettings.size);
+  $('#page-orientation').val(pageSettings.orientation);
+  $('#page-numbering').val(pageSettings.numbering).trigger('change');
+  $('#start-number').val(pageSettings.startNumber);
+  $('#custom-format').val(pageSettings.customFormat);
+  $('#same-header-all').prop('checked', pageSettings.sameHeaderAll);
+  $('#margin-top').val(pageSettings.margins.top);
+  $('#margin-bottom').val(pageSettings.margins.bottom);
+  $('#margin-left').val(pageSettings.margins.left);
+  $('#margin-right').val(pageSettings.margins.right);
+  $('#page-config-modal').modal('show');
+});
 $('#page-numbering').on('change', function () {
   $('#custom-format-container').toggle($(this).val() === 'custom');
 });
