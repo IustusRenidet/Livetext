@@ -735,8 +735,14 @@
             // Toggle chat
             const chatButton = document.getElementById('chatButton');
             const chatContainer = document.getElementById('chatContainer');
+            let chatInitialized = false;
             chatButton.addEventListener('click', () => {
-                chatContainer.style.display = chatContainer.style.display === 'none' ? 'flex' : 'none';
+                const hidden = chatContainer.style.display === 'none';
+                chatContainer.style.display = hidden ? 'flex' : 'none';
+                if (hidden && !chatInitialized) {
+                    addChatMessage('IA', '¡Hola! ¿En qué puedo ayudarte?');
+                    chatInitialized = true;
+                }
             });
 
             // Toggle tipo de chat
