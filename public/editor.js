@@ -207,6 +207,21 @@ window.addElement = function(type, event, editorIndex) {
       case 'list':
         editor.blocks.insert('list', { style: 'unordered', items: ['Item 1'] });
         break;
+      case 'columns2':
+      case 'columns3':
+      case 'columns4': {
+        const cols = parseInt(type.replace('columns', ''));
+        const container = $('<div class="columns columns-' + cols + '"></div>');
+        for (let i = 0; i < cols; i++) {
+          container.append('<div class="column" contenteditable="true">Columna ' + (i+1) + '</div>');
+        }
+        const wrapper = $('<div class="custom-block"></div>').append(container);
+        $(`#page-${currentPage} .editor-content`).append(wrapper);
+        makeElementDraggable(wrapper);
+        makeElementResizable(wrapper);
+        makeElementSelectable(wrapper);
+        break;
+      }
       default:
         console.warn(`Unsupported element type: ${type}`);
     }
@@ -593,7 +608,7 @@ function makeElementResizable(element) {
 function makeElementSelectable(element) {
   element.off('click.select').on('click.select', function (e) {
     e.stopPropagation();
-    $('.header-element, .footer-element').removeClass('selected');
+    $('.header-element, .footer-element, .custom-block').removeClass('selected');
     element.addClass('selected');
     selectedElement = element;
   });

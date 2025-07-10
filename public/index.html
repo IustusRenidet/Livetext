@@ -107,6 +107,9 @@
 
     .posts-feed {
         margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .feed-item {
@@ -116,6 +119,8 @@
         overflow: hidden;
         margin-bottom: 2rem;
         box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+        width: 100%;
+        max-width: 600px;
     }
 
     .feed-item img,
@@ -139,6 +144,21 @@
         display: flex;
         gap: 1rem;
         padding: 0.5rem 1rem;
+    }
+
+    .comments-section {
+        display: none;
+        background: var(--dark-bg);
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--light-bg);
+    }
+
+    .comments-section .comment {
+        margin-bottom: .5rem;
+    }
+
+    .comments-section .replies {
+        margin-left: 1rem;
     }
 
     .newsletter-card {
@@ -497,7 +517,7 @@
                     <div class="card newsletter-card">
                         <div class="card-body p-4 text-center">
                             <h4 class="card-title">¡Únete a nuestras notificaciones!</h4>
-                            <p class="card-text mb-4">Recibe notificaciones inmediatas sobre nuevos eventos y actualizaciones directamente en tu correo.</p>
+                            <p class="card-text mb-4">Recibe notificaciones inmediatas cuando se publiquen nuevas entradas, eventos, recursos o formularios.</p>
                             <form id="newsletterForm" class="row g-3 justify-content-center newsletter-form">
                                 <div class="col-md-5">
                                     <input type="text" class="form-control" id="nombreNewsletter" placeholder="Nombre" required>
@@ -507,7 +527,16 @@
                                 </div>
                                 <div class="col-12">
                                     <div style="margin-left: 20px;">
-                                        <label><input type="checkbox" name="notificationTypes" value="events" checked> Notificaciones de eventos</label>
+                                        <label><input type="checkbox" name="notificationTypes" value="posts" checked> Publicaciones</label>
+                                    </div>
+                                    <div style="margin-left: 20px;">
+                                        <label><input type="checkbox" name="notificationTypes" value="events" checked> Eventos</label>
+                                    </div>
+                                    <div style="margin-left: 20px;">
+                                        <label><input type="checkbox" name="notificationTypes" value="resources" checked> Recursos</label>
+                                    </div>
+                                    <div style="margin-left: 20px;">
+                                        <label><input type="checkbox" name="notificationTypes" value="forms" checked> Formularios</label>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -664,31 +693,7 @@
         </div>
     </footer>
 
-    <!-- Modal Comentarios -->
-    <div class="modal fade" id="commentsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title">Comentarios</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="commentsList" class="mb-3"></div>
-                    <textarea id="commentInput" class="form-control" placeholder="Escribe un comentario..."></textarea>
-                    <hr>
-                    <div id="modalChatBox" class="border rounded p-2 mb-2" style="height:180px;overflow-y:auto"></div>
-                    <div class="input-group">
-                        <input id="modalChatInput" class="form-control" placeholder="Pregunta a la IA">
-                        <button id="modalChatSend" class="btn btn-primary">Enviar</button>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" id="sendComment">Enviar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Modal para ver multimedia -->
     <div class="modal fade" id="mediaModal" tabindex="-1" aria-hidden="true">
@@ -739,8 +744,14 @@
             // Toggle chat
             const chatButton = document.getElementById('chatButton');
             const chatContainer = document.getElementById('chatContainer');
+            let chatInitialized = false;
             chatButton.addEventListener('click', () => {
-                chatContainer.style.display = chatContainer.style.display === 'none' ? 'flex' : 'none';
+                const hidden = chatContainer.style.display === 'none';
+                chatContainer.style.display = hidden ? 'flex' : 'none';
+                if (hidden && !chatInitialized) {
+                    addChatMessage('IA', '¡Hola! ¿En qué puedo ayudarte?');
+                    chatInitialized = true;
+                }
             });
 
             // Toggle tipo de chat
@@ -949,7 +960,7 @@
             // Cargar y mostrar posts
             async function loadPosts(filter = 'all') {
                 try {
-                    const response = await fetch('/api/posts');
+                    const response = await fetch('/api/posts?limit=0');
                     const posts = await response.json();
                     const container = document.getElementById('postsFeed');
                     container.innerHTML = '';
@@ -960,10 +971,6 @@
                         item.className = 'feed-item';
 
                         const mediaHtml = post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
-
-                        item.innerHTML = `
-                            <div class="post-media">
-                                ${post.media && post.media.length > 0 ? (post.mediaMode === 'gallery' && post.media.length >= 4 ? `
                                     <div class="preview-media-grid">
                                         ${post.media.map(m => `<${m.contentType.startsWith('image') ? 'img' : 'video'} src="${m.path}" ${m.contentType.startsWith('video') ? 'controls muted' : ''} style="height: 200px; object-fit: cover; border-radius: 12px;">`).join('')}
                                     </div>` : `
@@ -986,6 +993,7 @@
                                         ` : ''}
                                     </div>`)
                                 : '<img src="https://via.placeholder.com/400x300" alt="Placeholder">';
+
                         item.innerHTML = `
                             <div class="post-media">${mediaHtml}</div>
                             <div class="post-content">
@@ -995,6 +1003,13 @@
                             </div>
                             <div class="post-actions">
                                 <button class="btn btn-sm btn-secondary comment-btn" data-id="${post._id}" ${post.allowComments ? '' : 'disabled'}>Comentarios</button>
+                            </div>
+                            <div class="comments-section" id="comments-${post._id}">
+                                <div class="comments-list"></div>
+                                <div class="input-group mt-2">
+                                    <textarea class="form-control comment-input" rows="2" placeholder="Escribe un comentario..."></textarea>
+                                    <button class="btn btn-primary send-comment" type="button">Enviar</button>
+                                </div>
                             </div>`;
                         container.appendChild(item);
 
@@ -1009,14 +1024,42 @@
                         });
 
                         const btn = item.querySelector('.comment-btn');
+                        const section = item.querySelector(`#comments-${post._id}`);
+                        const list = section.querySelector('.comments-list');
+                        const input = section.querySelector('.comment-input');
+                        const sendBtn = section.querySelector('.send-comment');
                         if (btn) {
-                            btn.addEventListener('click', () => {
-                                activePost = btn.getAttribute('data-id');
-                                loadComments(activePost);
-                                const modal = new bootstrap.Modal(document.getElementById('commentsModal'));
-                                modal.show();
+                            btn.addEventListener('click', async () => {
+                                if (section.style.display === 'none') {
+                                    await loadComments(post._id, list);
+                                    section.style.display = 'block';
+                                } else {
+                                    section.style.display = 'none';
+                                }
                             });
                         }
+                        sendBtn.addEventListener('click', async () => {
+                            const content = input.value.trim();
+                            const parentId = input.dataset.parentId || null;
+                            if (!content) return;
+                            const res = await fetch(`/api/posts/${post._id}/comments`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ content, parentId })
+                            });
+                            if (res.ok) {
+                                input.value = '';
+                                input.dataset.parentId = '';
+                                await loadComments(post._id, list);
+                            }
+                        });
+
+                        section.addEventListener('click', e => {
+                            if (e.target.classList.contains('reply-btn')) {
+                                input.dataset.parentId = e.target.dataset.id;
+                                input.focus();
+                            }
+                        });
                     });
 
                 } catch (error) {
@@ -1053,12 +1096,11 @@
                 return div;
             }
 
-            async function loadComments(postId) {
+            async function loadComments(postId, list) {
                 try {
                     const res = await fetch(`/api/posts/${postId}/comments`);
                     const comments = await res.json();
                     const tree = buildCommentTree(comments);
-                    const list = document.getElementById('commentsList');
                     list.innerHTML = '';
                     tree.forEach(c => list.appendChild(renderComment(c)));
                     if (!tree.length) list.innerHTML = '<p>No hay comentarios</p>';
@@ -1067,74 +1109,12 @@
                 }
             }
 
-            let activePost = null;
-            const modalChatBox = document.getElementById('modalChatBox');
-            const modalChatInput = document.getElementById('modalChatInput');
-            const modalChatSend = document.getElementById('modalChatSend');
-            const modalMessages = [];
-
-            function addModalChat(sender, text) {
-                const div = document.createElement('div');
-                div.innerHTML = `<strong>${sender}:</strong> ${text}`;
-                modalChatBox.appendChild(div);
-                modalChatBox.scrollTop = modalChatBox.scrollHeight;
-            }
-
-            async function sendModalChat() {
-                const text = modalChatInput.value.trim();
-                if (!text) return;
-                addModalChat('Tú', text);
-                modalMessages.push({ role: 'user', content: text });
-                modalChatInput.value = '';
-                try {
-                    const res = await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ messages: modalMessages })
-                    });
-                    const data = await res.json();
-                    if (res.ok) {
-                        modalMessages.push({ role: 'assistant', content: data.reply });
-                        addModalChat('IA', data.reply);
-                    } else {
-                        addModalChat('Error', data.error || 'Error');
-                    }
-                } catch (e) {
-                    addModalChat('Error', 'No se pudo conectar');
-                }
-            }
-
-            modalChatSend.addEventListener('click', sendModalChat);
-            modalChatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendModalChat(); });
-            document.getElementById('sendComment').addEventListener('click', async () => {
-                const content = document.getElementById('commentInput').value.trim();
-                const parentId = document.getElementById('commentInput').dataset.parentId || null;
-                if (!content || !activePost) return;
-                const res = await fetch(`/api/posts/${activePost}/comments`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content, parentId })
-                });
-                if (res.ok) {
-                    document.getElementById('commentInput').value = '';
-                    document.getElementById('commentInput').dataset.parentId = '';
-                    await loadComments(activePost);
-                }
-            });
-
-            document.getElementById('commentsModal').addEventListener('hidden.bs.modal', () => {
-                document.getElementById('commentInput').dataset.parentId = '';
-            });
 
             document.addEventListener('click', e => {
                 if (e.target.classList.contains('show-more-link')) {
                     const p = e.target.closest('.expandable');
                     p.innerHTML = p.dataset.full;
                     p.classList.add('expanded');
-                }
-                if (e.target.classList.contains('reply-btn')) {
-                    document.getElementById('commentInput').dataset.parentId = e.target.dataset.id;
-                    document.getElementById('commentInput').focus();
                 }
             });
 

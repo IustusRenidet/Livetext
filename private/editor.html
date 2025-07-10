@@ -368,6 +368,32 @@
         .editor-content.dropzone-active {
             border-color: var(--secondary-color);
             background: rgba(230, 126, 34, 0.1);
+            color: black !important;
+        }
+
+        .editor-content, .header-content, .footer-content, .column {
+            color: black !important;
+        }
+
+        .columns {
+            display: grid;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .columns-1 { grid-template-columns: 1fr; }
+        .columns-2 { grid-template-columns: repeat(2, 1fr); }
+        .columns-3 { grid-template-columns: repeat(3, 1fr); }
+        .columns-4 { grid-template-columns: repeat(4, 1fr); }
+
+        .column {
+            border: 1px dashed #ccc;
+            min-height: 50px;
+            padding: 5px;
+        }
+
+        .custom-block {
+            position: relative;
         }
 
         .header-controls {
@@ -799,6 +825,9 @@
         <div class="element-icon" data-type="table"><i class="fas fa-table"></i> Tabla</div>
         <div class="element-icon" data-type="chart"><i class="fas fa-chart-bar"></i> Gráfica</div>
         <div class="element-icon" data-type="list"><i class="fas fa-list"></i> Lista</div>
+        <div class="element-icon" data-type="columns2"><i class="fas fa-columns"></i> 2 Columnas</div>
+        <div class="element-icon" data-type="columns3"><i class="fas fa-th-large"></i> 3 Columnas</div>
+        <div class="element-icon" data-type="columns4"><i class="fas fa-th"></i> 4 Columnas</div>
     </div>
 
     <!-- Editor Container -->
