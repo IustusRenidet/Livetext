@@ -137,7 +137,9 @@ const validateForm = [
   body('fields.*.label').trim().notEmpty().withMessage('La etiqueta del campo es obligatoria').isLength({ max: 50 }).withMessage('La etiqueta no puede exceder los 50 caracteres'),
   body('fields.*.required').isBoolean().withMessage('El campo requerido debe ser un booleano'),
   body('fields.*.placeholder').optional().trim().isLength({ max: 100 }).withMessage('El placeholder no puede exceder los 100 caracteres'),
+
   body('fields.*.correctAnswer').optional().trim().isLength({ max: 200 }).withMessage('La respuesta correcta es demasiado larga'),
+
   body('fields').custom(fields => {
     fields.forEach(f => {
       if (['select', 'radio', 'checkbox'].includes(f.type)) {
@@ -1491,6 +1493,7 @@ app.post('/api/form-submissions', upload.fields([
       }
     }
 
+
     let score = null;
     if (form.formType === 'exam') {
       let totalQ = 0;
@@ -1520,6 +1523,7 @@ app.post('/api/form-submissions', upload.fields([
       status: 'pending', // For review process
       govValidation,
       score,
+
     };
 
     const result = await db.collection('form_submissions').insertOne(submission);
