@@ -1160,6 +1160,44 @@
         </div>
     </footer>
 
+    <!-- Chat flotante -->
+    <div class="floating-button animate__animated animate__bounceIn" id="chatButton">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-sm text-white me-2" id="toggleChatType">
+                    <i class="fas fa-robot"></i>
+                </button>
+                <h5 class="chat-title mb-0" id="chatTitle">Chat IA</h5>
+            </div>
+            <button class="close-chat" id="closeChat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="quick-options" id="quickOptions">
+            <button class="quick-option">¿Cómo inscribirme?</button>
+            <button class="quick-option">Fechas de cursos</button>
+            <button class="quick-option">Costo de cursos</button>
+            <button class="quick-option">Certificaciones</button>
+        </div>
+        <div class="asesor-info d-none" id="asesorInfo">
+            <div class="p-3 bg-light border-top">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="online-indicator me-2"></div>
+                    <span class="fw-bold" id="asesorNombre">Conectando...</span>
+                </div>
+                <small class="text-muted" id="asesorStatus">Por favor espere...</small>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu mensaje...">
+            <button class="chat-send" id="chatSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container">
         <div id="errorToast" class="toast align-items-center text-white bg-danger border-0" role="alert"
@@ -1456,6 +1494,86 @@
                     gutter: 20
                 });
             });
+
+            // Chat
+            const chatButton = document.getElementById('chatButton');
+            const chatContainer = document.getElementById('chatContainer');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const toggleChatType = document.getElementById('toggleChatType');
+            const chatTitle = document.getElementById('chatTitle');
+            const quickOptions = document.getElementById('quickOptions');
+            const asesorInfo = document.getElementById('asesorInfo');
+            const messages = [];
+            let chatInitialized = false;
+
+            chatButton.addEventListener('click', () => {
+                const hidden = chatContainer.style.display === 'none';
+                chatContainer.style.display = hidden ? 'flex' : 'none';
+                if (hidden && !chatInitialized) {
+                    addChatMessage('IA', '¡Hola! ¿En qué puedo ayudarte?');
+                    chatInitialized = true;
+                }
+            });
+            document.getElementById('closeChat').addEventListener('click', () => {
+                chatContainer.style.display = 'none';
+            });
+
+            toggleChatType.addEventListener('click', () => {
+                if (chatTitle.textContent === 'Chat IA') {
+                    chatTitle.textContent = 'Chat con Asesor';
+                    toggleChatType.innerHTML = '<i class="fas fa-robot"></i>';
+                    quickOptions.classList.add('d-none');
+                    asesorInfo.classList.remove('d-none');
+                } else {
+                    chatTitle.textContent = 'Chat IA';
+                    toggleChatType.innerHTML = '<i class="fas fa-user"></i>';
+                    quickOptions.classList.remove('d-none');
+                    asesorInfo.classList.add('d-none');
+                }
+            });
+
+            chatSend.addEventListener('click', sendChatMessage);
+            chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+            document.querySelectorAll('.quick-option').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    chatInput.value = btn.textContent;
+                    sendChatMessage();
+                });
+            });
+
+            function addChatMessage(sender, text) {
+                const div = document.createElement('div');
+                div.className = 'mb-2';
+                div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            async function sendChatMessage() {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                addChatMessage('Tú', text);
+                messages.push({ role: 'user', content: text });
+                chatInput.value = '';
+                try {
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        messages.push({ role: 'assistant', content: data.reply });
+                        addChatMessage('IA', data.reply);
+                    } else {
+                        addChatMessage('Error', data.error || 'Error');
+                    }
+                } catch (err) {
+                    addChatMessage('Error', 'No se pudo conectar');
+                }
+            }
         });
 
         function showToast(title, message) {
