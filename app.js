@@ -1450,6 +1450,28 @@ app.post('/api/form-submissions', upload.fields([
       fieldId: file.fieldname, // Associate with fieldId if needed
     }));
 
+    let govValidation = 'pending';
+    if (form.formType === 'payment') {
+      const captureField = form.fields.find(f => (f.label || '').toLowerCase().includes('línea de captura'));
+      if (captureField) {
+        const resp = sanitizedResponses.find(r => r.fieldId === captureField.id);
+        if (resp && resp.value) {
+          try {
+            const params = new URLSearchParams({ lineaCaptura: resp.value });
+            const govRes = await fetch('https://sfpya.edomexico.gob.mx/controlv/consultas/ConsultaDatos.jsp', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: params.toString()
+            });
+            const html = await govRes.text();
+            govValidation = !/no\s+se\s+encontr/i.test(html) ? 'valid' : 'invalid';
+          } catch (e) {
+            console.error('Error gov validation:', e);
+          }
+        }
+      }
+    }
+
     // Create submission
     const submission = {
       formId: new ObjectId(formId),
@@ -1457,6 +1479,7 @@ app.post('/api/form-submissions', upload.fields([
       files: processedFiles,
       createdAt: new Date(),
       status: 'pending', // For review process
+      govValidation,
     };
 
     const result = await db.collection('form_submissions').insertOne(submission);
@@ -1489,8 +1512,16 @@ app.get('/api/form-submissions', requireAuth, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const formType = req.query.formType;
+
+    let query = {};
+    if (formType) {
+      const formIds = (await db.collection('forms').find({ formType }, { projection: { _id: 1 } }).toArray()).map(f => f._id);
+      query.formId = { $in: formIds };
+    }
+
     const submissions = await db.collection('form_submissions')
-      .find()
+      .find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -1734,12 +1765,14 @@ app.get('/api/stats', requireAuth, async (req, res) => {
     start.setDate(start.getDate() - 6);
     start.setHours(0, 0, 0, 0);
 
+    const paymentFormIds = (await db.collection('forms').find({ formType: 'payment' }, { projection: { _id: 1 } }).toArray()).map(f => f._id);
+
     const [pendingPayments, postCount, subscriberCount, paymentsDailyAgg, postsDailyAgg, subscribersDailyAgg] = await Promise.all([
-      db.collection('form_submissions').countDocuments({ status: 'pending' }),
+      db.collection('form_submissions').countDocuments({ formId: { $in: paymentFormIds }, status: 'pending' }),
       db.collection('posts').countDocuments(),
       db.collection('newsletter_subscribers').countDocuments({ subscribed: true }),
       db.collection('form_submissions').aggregate([
-        { $match: { status: 'pending', createdAt: { $gte: start } } },
+        { $match: { formId: { $in: paymentFormIds }, status: 'pending', createdAt: { $gte: start } } },
         { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, count: { $sum: 1 } } },
         { $sort: { _id: 1 } }
       ]).toArray(),
